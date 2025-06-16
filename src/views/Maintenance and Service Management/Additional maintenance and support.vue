@@ -48,15 +48,6 @@
 
       <div class="empty-text">暂无数据</div>
     </div>
-
-    <!-- 悬浮设置按钮 -->
-    <el-button
-      class="setting-btn"
-      type="primary"
-      icon="el-icon-setting"
-      circle
-      @click="onSetting"
-    />
   </div>
 </template>
 

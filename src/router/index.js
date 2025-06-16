@@ -170,9 +170,15 @@ export const asyncRoutes = [
     name: 'OwnerUnitManagement',
     meta: {
       title: '业主单位管理',
-      icon: 'nested' // 可根据需要更换图标，比如 'tree', 'people', 'documentation'
+      icon: 'nested'
     },
     children: [
+      {
+        path: 'project',
+        name: 'UnitProject',
+        component: () => import('@/views/Owner unit management/Unit Project Management.vue'),
+        meta: { title: '单位项目管理' }
+      },
       {
         path: 'plan',
         name: 'MaintenancePlan',
@@ -183,13 +189,65 @@ export const asyncRoutes = [
         path: 'point',
         name: 'MaintenancePoint',
         component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
-        meta: { title: '维保点管理' }
+        meta: { title: '维保点位管理' }
       },
       {
-        path: 'project',
-        name: 'UnitProject',
-        component: () => import('@/views/Owner unit management/Unit Project Management.vue'),
-        meta: { title: '单位项目管理' }
+        path: 'unit-detail',
+        name: 'UnitDetail',
+        hidden: true, // 隐藏在侧边栏
+        component: () => import('@/views/Owner unit management/UnitDetail.vue'),
+        meta: {
+          title: '项目详情',
+          noCache: true,
+          activeMenu: '/owner/project'
+        }
+      },
+      {
+        path: 'detail',
+        name: 'Detail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/Detail.vue'),
+        meta: {
+          title: '项目与合同具体详情',
+          noCache: true,
+          activeMenu: '/owner/project'
+        }
+      },
+      {
+        path: '/contract/add',
+        name: 'add',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/add.vue'),
+        meta: {
+          title: '新增项目管理页面'
+        }
+      },
+      {
+        path: '/owner-unit/plan-detail',
+        name: 'OwnerUnitPlanDetail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/mpm-PlanDetail.vue'),
+        meta: { title: '计划详情' }
+      },
+      {
+        path: '/owner-unit/task-detail',
+        name: 'OwnerUnitTaskDetail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/mpm-TaskDetail.vue'),
+        meta: { title: '任务详情' }
+      },
+      {
+        path: '/owner-unit/mpmTD-detail',
+        name: 'mpmTD-detail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/mpmTD-detail.vue'),
+        meta: { title: '维保任务详情' }
+      },
+      {
+        path: '/owner-unit/renewal',
+        name: 'OwnerRenewal',
+        component: () => import('@/views/Owner unit management/Renewal.vue'),
+        meta: { title: '续签合同' }
       }
     ]
   },
@@ -258,7 +316,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
   {
     path: '/system',
     component: Layout,
