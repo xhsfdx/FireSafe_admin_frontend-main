@@ -74,14 +74,14 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/digitalscreen/digitalScreen', // 改成数字大屏路径
     children: [
       {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
+        path: 'digitalscreen/digitalScreen',
+        component: () => import('@/views/digitalscreen/digitalScreen.vue'),
+        name: 'DigitalScreen',
         hidden: true,
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+        meta: { title: '数字可视化大屏' }
       }
     ]
   },
@@ -134,6 +134,136 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
+    path: '/digiScreen',
+    component: Layout,
+    hidden: true, // 不显示在侧边栏
+    name: 'digitalScreen',
+    meta: {
+      title: ''
+    },
+    children: [
+      {
+        path: '/Comprehensiveranking',
+        name: 'ComprehensiveRanking',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/ComprehensiveRanking.vue'),
+        meta: {
+          title: '综合排名'
+        }
+      },
+      {
+        path: '/Totalower',
+        name: 'TotalOwer',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/TotalOwer.vue'),
+        meta: {
+          title: '业主总数'
+        }
+      },
+      {
+        path: '/Personnelstatistics',
+        name: 'PersonnelStatistics',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/PersonnelStatistics.vue'),
+        meta: {
+          title: '人员统计'
+        }
+      },
+      {
+        path: '/Checkinrecord',
+        name: 'CheckinRecord',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/CheckinRecord.vue'),
+        meta: {
+          title: '打卡记录'
+        }
+      },
+      {
+        path: '/Totalmaintencearea',
+        name: 'TotalmaintenceArea',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/TotalmaintenanceArea.vue'),
+        meta: {
+          title: '维保总面积'
+        }
+      },
+      {
+        path: '/Businesstrend',
+        name: 'BusinessTrend',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/BusinessTrend.vue'),
+        meta: {
+          title: '业务趋势'
+        }
+      },
+      {
+        path: '/businessStats',
+        name: 'BusinessStats',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/BusinessStats.vue'),
+        meta: {
+          title: '业务状态'
+        }
+      },
+      {
+        path: '/leftPanel',
+        name: 'LeftPanel',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/LeftPanel.vue'),
+        meta: {
+          title: '左侧图表'
+        }
+      },
+      {
+        path: '/rightPanel',
+        name: 'RightPanel',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/RightPanel.vue'),
+        meta: {
+          title: '右侧图表'
+        }
+      },
+      {
+        path: '/mapChart',
+        name: 'MapChart',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/MapChart.vue'),
+        meta: {
+          title: '地图'
+        }
+      },
+      {
+        path: '/topBar',
+        name: 'TopBar',
+        hidden: true,
+        component: () => import('@/components/digitalScreen/TopBar.vue'),
+        meta: {
+          title: '顶部'
+        }
+      }
+    ]
+  },
+  {
+    path: '/digitalscreen',
+    component: Layout,
+    alwaysShow: true,
+    name: 'Screen',
+    meta: {
+      title: '数字大屏',
+      icon: ''
+    },
+    children: [
+      {
+        path: 'digitalScreen',
+        name: 'DigitalScreen',
+        component: () => import('@/views/digitalscreen/digitalScreen.vue'),
+        meta: {
+          title: '数字可视化大屏'
+        }
+      }
+    ]
+  },
+  {
     path: '/agency',
     component: Layout,
     redirect: '/agency/basic',
@@ -153,12 +283,76 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'basic/edit/:id',
+        name: 'EditAgencyBasic',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/EditInstitutionBasic.vue'),
+        meta: { title: '编辑机构信息' }
+      },
+      {
         path: 'staff',
         name: 'AgencyStaffInfo',
-        component: () => import('@/views/Service agency management/Institution personnel information.vue'),
+        hidden: true,
+        component: () => import('@/views/Service agency management/personCard.vue'),
         meta: {
           title: '机构人员信息'
         }
+      },
+      {
+        path: 'person-info',
+        name: 'PersonInfo',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/PersonInfo.vue'),
+        meta: { title: '个人信息' }
+      },
+      {
+        path: 'service-unit',
+        name: 'ServiceUnit',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/ServiceUnit.vue'),
+        meta: { title: '服务单位' }
+      },
+      {
+        path: 'maintenance-tasks',
+        name: 'MaintenanceTasks',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/MaintenanceTasks.vue'),
+        meta: { title: '维保任务' }
+      },
+      {
+        path: 'create-account',
+        name: 'CreateAccount',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/CreateAccount.vue'),
+        meta: { title: '创建账号' }
+      },
+      {
+        path: 'person-list',
+        name: 'PersonList',
+        // hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/personList.vue'),
+        meta: { title: '人员列表' }
+      },
+      {
+        path: 'FaultWorkOrder',
+        name: 'Faultworkorder',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/Faultworkorder.vue'),
+        meta: { title: '故障工单' }
+      },
+      {
+        path: 'Additionalmaintenance',
+        name: 'AdditionalMaintenance',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/Additionalmaintenance.vue'),
+        meta: { title: '附加维保' }
+      },
+      {
+        path: 'Workreport',
+        name: 'WorkReport',
+        hidden: true, // 不显示在侧边栏
+        component: () => import('@/views/Service agency management/WorkReport.vue'),
+        meta: { title: '工作上报' }
       }
     ]
   },
@@ -246,6 +440,7 @@ export const asyncRoutes = [
       {
         path: '/owner-unit/renewal',
         name: 'OwnerRenewal',
+        hidden: true,
         component: () => import('@/views/Owner unit management/Renewal.vue'),
         meta: { title: '续签合同' }
       }
