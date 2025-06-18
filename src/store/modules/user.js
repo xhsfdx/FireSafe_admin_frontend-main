@@ -23,20 +23,20 @@ const mutations = {
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_ROLES: (state, roles) => {
-    state.roles = roles
+  SET_ROLES: (state, role) => {
+    state.roles = [role]
   }
 }
 
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    const { username, password } = userInfo
+    const { mobile, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+      login({ mobile: mobile.trim(), password: password }).then(response => {
+        const { token } = response
+        commit('SET_TOKEN', token)
+        setToken(token)
         resolve()
       }).catch(error => {
         reject(error)
@@ -53,18 +53,18 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
-        const { roles, name, avatar, introduction } = data
+        
+        const { role, name, avatar, introduction } = data.user
 
         // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
+        if (!role || role.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
 
-        commit('SET_ROLES', roles)
+        commit('SET_ROLES', role)
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
+        commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
+        commit('SET_INTRODUCTION', 'I am SuperAdmin')
         resolve(data)
       }).catch(error => {
         reject(error)
