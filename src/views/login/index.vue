@@ -18,8 +18,8 @@
         </div>
 
         <el-form ref="loginForm" :model="loginForm" :rules="rules" class="form" label-position="top">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="loginForm.username" placeholder="请输入用户名" />
+          <el-form-item label="用户名" prop="mobile">
+            <el-input v-model="loginForm.mobile" placeholder="请输入手机号" />
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
@@ -48,32 +48,32 @@ export default {
   data() {
     return {
       loginForm: {
-        username: 'admin',
-        password: '11111'
+        mobile: '17893248975',
+        password: 'chaggle2022'
       },
       rules: {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
       }
     }
   },
   methods: {
     handleLogin() {
-    this.$refs.loginForm.validate(valid => {
-      if (valid) {
-        this.loading = true
-        this.$store.dispatch('user/login', this.loginForm)
-          .then(() => {
-           this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-           this.loading = false
-          })
-          .catch((err) => {
-           this.$message.error(err || '登录失败')
-           this.loading = false
-          })
-      } else {
-        console.log('error submit!!')
-        return false
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          this.$store.dispatch('user/login', this.loginForm)
+            .then(() => {
+              this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+              this.loading = false
+            })
+            .catch((err) => {
+              this.$message.error(err || '登录失败')
+              this.loading = false
+            })
+        } else {
+          console.log('error submit!!')
+          return false
         }
       })
     }
@@ -96,7 +96,7 @@ export default {
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 
     .left-panel {
       flex: 1;
