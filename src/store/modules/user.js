@@ -24,7 +24,7 @@ const mutations = {
     state.avatar = avatar
   },
   SET_ROLES: (state, role) => {
-    state.roles = [role]
+    state.roles = role
   }
 }
 
@@ -54,14 +54,15 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
         
-        const { role, name, avatar, introduction } = data.user
+        const { roles, name } = data
 
         // roles must be a non-empty array
-        if (!role || role.length <= 0) {
+        if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
+        console.log(roles)
 
-        commit('SET_ROLES', role)
+        commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
         commit('SET_INTRODUCTION', 'I am SuperAdmin')
