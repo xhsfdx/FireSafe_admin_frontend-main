@@ -2,9 +2,9 @@
   <div class="info-block">
     <div class="info-title">合同详情</div>
     <el-table :data="detailList" border style="width:100%">
-      <el-table-column prop="item" label="条款编号" align="center" width="120"/>
-      <el-table-column prop="content" label="内容描述" align="center"/>
-      <el-table-column prop="remark" label="备注" align="center"/>
+      <el-table-column prop="item" label="条款编号" align="center" width="120" />
+      <el-table-column prop="content" label="内容描述" align="center" />
+      <el-table-column prop="remark" label="备注" align="center" />
     </el-table>
   </div>
 </template>

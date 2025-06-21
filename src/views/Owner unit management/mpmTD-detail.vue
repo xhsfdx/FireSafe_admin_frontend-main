@@ -3,29 +3,29 @@
     <!-- 步骤条+基础信息 -->
     <div class="task-steps-section">
       <!-- 步骤条 -->
-     <!-- 步骤条 完全还原图片风格 -->
-<template>
-  <div class="step-bar-perfect">
-    <div v-for="(step, i) in steps" :key="i" class="step-item-perfect">
-      <div class="step-time-perfect">{{ step.time }}</div>
-      <div class="step-center-block">
-        <!-- 圆圈+勾 -->
-        <div class="circle-outer" :class="{ active: i <= activeStep }">
-          <div class="circle-inner" :class="{ active: i <= activeStep }">
-            <i v-if="i <= activeStep" class="el-icon-check"></i>
+      <!-- 步骤条 完全还原图片风格 -->
+      <template>
+        <div class="step-bar-perfect">
+          <div v-for="(step, i) in steps" :key="i" class="step-item-perfect">
+            <div class="step-time-perfect">{{ step.time }}</div>
+            <div class="step-center-block">
+              <!-- 圆圈+勾 -->
+              <div class="circle-outer" :class="{ active: i <= activeStep }">
+                <div class="circle-inner" :class="{ active: i <= activeStep }">
+                  <i v-if="i <= activeStep" class="el-icon-check" />
+                </div>
+              </div>
+              <!-- 横线 -->
+              <div
+                v-if="i < steps.length - 1"
+                class="step-line-perfect"
+                :class="{ active: i < activeStep }"
+              />
+            </div>
+            <div class="step-label-perfect">{{ step.label }}</div>
           </div>
         </div>
-        <!-- 横线 -->
-        <div
-          v-if="i < steps.length - 1"
-          class="step-line-perfect"
-          :class="{ active: i < activeStep }"
-        ></div>
-      </div>
-      <div class="step-label-perfect">{{ step.label }}</div>
-    </div>
-  </div>
-</template>
+      </template>
 
       <!-- 任务基础信息 -->
       <div class="task-base-info">
@@ -53,7 +53,7 @@
             <div class="row-txt"><span class="label">项目负责人：</span>{{ task.manager }}</div>
             <div class="row-txt">
               <span class="label">故障列表：</span>
-              <el-link type="primary" style="padding: 0 4px;" @click="showFaultList">详情<i class="el-icon-arrow-right"></i></el-link>
+              <el-link type="primary" style="padding: 0 4px;" @click="showFaultList">详情<i class="el-icon-arrow-right" /></el-link>
             </div>
           </el-col>
           <el-col :span="6">
@@ -112,10 +112,10 @@
             node-key="id"
             :default-expand-all="true"
             highlight-current
-            @current-change="handleTreeChange"
             :expand-on-click-node="false"
             :render-content="renderTreeNode"
             class="check-tree"
+            @current-change="handleTreeChange"
           />
         </el-col>
         <!-- 右侧表格 -->
@@ -137,17 +137,17 @@
 
 <script>
 export default {
-  name: "mpmTD-detail",
+  name: 'MpmTDDetail',
   data() {
     return {
       // 步骤条数据
       steps: [
-        { label: "已派发", time: "2025-04-09 08:36:08" },
-        { label: "已到达", time: "2025-04-16 15:11:43" },
-        { label: "开始处置", time: "2025-04-16 15:12:34" },
-        { label: "处置完成提交审批", time: "2025-04-20 14:51:12" },
-        { label: "完成维保", time: "2025-04-22 01:30:58" },
-        { label: "已评价", time: "" }
+        { label: '已派发', time: '2025-04-09 08:36:08' },
+        { label: '已到达', time: '2025-04-16 15:11:43' },
+        { label: '开始处置', time: '2025-04-16 15:12:34' },
+        { label: '处置完成提交审批', time: '2025-04-20 14:51:12' },
+        { label: '完成维保', time: '2025-04-22 01:30:58' },
+        { label: '已评价', time: '' }
       ],
       activeStep: 4, // 当前进度
       // 基本信息
@@ -188,9 +188,9 @@ export default {
       ],
       // 检测表格数据
       tableData: [
-        { content: "消防电源主电源、备用电源工作状态", result: "异常" },
-        { content: "消防设备未端配电切换装置工作状态", result: "正常" },
-        { content: "试验主、备电切换功能", result: "正常" }
+        { content: '消防电源主电源、备用电源工作状态', result: '异常' },
+        { content: '消防设备未端配电切换装置工作状态', result: '正常' },
+        { content: '试验主、备电切换功能', result: '正常' }
       ]
     }
   },
@@ -198,16 +198,16 @@ export default {
     renderTreeNode(h, { node, data }) {
       return (
         <span>
-          <i class="el-icon-folder" style="margin-right:5px;color:#599af5;font-size:18px;"></i>
+          <i class='el-icon-folder' style='margin-right:5px;color:#599af5;font-size:18px;'></i>
           <span>{data.label}</span>
           {data.children && data.children.length === 0 && node.level === 2 ? (
             <el-link
-              style="float:right;color:#2574d8;font-size:15px"
+              style='float:right;color:#2574d8;font-size:15px'
               onClick={() => this.$message('现场详情')}
-            >现场详情<i class="el-icon-arrow-right"></i></el-link>
+            >现场详情<i class='el-icon-arrow-right'></i></el-link>
           ) : null}
           {data.checked ? (
-            <i class="el-icon-check" style="float:right;color:#2b92f9;margin-right:12px;font-size:22px;font-weight:bold"></i>
+            <i class='el-icon-check' style='float:right;color:#2b92f9;margin-right:12px;font-size:22px;font-weight:bold'></i>
           ) : null}
         </span>
       )
@@ -216,9 +216,9 @@ export default {
       // 简单模拟切换
       if (data.id === 11) {
         this.tableData = [
-          { content: "消防电源主电源、备用电源工作状态", result: "异常" },
-          { content: "消防设备未端配电切换装置工作状态", result: "正常" },
-          { content: "试验主、备电切换功能", result: "正常" }
+          { content: '消防电源主电源、备用电源工作状态', result: '异常' },
+          { content: '消防设备未端配电切换装置工作状态', result: '正常' },
+          { content: '试验主、备电切换功能', result: '正常' }
         ]
       } else {
         this.tableData = []

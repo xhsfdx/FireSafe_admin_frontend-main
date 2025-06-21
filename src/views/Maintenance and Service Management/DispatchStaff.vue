@@ -1,359 +1,409 @@
 <template>
-  <div class="dispatch-staff-page">
-    <!-- 顶部步骤提示 -->
-    <div class="header-bar">
-      <span class="title">改派人员</span>
-      <span class="tip">(提示：必须选择项目负责人和技术负责人，至少一名现场维护人员。)</span>
+  <div class="dispatch-staff-root">
+    <div class="form-card">
+      <div class="section-title">配置维保人员</div>
+      <div class="tips">
+        <b>（提示：必须选择且只能选择一名项目负责人和技术负责人，至少一名现场维保人员。）</b>
+      </div>
+
+      <!-- 顶部角色切换按钮 -->
+      <div class="role-tabs">
+        <button
+          v-for="(label, key) in roleMap"
+          :key="key"
+          :class="['role-tab-btn', { active: activeTab === key }]"
+          @click="activeTab = key"
+        >
+          {{ label }}
+        </button>
+      </div>
+
+      <!-- 左右两栏 -->
+      <div class="staff-panel">
+        <!-- 左侧人员列表 -->
+        <div class="staff-list">
+          <el-input v-model="search" placeholder="输入姓名查询" clearable class="search-input">
+            <el-button slot="append" icon="el-icon-search" />
+          </el-input>
+
+          <el-scrollbar class="scroll-area">
+            <div v-for="person in filteredStaff" :key="person.id" class="staff-item">
+              <el-checkbox
+                v-if="activeTab === 'maintainer'"
+                :checked="isSelected('maintainer', person)"
+                @change="() => toggleSelect('maintainer', person)"
+              />
+              <div
+                class="info-box"
+                :class="{ selected: isSelected(activeTab, person), clickable: activeTab !== 'maintainer' }"
+                @click="activeTab !== 'maintainer' && selectSingle(activeTab, person)"
+              >
+                <img :src="person.avatar" class="avatar">
+                <div class="meta">
+                  <div class="name">{{ person.name }}</div>
+                  <div class="title">{{ person.title }}</div>
+                  <div class="company">已分配 {{ person.assignedCount }} 家企业</div>
+                </div>
+              </div>
+            </div>
+          </el-scrollbar>
+        </div>
+
+        <!-- 右侧已选卡片 -->
+        <!-- 右侧服务人员区域（已勾选人员） -->
+        <div class="selected-panel">
+          <div class="selected-header">服务人员（已勾选人员）</div>
+
+          <div v-for="(label, role) in roleMap" :key="role" class="selected-block">
+            <div class="selected-title">{{ label }}</div>
+
+            <template v-if="role === 'maintainer'">
+              <template v-if="Array.isArray(selected.maintainer) && selected.maintainer.length > 0">
+                <div v-for="person in selected.maintainer" :key="person.id" class="card">
+                  <img :src="person.avatar" class="avatar">
+                  <div class="meta">
+                    <div class="name">{{ person.name }}</div>
+                    <div class="title">{{ person.title }}</div>
+                  </div>
+                  <i class="el-icon-close" @click="remove(role, person)" />
+                </div>
+              </template>
+              <template v-else>
+                <div class="empty-card">+ 选择"现场维保人员"</div>
+              </template>
+            </template>
+
+            <template v-else>
+              <div v-if="selected[role]" class="card">
+                <img :src="selected[role].avatar" class="avatar">
+                <div class="meta">
+                  <div class="name">{{ selected[role].name }}</div>
+                  <div class="title">{{ selected[role].title }}</div>
+                </div>
+                <i class="el-icon-close" @click="remove(role)" />
+              </div>
+              <div v-else class="empty-card">+ 选择"{{ label }}"</div>
+            </template>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <el-row :gutter="28" class="main-content">
-      <!-- 左侧选择栏 -->
-      <el-col :span="12">
-        <el-card class="left-card">
-          <el-tabs v-model="activeTab" type="card">
-            <el-tab-pane label="技术负责人" name="tech">
-              <div class="user-search-bar">
-                <el-input v-model="searchName" placeholder="输入姓名查询" clearable style="width:240px;">
-                  <template #append>
-                    <el-button icon="el-icon-search" @click="onSearch" />
-                  </template>
-                </el-input>
-              </div>
-              <div class="user-list">
-                <div
-                  v-for="(user, idx) in filteredList('tech')"
-                  :key="user.id"
-                  :class="['user-item', { checked: selected.tech && selected.tech.id === user.id }]"
-                  @click="selectUser('tech', user)"
-                >
-                  <el-checkbox
-                    v-model="selected.tech"
-                    :checked="selected.tech && selected.tech.id === user.id"
-                    :label="user.name"
-                    @change="selectUser('tech', user)"
-                    @click.stop
-                  />
-                  <img :src="user.avatar" class="avatar">
-                  <div class="user-info">
-                    <span class="name">{{ user.name }}</span>
-                    <span class="desc">{{ user.role }}</span>
-                    <span class="desc">已分配 {{ user.companyCount }} 家企业</span>
-                  </div>
-                </div>
-              </div>
-            </el-tab-pane>
-            <el-tab-pane label="项目负责人" name="manager">
-              <div class="user-search-bar">
-                <el-input v-model="searchName" placeholder="输入姓名查询" clearable style="width:240px;">
-                  <template #append>
-                    <el-button icon="el-icon-search" @click="onSearch" />
-                  </template>
-                </el-input>
-              </div>
-              <div class="user-list">
-                <div
-                  v-for="(user, idx) in filteredList('manager')"
-                  :key="user.id"
-                  :class="['user-item', { checked: selected.manager && selected.manager.id === user.id }]"
-                  @click="selectUser('manager', user)"
-                >
-                  <el-checkbox
-                    v-model="selected.manager"
-                    :checked="selected.manager && selected.manager.id === user.id"
-                    :label="user.name"
-                    @change="selectUser('manager', user)"
-                    @click.stop
-                  />
-                  <img :src="user.avatar" class="avatar">
-                  <div class="user-info">
-                    <span class="name">{{ user.name }}</span>
-                    <span class="desc">{{ user.role }}</span>
-                    <span class="desc">已分配 {{ user.companyCount }} 家企业</span>
-                  </div>
-                </div>
-              </div>
-            </el-tab-pane>
-            <el-tab-pane label="现场维护人员" name="worker">
-              <div class="user-search-bar">
-                <el-input v-model="searchName" placeholder="输入姓名查询" clearable style="width:240px;">
-                  <template #append>
-                    <el-button icon="el-icon-search" @click="onSearch" />
-                  </template>
-                </el-input>
-              </div>
-              <div class="user-list">
-                <div
-                  v-for="(user, idx) in filteredList('worker')"
-                  :key="user.id"
-                  :class="['user-item', { checked: isWorkerSelected(user) }]"
-                  @click="toggleWorker(user)"
-                >
-                  <el-checkbox
-                    v-model="selected.workerIds"
-                    :checked="isWorkerSelected(user)"
-                    :label="user.name"
-                    @change="toggleWorker(user)"
-                    @click.stop
-                  />
-                  <img :src="user.avatar" class="avatar">
-                  <div class="user-info">
-                    <span class="name">{{ user.name }}</span>
-                    <span class="desc">{{ user.role }}</span>
-                    <span class="desc">已分配 {{ user.companyCount }} 家企业</span>
-                  </div>
-                </div>
-              </div>
-            </el-tab-pane>
-          </el-tabs>
-        </el-card>
-      </el-col>
-      <!-- 右侧已选栏 -->
-      <el-col :span="12">
-        <el-card class="right-card">
-          <div class="picked-block">
-            <div class="role-block">
-              <div class="role-title">技术负责人</div>
-              <div v-if="selected.tech" class="picked-item">
-                <img :src="selected.tech.avatar" class="avatar">
-                <div class="user-info">
-                  <span class="name">{{ selected.tech.name }}</span>
-                  <span class="desc">{{ selected.tech.role }}</span>
-                  <span class="desc">已分配 {{ selected.tech.companyCount }} 家企业</span>
-                </div>
-                <i class="el-icon-close remove-btn" @click="removePicked('tech')" />
-              </div>
-            </div>
-            <div class="role-block">
-              <div class="role-title">项目负责人</div>
-              <div v-if="selected.manager" class="picked-item">
-                <img :src="selected.manager.avatar" class="avatar">
-                <div class="user-info">
-                  <span class="name">{{ selected.manager.name }}</span>
-                  <span class="desc">{{ selected.manager.role }}</span>
-                  <span class="desc">已分配 {{ selected.manager.companyCount }} 家企业</span>
-                </div>
-                <i class="el-icon-close remove-btn" @click="removePicked('manager')" />
-              </div>
-            </div>
-            <div class="role-block">
-              <div class="role-title">现场维护人员</div>
-              <div v-for="w in selected.workers" :key="w.id" class="picked-item">
-                <img :src="w.avatar" class="avatar">
-                <div class="user-info">
-                  <span class="name">{{ w.name }}</span>
-                  <span class="desc">{{ w.role }}</span>
-                  <span class="desc">已分配 {{ w.companyCount }} 家企业</span>
-                </div>
-                <i class="el-icon-close remove-btn" @click="removePicked('worker', w)" />
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-    <div style="text-align:center;margin-top:32px;">
-      <el-button type="primary" style="width:130px;" @click="onSave">保存</el-button>
+    <div class="footer">
+      <el-button type="primary" @click="submit">保存</el-button>
     </div>
-    <el-button class="setting-btn" type="primary" icon="el-icon-setting" circle @click="onSetting" />
   </div>
 </template>
 
 <script>
+import avatar1 from '@/assets/avatar-1.jpg'
 export default {
-  name: 'DispatchStaffPage',
+  name: 'DispatchStaff',
   data() {
     return {
-      activeTab: 'tech',
-      searchName: '',
-      // mock 用户数据
-      userPool: {
-        tech: [
-          { id: 1, name: '邱峰', role: '一级注册消防工程师', companyCount: 2, avatar: require('@/assets/avatar-1.jpg') },
-          { id: 3, name: '何珍', role: '一级注册消防工程师', companyCount: 2, avatar: require('@/assets/avatar-3.jpg') }
-        ],
-        manager: [
-          { id: 2, name: '王蕾', role: '一级注册消防工程师', companyCount: 2, avatar: require('@/assets/avatar-2.jpg') }
-        ],
-        worker: [
-          { id: 4, name: '黎建军', role: '消防设施操作员', companyCount: 2, avatar: require('@/assets/avatar-4.jpg') },
-          { id: 5, name: '邱峰', role: '一级注册消防工程师', companyCount: 2, avatar: require('@/assets/avatar-1.jpg') },
-          { id: 6, name: '何珍', role: '一级注册消防工程师', companyCount: 2, avatar: require('@/assets/avatar-3.jpg') }
-        ]
-      },
+      activeTab: 'technical',
+      search: '',
+      staffList: [
+        { id: 1, name: '张', title: '一级注册消防工程师', assignedCount: 4, avatar: avatar1 },
+        { id: 2, name: 'ljh', title: '一级注册消防工程师', assignedCount: 4, avatar: avatar1 },
+        { id: 3, name: '陈xx', title: '一级注册消防工程师', assignedCount: 5, avatar: avatar1 },
+        { id: 4, name: '邱峰', title: '一级注册消防工程师', assignedCount: 6, avatar: avatar1 },
+        { id: 5, name: '黎建军', title: '消防设施操作员', assignedCount: 4, avatar: avatar1 }
+      ],
       selected: {
-        tech: null,
-        manager: null,
-        workers: [],
-        workerIds: []
+        technical: null,
+        leader: null,
+        maintainer: [] // ✅ 一定要这样
+      },
+
+      roleMap: {
+        technical: '技术负责人',
+        leader: '项目负责人',
+        maintainer: '现场维保人员'
       }
     }
   },
+  computed: {
+    filteredStaff() {
+      return this.staffList.filter(p => p.name.includes(this.search))
+    }
+  },
   methods: {
-    filteredList(roleType) {
-      return this.userPool[roleType].filter(u => !this.searchName || u.name.includes(this.searchName))
+    isSelected(role, person) {
+      if (role === 'maintainer') {
+        return this.selected.maintainer.some(p => p.id === person.id)
+      }
+      return this.selected[role]?.id === person.id
     },
-    selectUser(type, user) {
-      if (type === 'tech') this.selected.tech = user
-      if (type === 'manager') this.selected.manager = user
-    },
-    toggleWorker(user) {
-      const idx = this.selected.workers.findIndex(w => w.id === user.id)
-      if (idx === -1) {
-        this.selected.workers.push(user)
-        this.selected.workerIds.push(user.id)
+    toggleSelect(role, person) {
+      const exists = this.selected.maintainer.find(p => p.id === person.id)
+      if (exists) {
+        this.selected.maintainer = this.selected.maintainer.filter(p => p.id !== person.id)
       } else {
-        this.selected.workers.splice(idx, 1)
-        this.selected.workerIds = this.selected.workerIds.filter(id => id !== user.id)
+        this.selected.maintainer.push(person)
       }
     },
-    isWorkerSelected(user) {
-      return this.selected.workerIds.includes(user.id)
+    selectSingle(role, person) {
+      this.selected[role] = person
     },
-    removePicked(type, user) {
-      if (type === 'tech') this.selected.tech = null
-      if (type === 'manager') this.selected.manager = null
-      if (type === 'worker') {
-        this.selected.workers = this.selected.workers.filter(w => w.id !== user.id)
-        this.selected.workerIds = this.selected.workerIds.filter(id => id !== user.id)
+    remove(role, person) {
+      if (role === 'maintainer') {
+        this.selected.maintainer = this.selected.maintainer.filter(p => p.id !== person.id)
+      } else {
+        this.selected[role] = null
       }
     },
-    onSave() {
-      // 提交选中的数据
-      this.$message.success('保存成功')
-      // 可以 this.$router.go(-1) 或返回上一页
-    },
-    onSetting() {
-      this.$message.info('设置')
-    },
-    onSearch() {
-      // 前端本地过滤
+    submit() {
+      if (!this.selected.technical || !this.selected.leader || this.selected.maintainer.length === 0) {
+        this.$message.error('请选择技术负责人、项目负责人和至少一名现场维保人员')
+        return
+      }
+      const result = {
+        projectName: this.data && this.data.projectName ? this.data.projectName : '',
+        maintainPersons: {
+          technical: this.selected.technical?.name || '',
+          leader: this.selected.leader?.name || '',
+          maintainer: this.selected.maintainer.map(p => p.name)
+        },
+        technical: this.selected.technical || null,
+        leader: this.selected.leader || null,
+        maintainer: this.selected.maintainer || []
+      }
+      console.log('弹窗保存返回:', result)
+      this.$emit('confirm', result)
+      this.$emit('submit', result)
     }
   }
 }
 </script>
 
 <style scoped>
-.dispatch-staff-page {
-  background: #fff;
-  min-height: 100vh;
-  padding: 16px 8px 40px 8px;
-  position: relative;
+.dispatch-staff-root {
+  padding: 20px;
 }
-.header-bar {
-  display: flex;
-  align-items: center;
-  padding: 10px 0 22px 0;
-}
-.title {
-  font-size: 26px;
-  font-weight: bold;
-  color: #222;
-  margin-right: 18px;
-}
-.tip {
-  color: #f55;
-  font-size: 15px;
-  margin-left: 6px;
-}
-.main-content {
-  margin: 0;
-}
-.left-card, .right-card {
-  background: #f6faff;
-  border-radius: 10px;
-  min-height: 510px;
-  box-shadow: 0 2px 10px #77baff0c;
-  border: none;
-}
-.el-tabs__header {
-  margin: 0 0 10px 0;
-}
-.user-search-bar {
-  margin-bottom: 12px;
-}
-.user-list {
-  min-height: 320px;
-  max-height: 430px;
-  overflow-y: auto;
-  background: #f8fafc;
-  border-radius: 5px;
-}
-.user-item {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-  padding: 12px 16px;
-  border: 1px solid #f2f6fa;
-}
-.user-item.checked {
-  border: 1.5px solid #3d99fc;
-  background: #f0f8ff;
-}
-.user-item .avatar {
-  width: 50px;
-  height: 50px;
-  margin-right: 18px;
-  border-radius: 50%;
-  background: #eee;
-}
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-.user-info .name {
+
+.section-title {
   font-size: 18px;
-  color: #26323e;
-  font-weight: 700;
+  font-weight: bold;
+  margin-bottom: 6px;
 }
-.user-info .desc {
-  color: #789;
+
+.tips {
+  color: #f56c6c;
   font-size: 14px;
-  margin-top: 2px;
-}
-.picked-block .role-block {
-  margin-bottom: 30px;
-}
-.role-title {
-  font-weight: bold;
-  font-size: 18px;
   margin-bottom: 12px;
-  color: #212121;
 }
-.picked-item {
+
+.role-tabs {
   display: flex;
-  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.role-tab-btn {
+  padding: 8px 16px;
+  border: none;
+  background: #eaf3ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.role-tab-btn.active {
+  background: #409EFF;
+  color: white;
+}
+
+.staff-panel {
+  display: flex;
+  gap: 20px;
+}
+
+.staff-list {
+  width: 50%;
   background: #fff;
   border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 2px 6px #a9c6fd14;
-  border: 1px solid #e3eaf5;
-  position: relative;
+  padding: 12px;
 }
-.picked-item .avatar {
-  width: 48px;
-  height: 48px;
-  margin-right: 18px;
+
+.search-input {
+  margin-bottom: 12px;
+}
+
+.scroll-area {
+  max-height: 480px;
+}
+
+.staff-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.info-box {
+  display: flex;
+  margin-left: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.info-box.clickable:hover {
+  background: #f0f7ff;
+}
+
+.info-box.selected {
+  background: #ecf5ff;
+  border: 1px solid #409EFF;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #eee;
 }
-.remove-btn {
-  color: #f55;
-  font-size: 22px;
+
+.meta {
+  margin-left: 10px;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.title,
+.company {
+  font-size: 12px;
+  color: #888;
+}
+
+.selected-list {
+  width: 50%;
+}
+
+.selected-block {
+  margin-bottom: 20px;
+}
+
+.selected-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 10px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+}
+
+.card .avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.card .meta {
+  margin-left: 10px;
+}
+
+.card i {
+  position: absolute;
+  top: 8px;
+  right: 10px;
   cursor: pointer;
+  color: #f56c6c;
+}
+
+.empty-card {
+  padding: 20px;
+  background: #f7f9fc;
+  border: 1px dashed #bbb;
+  border-radius: 6px;
+  color: #409EFF;
+  text-align: center;
+}
+
+.footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.selected-panel {
+  width: 50%;
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 200px;
+}
+
+.selected-header {
+  background: #eaf3ff;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.selected-block {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.selected-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  margin-bottom: 12px;
+}
+
+.card .avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.card .meta .name {
+  font-weight: bold;
+}
+
+.card .meta .title {
+  font-size: 12px;
+  color: #888;
+}
+
+.card i {
   position: absolute;
   right: 12px;
-  top: 18px;
+  top: 12px;
+  color: #f56c6c;
+  cursor: pointer;
 }
-.setting-btn {
-  position: fixed;
-  right: 32px;
-  top: 320px;
-  z-index: 10;
-  box-shadow: 0 2px 8px #87b7fd33;
+
+.empty-card {
+  padding: 24px;
+  background: #f0f6fd;
+  border: 1px dashed #bbb;
+  border-radius: 8px;
+  color: #409EFF;
+  text-align: left;
+  font-size: 14px;
 }
 </style>

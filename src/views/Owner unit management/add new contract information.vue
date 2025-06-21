@@ -4,7 +4,7 @@
     <div class="form-card">
       <!-- 合同信息 -->
       <div class="section-title">合同信息</div>
-      <el-form :model="form" :rules="rules" ref="form" label-width="112px" class="double-form-row">
+      <el-form ref="form" :model="form" :rules="rules" label-width="112px" class="double-form-row">
         <el-row :gutter="48">
           <!-- 左栏 -->
           <el-col :span="12">
@@ -12,19 +12,9 @@
               <el-input v-model="form.entrustName" placeholder="请输入委托单位名称" />
             </el-form-item>
             <el-form-item label="合同时间" required>
-              <el-date-picker
-                v-model="form.dateStart"
-                type="date"
-                placeholder="开始日期"
-                style="width: 140px"
-              />
+              <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 140px" />
               <span class="date-sep">-</span>
-              <el-date-picker
-                v-model="form.dateEnd"
-                type="date"
-                placeholder="结束日期"
-                style="width: 140px"
-              />
+              <el-date-picker v-model="form.dateEnd" type="date" placeholder="结束日期" style="width: 140px" />
             </el-form-item>
             <el-form-item label="合同名称">
               <el-input v-model="form.contractName" placeholder="请输入合同名称" />
@@ -34,21 +24,39 @@
             </el-form-item>
             <el-form-item label="付款周期">
               <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%">
+                <el-option label="月" value="月" />
+                <el-option label="季" value="季" />
                 <el-option label="半年" value="半年" />
-                <el-option label="一年" value="一年" />
+                <el-option label="年" value="年" />
+
               </el-select>
             </el-form-item>
             <el-form-item label="维保建筑类型">
               <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%">
-                <el-option label="高层建筑" value="高层建筑" />
-                <el-option label="大型商场" value="大型商场" />
+                <el-option label="高层" value="高层" />
+                <el-option label="地下" value="地下" />
+                <el-option label="人员密集场所" value="人员密集场所" />
+                <el-option label="易燃易爆场所" value="易燃易爆场所" />
+                <el-option label="居民住宅" value="居民住宅" />
+                <el-option label="商住一体" value="商住一体" />
+                <el-option label="文物古建筑" value="文物古建筑" />
+                <el-option label="医院" value="医院" />
+                <el-option label="学校" value="学校" />
+                <el-option label="政府机关" value="政府机关" />
+                <el-option label="酒店宾馆" value="酒店宾馆" />
+                <el-option label="加油站" value="加油站" />
+                <el-option label="停车场" value="停车场" />
+                <el-option label="厂房仓库" value="厂房仓库" />
+                <el-option label="其他" value="其他" />
+
               </el-select>
             </el-form-item>
             <el-form-item label="设计单位">
               <el-input v-model="form.designOrg" placeholder="请输入设计单位" />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" placeholder="请输入备注说明" />
+              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }"
+                placeholder="请输入备注说明" />
             </el-form-item>
           </el-col>
           <!-- 右栏 -->
@@ -59,7 +67,7 @@
             <el-form-item label="维保方式" prop="maintType" required>
               <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%">
                 <el-option label="系统维保" value="系统维保" />
-                <el-option label="设备维保" value="设备维保" />
+                <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
@@ -84,11 +92,7 @@
               <el-input v-model="form.recordOrg" placeholder="请输入验收备案单位全称" />
             </el-form-item>
             <el-form-item label="合同文件">
-              <el-upload
-                action="#"
-                :show-file-list="false"
-                style="display:inline-block"
-              >
+              <el-upload action="#" :show-file-list="false" style="display:inline-block">
                 <el-button size="mini">+ 上传合同文件</el-button>
               </el-upload>
               <span class="upload-tips">上传支持: DOCX、PDF、PNG、JPG等格式文件</span>
@@ -130,18 +134,14 @@
         </el-table-column>
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
-            <el-button
-              v-if="buildingList.length > 1"
-              type="text"
-              style="color:#f56c6c"
-              @click="removeRow(scope.$index)"
-            >删除</el-button>
+            <el-button v-if="buildingList.length > 1" type="text" style="color:#f56c6c"
+              @click="removeRow(scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div style="text-align: left; margin-bottom: 18px;">
         <el-button type="text" style="font-size: 16px; color: #409EFF;" @click="addRow">
-          <i class="el-icon-plus"></i> 新增内容
+          <i class="el-icon-plus" /> 新增内容
         </el-button>
       </div>
 
@@ -150,27 +150,25 @@
         合同维保内容
       </div>
       <el-row :gutter="14">
-        <!-- 左侧：勾选维保内容的树形列表 -->
+        <!-- 左侧树形列表 + 全选 -->
         <el-col :span="6">
+          <div style="margin-bottom:12px;">
+            <el-checkbox v-model="treeCheckAll" @change="handleCheckAll" style="margin-left:2px;">一键全选</el-checkbox>
+          </div>
           <el-tabs v-model="activeTab" class="tab-tree">
             <el-tab-pane label="平台标准系统" name="standard">
-              <el-tree
-                :data="maintTree"
-                show-checkbox
-                node-key="id"
-                :default-checked-keys="checkedKeys"
-                @check="handleCheck"
-                :expand-on-click-node="false"
-              />
+              <el-tree ref="maintTree" :data="maintTree" show-checkbox node-key="id" :default-checked-keys="checkedKeys"
+                :expand-on-click-node="false" @check="handleTreeCheck" />
             </el-tab-pane>
             <el-tab-pane label="自建标准系统" name="custom">
               <div class="tab-empty">暂无内容</div>
             </el-tab-pane>
           </el-tabs>
         </el-col>
-        <!-- 右侧：已勾选维保内容（表格展示，无数据时空占位图）-->
+        <!-- 右侧表格展示 -->
         <el-col :span="18">
           <el-table :data="checkedMaintList" border style="width:100%;">
+            <el-table-column type="index" label="序号" width="55" align="center" />
             <el-table-column prop="system" label="消防系统/设施" align="center" />
             <el-table-column prop="item" label="维保项目" align="center" />
             <el-table-column prop="content" label="检测内容" align="center" />
@@ -184,114 +182,198 @@
         </el-col>
       </el-row>
 
+
       <!-- 下一步 -->
       <div style="text-align: center; margin: 38px 0 12px 0;">
-        <el-button type="primary" size="large" @click="nextStep" style="width: 160px;font-size:18px;">下一步</el-button>
+        <el-button type="primary" size="large" style="width: 160px;font-size:18px;" @click="nextStep">下一步</el-button>
       </div>
     </div>
   </div>
 </template>
-
 <script>
+import { mapActions } from 'vuex'
+import { createContract } from '@/api/contract'
+
 export default {
-  name: "AddNewContractInfo",
-  props: {
-    formData: Object
-  },
+  name: 'AddNewContractInfo',
+  props: ['data'],
   data() {
     return {
-      // 合同基本信息
       form: {
-        entrustName: '',
-        dateStart: '',
-        dateEnd: '',
-        contractName: '',
-        contractNo: '',
-        payCycle: '',
-        buildType: '',
-        creditCode: '',
-        maintType: '',
-        maintArea: '',
-        amount: '',
-        remind: 0,
-        designOrg: '',
-        remark: '',
-        debugOrg: '',
-        recordOrg: ''
+        entrustName: '', dateStart: '', dateEnd: '', contractName: '', contractNo: '',
+        payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
+        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: ''
       },
       rules: {
         entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
         creditCode: [{ required: true, message: '请输入统一社会信用代码', trigger: 'blur' }],
         maintType: [{ required: true, message: '请选择维保方式', trigger: 'change' }]
       },
-      // 建筑信息表
-      buildingList: [
-        { name: '', area: '', floor: '', height: '', remark: '' }
-      ],
-      // 维保内容树&勾选
+      buildingList: [{ name: '', area: '', floor: '', height: '', remark: '' }],
       activeTab: 'standard',
-      maintTree: [
-        {
-          id: 1, label: '消防供配电设施',
-          children: [
-            { id: 2, label: '配电柜', data: { system: '消防供配电设施', item: '配电柜', content: '试验主电源', period: '月检', standard: 'GB50116' } }
-          ]
-        },
-        {
-          id: 3, label: '火灾自动报警系统',
-          children: [
-            { id: 4, label: '报警主机', data: { system: '火灾自动报警系统', item: '报警主机', content: '报警测试', period: '月检', standard: 'GB50116' } }
-          ]
-        }
-      ],
+      maintTree: [],
       checkedKeys: [],
-      checkedMaintList: []
+      checkedMaintList: [],
+      treeCheckAll: false,
+      activeTab: 'standard'// 全选
     }
   },
   mounted() {
-    if (this.formData) {
-      this.form = Object.assign({}, this.form, this.formData)
-    }
+    this.loadMaintainTree()
   },
   methods: {
+    ...mapActions('contractSubmit', ['updateContractField', 'updateBuildings']),
+
+    // 递归挂 parent
+    transformToTree(rawData) {
+      function attachParent(nodes, parent = null) {
+        return nodes.map(node => {
+          const n = { ...node, parent }
+          if (n.children && n.children.length) {
+            n.children = attachParent(n.children, n)
+          }
+          return n
+        })
+      }
+      return attachParent(rawData)
+    },
+    transformToTree(data) {
+      // period: 1 => '月检'
+      const getPeriodLabel = (p) => {
+        if (!p) return ''
+        if (p == 1) return '月检'
+        if (p == 12) return '年检'
+        return `每${p}月`
+      }
+      return data.map(system => ({
+        id: system.id,
+        label: system.name,
+        children: (system.children || []).map(project => ({
+          id: project.id,
+          label: project.projectName,
+          children: (project.children || []).map(item => ({
+            id: item.id,
+            label: item.content,
+            data: {
+              system: system.name,
+              item: project.projectName,
+              content: item.content,
+              period: getPeriodLabel(item.period),
+              standard: item.attention || '',
+            }
+          }))
+        }))
+      }))
+    },
+    async loadMaintainTree() {
+      try {
+        const res = await fetch('/maintainTree.json')
+        const rawData = await res.json()
+        this.maintTree = this.transformToTree(rawData)
+      } catch (err) {
+        this.$message.error('加载维保项目失败')
+      }
+    },
+    handleTreeCheck(checkedKeys, { checkedNodes }) {
+      this.checkedKeys = checkedKeys
+      this.updateCheckedMaintList()
+      // 控制全选
+      const allIds = this.getAllLeafIds(this.maintTree)
+      this.treeCheckAll = checkedKeys.length === allIds.length
+    },
+    // 全选
+    handleCheckAll(val) {
+      const getAllLeafIds = (nodes, arr = []) => {
+        nodes.forEach(n => {
+          if (n.children && n.children.length) {
+            getAllLeafIds(n.children, arr)
+          } else {
+            arr.push(n.id)
+          }
+        })
+        return arr
+      }
+      if (val) {
+        const allIds = getAllLeafIds(this.maintTree)
+        this.checkedKeys = allIds
+        this.$refs.maintTree.setCheckedKeys(allIds)
+      } else {
+        this.checkedKeys = []
+        this.$refs.maintTree.setCheckedKeys([])
+      }
+      this.updateCheckedMaintList()
+    },
+
+     // 提取所有叶子节点id
+    getAllLeafIds(nodes, arr = []) {
+      nodes.forEach(n => {
+        if (n.children && n.children.length) {
+          this.getAllLeafIds(n.children, arr)
+        } else {
+          arr.push(n.id)
+        }
+      })
+      return arr
+    },
+    // 生成右侧表格完整内容
+     updateCheckedMaintList() {
+      const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
+      this.checkedMaintList = checkedNodes
+        .filter(n => !n.children)
+        .map(n => n.data ? n.data : {
+          system: n.label,
+          item: '', content: '', period: '', standard: ''
+        })
+    },
+
     nextStep() {
-      // 校验所有表单
       this.$refs.form.validate(valid => {
         if (!valid) return
-        // 你也可以加其它校验，例如建筑信息至少有一条
-        this.$emit('update', this.form)
+        const data = {
+          contractName: this.form.contractName,
+          contractNo: this.form.contractNo,
+          entrustName: this.form.entrustName,
+          creditCode: this.form.creditCode,
+          payCycle: this.form.payCycle,
+          buildType: this.form.buildType,
+          maintType: this.form.maintType,
+          maintArea: this.form.maintArea,
+          amount: this.form.amount,
+          dateStart: this.form.dateStart,
+          dateEnd: this.form.dateEnd,
+          remind: this.form.remind,
+          designOrg: this.form.designOrg,
+          debugOrg: this.form.debugOrg,
+          recordOrg: this.form.recordOrg,
+          remark: this.form.remark,
+          buildingList: this.buildingList,
+          checkedMaintList: this.checkedMaintList,
+          type: 'contract'
+        }
+        this.$emit('update', data)
         this.$emit('next')
       })
     },
-    // 建筑表增删
     addRow() {
       this.buildingList.push({ name: '', area: '', floor: '', height: '', remark: '' })
     },
     removeRow(idx) {
       this.buildingList.splice(idx, 1)
-    },
-    handleCheck(checked, { checkedNodes }) {
-      // 只收集叶子节点
-      this.checkedMaintList = checkedNodes
-        .filter(n => !n.children)
-        .map(n => n.data && n.data.data ? n.data.data : {
-          system: n.data.label,
-          item: '',
-          content: '',
-          period: '',
-          standard: ''
-        })
     }
   }
 }
 </script>
 
 <style scoped>
+/* 样式保持不变 */
+</style>
+<style scoped>
 .contract-info-root {
   width: 100%;
   padding: 0 16px 26px 16px;
   background: #f9fbfd;
 }
+
 .title-bar {
   font-size: 22px;
   font-weight: bold;
@@ -300,6 +382,7 @@ export default {
   margin: 28px 0 16px 0;
   letter-spacing: 2px;
 }
+
 .form-card {
   background: #fff;
   border-radius: 12px;
@@ -308,6 +391,7 @@ export default {
   max-width: 1520px;
   box-shadow: 0 4px 16px #e0ebff22;
 }
+
 .section-title {
   font-size: 19px;
   font-weight: bold;
@@ -315,45 +399,56 @@ export default {
   margin-bottom: 16px;
   letter-spacing: 1.5px;
 }
+
 .double-form-row {
   margin-top: 10px;
 }
+
 .unit-text {
   margin-left: 8px;
   color: #666;
 }
+
 .date-sep {
   margin: 0 12px;
   color: #aaa;
   font-size: 16px;
 }
+
 .upload-tips {
   font-size: 13px;
   color: #888;
   margin-left: 14px;
 }
+
 .remind-tip {
   color: #888;
   margin-left: 10px;
   font-size: 13px;
 }
+
 .tip {
   font-size: 13px;
   color: #888;
   margin-left: 14px;
 }
-.building-table >>> th, .building-table >>> td {
+
+.building-table>>>th,
+.building-table>>>td {
   font-size: 15px;
 }
+
 .tab-tree {
   background: #fff;
   min-height: 320px;
 }
+
 .tab-empty {
   color: #888;
   text-align: center;
   padding: 30px 0;
 }
+
 .empty-box {
   text-align: center;
   margin-top: 38px;

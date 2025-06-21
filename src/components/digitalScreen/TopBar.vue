@@ -14,8 +14,8 @@
         <!-- <div class="system-link">维保服务系统</div> -->
         <div class="user-info">
           <span class="member-level">V1白银会员</span>
-          <i class="el-icon-user"></i>
-          <i class="el-icon-arrow-down"></i>
+          <i class="el-icon-user" />
+          <i class="el-icon-arrow-down" />
         </div>
       </div>
     </div>
@@ -96,7 +96,7 @@
         </div>
       </div> -->
 
-      <!-- <div class="data-card">
+    <!-- <div class="data-card">
          <div class="icon-circle">
           <i class="el-icon-setting"></i>
         </div>
@@ -113,7 +113,7 @@
         </div>
       </div> -->
 
-      <!-- <div class="data-card">
+    <!-- <div class="data-card">
         <div class="icon-circle">
           <i class="el-icon-lock"></i>
         </div>
@@ -130,8 +130,8 @@
         </div>
       </div> -->
 
-      <!-- 您可以根据需要添加更多数据卡片 -->
-    </div>
+    <!-- 您可以根据需要添加更多数据卡片 -->
+  </div>
   </div>
 </template>
 

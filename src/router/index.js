@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Vuex from 'vuex'
 import Router from 'vue-router'
 
 Vue.use(Router)
@@ -11,6 +12,7 @@ import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
+
 // import { title } from '@/settings'
 
 /**
@@ -39,7 +41,9 @@ import nestedRouter from './modules/nested'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+Vue.use(Vuex)
 export const constantRoutes = [
+
   {
     path: '/redirect',
     component: Layout,
@@ -82,19 +86,6 @@ export const constantRoutes = [
         name: 'DigitalScreen',
         hidden: true,
         meta: { title: '数字可视化大屏' }
-      }
-    ]
-  },
-  {
-    path: '/documentation',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: 'Documentation', icon: 'documentation', affix: true }
       }
     ]
   },
@@ -263,6 +254,7 @@ export const asyncRoutes = [
       }
     ]
   },
+
   {
     path: '/agency',
     component: Layout,
@@ -273,6 +265,7 @@ export const asyncRoutes = [
       title: '服务机构管理',
       icon: 'nested' // 你可以换成你想用的图标
     },
+
     children: [
       {
         path: 'basic',
@@ -362,11 +355,9 @@ export const asyncRoutes = [
     redirect: '/owner/plan',
     alwaysShow: true,
     name: 'OwnerUnitManagement',
-    meta: {
-      title: '业主单位管理',
-      icon: 'nested'
-    },
+    meta: { title: '项目管理', icon: 'nested' },
     children: [
+      // 已有的
       {
         path: 'project',
         name: 'UnitProject',
@@ -385,61 +376,122 @@ export const asyncRoutes = [
         component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
         meta: { title: '维保点位管理' }
       },
+
+      // 🔧 补全缺失页面
+      {
+        path: 'new-contract-info',
+        name: 'AddNewContractInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/add new contract information.vue'),
+        meta: { title: '新增合同信息' }
+      },
+      {
+        path: 'new-project-info',
+        name: 'AddNewProjectInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/add new project information.vue'),
+        meta: { title: '新增项目信息' }
+      },
+      {
+        path: 'contract-detail',
+        name: 'ContractDetail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/ContractDetail.vue'),
+        meta: { title: '合同详情' }
+      },
+      {
+        path: 'contract-info',
+        name: 'ContractInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/ContractInfo.vue'),
+        meta: { title: '合同信息' }
+      },
+      {
+        path: 'project-info',
+        name: 'ProjectInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/ProjectInfo.vue'),
+        meta: { title: '项目信息详情' }
+      },
+      {
+        path: 'renewal-contract-info',
+        name: 'RenewalContractInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/Renewal contract information.vue'),
+        meta: { title: '续签合同信息' }
+      },
+      {
+        path: 'renewal-project-info',
+        name: 'RenewalProjectInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/Renewal Project information.vue'),
+        meta: { title: '续签项目信息' }
+      },
+      {
+        path: 'renewal-configure-personnel',
+        name: 'RenewalConfigurePersonnel',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/Renewwal Configure maintenance personnel.vue'),
+        meta: { title: '续签人员配置' }
+      },
+
+      // 原有隐藏页
       {
         path: 'unit-detail',
         name: 'UnitDetail',
-        hidden: true, // 隐藏在侧边栏
+        hidden: true,
         component: () => import('@/views/Owner unit management/UnitDetail.vue'),
-        meta: {
-          title: '项目详情',
-          noCache: true,
-          activeMenu: '/owner/project'
-        }
+        meta: { title: '项目详情', noCache: true, activeMenu: '/owner/project' }
       },
       {
         path: 'detail',
         name: 'Detail',
         hidden: true,
         component: () => import('@/views/Owner unit management/Detail.vue'),
-        meta: {
-          title: '项目与合同具体详情',
-          noCache: true,
-          activeMenu: '/owner/project'
-        }
+        meta: { title: '项目与合同具体详情', noCache: true, activeMenu: '/owner/project' }
       },
+
       {
-        path: '/contract/add',
-        name: 'add',
+        path: 'contract/add',
+        name: 'AddContractPage',
         hidden: true,
         component: () => import('@/views/Owner unit management/add.vue'),
-        meta: {
-          title: '新增项目管理页面'
-        }
+        // 第一个contract试试写接口
+        meta: { title: '新增项目管理页面' }
       },
       {
-        path: '/owner-unit/plan-detail',
-        name: 'OwnerUnitPlanDetail',
+        path: 'contract/addnewdispatchStaff',
+        name: 'addnewDispatchStaff',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/addnewdispatchStaff.vue'),
+        meta: { title: '新增配置维保人员' }
+      },
+
+      // 维保计划 & 任务详情
+      {
+        path: 'plan-detail',
+        name: 'PlanDetail',
         hidden: true,
         component: () => import('@/views/Owner unit management/mpm-PlanDetail.vue'),
         meta: { title: '计划详情' }
       },
       {
-        path: '/owner-unit/task-detail',
-        name: 'OwnerUnitTaskDetail',
+        path: 'task-detail',
+        name: 'TaskDetail',
         hidden: true,
         component: () => import('@/views/Owner unit management/mpm-TaskDetail.vue'),
         meta: { title: '任务详情' }
       },
       {
-        path: '/owner-unit/mpmTD-detail',
-        name: 'mpmTD-detail',
+        path: 'mpmTD-detail',
+        name: 'MpmTDDetail',
         hidden: true,
         component: () => import('@/views/Owner unit management/mpmTD-detail.vue'),
         meta: { title: '维保任务详情' }
       },
       {
-        path: '/owner-unit/renewal',
-        name: 'OwnerRenewal',
+        path: 'renewal',
+        name: 'RenewalPage',
         hidden: true,
         component: () => import('@/views/Owner unit management/Renewal.vue'),
         meta: { title: '续签合同' }

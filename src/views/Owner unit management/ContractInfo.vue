@@ -83,7 +83,7 @@
               <el-input v-model="form.designOrg" />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input type="textarea" v-model="form.remark" />
+              <el-input v-model="form.remark" type="textarea" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -124,9 +124,9 @@
           <div>操作</div>
         </div>
         <div
-          class="building-table-row"
           v-for="(row, idx) in buildingData"
           :key="idx"
+          class="building-table-row"
         >
           <el-input v-model="row.name" placeholder="请输入建筑名称" size="small" />
           <el-input-number
@@ -158,8 +158,7 @@
             type="text"
             style="color: #f56c6c"
             @click="removeBuilding(idx)"
-            >删除</el-button
-          >
+          >删除</el-button>
         </div>
         <div class="building-table-add">
           <el-button
@@ -167,7 +166,7 @@
             style="font-size: 16px; color: #409EFF;"
             @click="addBuilding"
           >
-            <i class="el-icon-plus"></i> 新增内容
+            <i class="el-icon-plus" /> 新增内容
           </el-button>
         </div>
       </div>
@@ -186,7 +185,7 @@
         node-key="id"
         :default-checked-keys="[2, 5]"
         :expand-on-click-node="false"
-      ></el-tree>
+      />
       <!-- 右侧表 -->
       <el-table :data="maintTableData" border class="maint-table">
         <el-table-column prop="index" label="序号" width="60" align="center" />
@@ -206,50 +205,50 @@
 
 <script>
 export default {
-  name: "ContractDetail",
+  name: 'ContractDetail',
   data() {
     return {
       form: {
-        entrustName: "Cell C",
-        dateStart: "2025-04-08",
-        dateEnd: "2026-05-01",
-        contractName: "VDS",
-        contractNo: "BDR575",
-        payCycle: "半年",
-        buildType: "人员密集场所",
-        creditCode: "91440101304662708A",
-        maintType: "系统维保",
+        entrustName: 'Cell C',
+        dateStart: '2025-04-08',
+        dateEnd: '2026-05-01',
+        contractName: 'VDS',
+        contractNo: 'BDR575',
+        payCycle: '半年',
+        buildType: '人员密集场所',
+        creditCode: '91440101304662708A',
+        maintType: '系统维保',
         maintArea: 3000,
         amount: 20000,
         remind: 0,
-        designOrg: "",
-        remark: "",
-        debugOrg: "",
-        recordOrg: ""
+        designOrg: '',
+        remark: '',
+        debugOrg: '',
+        recordOrg: ''
       },
       buildingData: [
-        { name: "jk", area: 3000, floor: 6, height: 140, remark: "" }
+        { name: 'jk', area: 3000, floor: 6, height: 140, remark: '' }
       ],
       maintTree: [
-        { id: 1, label: "消防供配电设施", children: [
-          { id: 2, label: "配电柜" }
-        ]},
-        { id: 3, label: "火灾自动报警系统", children: [
-          { id: 4, label: "报警主机" }
-        ]}
+        { id: 1, label: '消防供配电设施', children: [
+          { id: 2, label: '配电柜' }
+        ] },
+        { id: 3, label: '火灾自动报警系统', children: [
+          { id: 4, label: '报警主机' }
+        ] }
       ],
       maintTableData: [
-        { index: 1, system: "消防供配电设施", item: "配电柜", content: "试验主电源", period: "月检" },
-        { index: 2, system: "消防供配电设施", item: "配电柜", content: "消防设备", period: "月检" }
+        { index: 1, system: '消防供配电设施', item: '配电柜', content: '试验主电源', period: '月检' },
+        { index: 2, system: '消防供配电设施', item: '配电柜', content: '消防设备', period: '月检' }
       ]
     }
   },
   methods: {
     addBuilding() {
-      this.buildingData.push({ name: "", area: "", floor: "", height: "", remark: "" });
+      this.buildingData.push({ name: '', area: '', floor: '', height: '', remark: '' })
     },
     removeBuilding(index) {
-      this.buildingData.splice(index, 1);
+      this.buildingData.splice(index, 1)
     }
   }
 }

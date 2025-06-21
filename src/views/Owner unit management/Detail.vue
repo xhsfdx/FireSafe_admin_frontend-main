@@ -1,73 +1,73 @@
-  <template>
-    <div class="progress-navbar">
-      <div class="steps-bar">
-        <div
-          v-for="(step, idx) in steps"
-          :key="step.name"
-          :class="['step-item', { active: idx === activeIndex }]"
-          @click="handleStepClick(idx)"
-        >
-          <div class="step-bg">
-            <div class="step-icon">
-              <img :src="step.icon" alt="" />
-            </div>
-            <span>{{ step.label }}</span>
+<template>
+  <div class="progress-navbar">
+    <div class="steps-bar">
+      <div
+        v-for="(step, idx) in steps"
+        :key="step.name"
+        :class="['step-item', { active: idx === activeIndex }]"
+        @click="handleStepClick(idx)"
+      >
+        <div class="step-bg">
+          <div class="step-icon">
+            <img :src="step.icon" alt="">
           </div>
-          <template v-if="idx < steps.length - 1">
-            <div class="step-arrow"></div>
-          </template>
+          <span>{{ step.label }}</span>
         </div>
-        <el-button class="back-btn" icon="el-icon-back" @click="$router.back()">返回</el-button>
+        <template v-if="idx < steps.length - 1">
+          <div class="step-arrow" />
+        </template>
       </div>
-      <div class="step-content">
-        <component :is="steps[activeIndex].component" :projectId="projectId" />
-      </div>
+      <el-button class="back-btn" icon="el-icon-back" @click="$router.back()">返回</el-button>
     </div>
-  </template>
+    <div class="step-content">
+      <component :is="steps[activeIndex].component" :project-id="projectId" />
+    </div>
+  </div>
+</template>
 
-  <script>
-  import ContractInfo from './ContractInfo.vue'
-  import ProjectInfo from './ProjectInfo.vue'
-  import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+<script>
+import ContractInfo from './ContractInfo.vue'
+import ProjectInfo from './ProjectInfo.vue'
+import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
 
-  export default {
-    name: 'DetailStepNav',
-    components: { ContractInfo, ProjectInfo, DispatchStaff },
-    props: {
-      projectId: String
-    },
-    data() {
-      return {
-        activeIndex: 0,
-        steps: [
-          {
-            label: '合同信息',
-            name: 'contract',
-            icon: require('@/assets/contract-icon.png'),
-            component: 'ContractInfo'
-          },
-          {
-            label: '项目信息',
-            name: 'project',
-            icon: require('@/assets/project-icon.png'),
-            component: 'ProjectInfo'
-          },
-          {
-            label: '维保人员',
-            name: 'staff',
-            icon: require('@/assets/staff-icon.png'),
-            component: 'DispatchStaff'
-          }
-        ]
-      }
-    },
-    methods: {
-      handleStepClick(idx) {
-        this.activeIndex = idx
-      }
+export default {
+  name: 'DetailStepNav',
+  components: { ContractInfo, ProjectInfo, DispatchStaff },
+  props: {
+    projectId: String
+  },
+  data() {
+    return {
+      activeIndex: 0,
+      steps: [
+        {
+          label: '合同信息',
+          name: 'contract',
+          icon: require('@/assets/contract-icon.png'),
+          component: 'ContractInfo'
+        },
+        {
+          label: '项目信息',
+          name: 'project',
+          icon: require('@/assets/project-icon.png'),
+          component: 'ProjectInfo'
+        },
+        {
+          label: '维保人员',
+          name: 'staff',
+          icon: require('@/assets/staff-icon.png'),
+          component: 'DispatchStaff'
+        }
+      ]
+    }
+  },
+  methods: {
+    handleStepClick(idx) {
+      this.activeIndex = idx
     }
   }
-  </script>
+}
+</script>
 
   <style scoped>
   .progress-navbar {

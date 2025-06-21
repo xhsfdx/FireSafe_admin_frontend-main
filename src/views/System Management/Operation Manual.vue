@@ -4,7 +4,7 @@
       src="/web/viewer.html?file=/pdf/3.pdf"
       frameborder="0"
       style="width:100vw;height:100vh;min-height:100vh;"
-    ></iframe>
+    />
   </div>
 </template>
 

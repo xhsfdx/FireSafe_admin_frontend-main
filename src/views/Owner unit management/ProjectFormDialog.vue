@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" ref="projectForm" label-width="110px" :rules="rules" style="padding-right:24px;">
+  <el-form ref="projectForm" :model="form" label-width="110px" :rules="rules" style="padding-right:24px;">
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="项目名称" prop="name" required>
@@ -11,7 +11,7 @@
         <el-form-item label="项目定位" required>
           <!-- 这里可接高德地图组件, 暂用img/空div占位，实际接入见注释 -->
           <div style="border:1px solid #e0e0e0; border-radius:6px; height:180px; margin-bottom:12px;overflow:hidden;">
-            <img src="https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/center.png" style="width:100%;height:100%;object-fit:cover;" alt="地图"/>
+            <img src="https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/center.png" style="width:100%;height:100%;object-fit:cover;" alt="地图">
           </div>
         </el-form-item>
         <el-form-item label="项目区域" prop="area" required>
@@ -49,21 +49,21 @@
             action="#"
             :show-file-list="false"
           >
-            <i class="el-icon-camera logo-upload-icon"></i>
+            <i class="el-icon-camera logo-upload-icon" />
             <div class="el-upload__text">上传图片</div>
           </el-upload>
         </el-form-item>
       </el-col>
     </el-row>
     <div style="text-align:center; margin-top:10px;">
-      <el-button type="primary" @click="onSave" style="width:120px;">保存</el-button>
-      <el-button @click="$emit('cancel')" style="width:120px; margin-left:18px;">取消</el-button>
+      <el-button type="primary" style="width:120px;" @click="onSave">保存</el-button>
+      <el-button style="width:120px; margin-left:18px;" @click="$emit('cancel')">取消</el-button>
     </div>
   </el-form>
 </template>
 <script>
 export default {
-  name: "ProjectFormDialog",
+  name: 'ProjectFormDialog',
   props: {
     formData: Object
   },

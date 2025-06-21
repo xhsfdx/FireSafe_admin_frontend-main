@@ -4,8 +4,12 @@
     <div class="left-bar">
       <el-input v-model="orgFilter" placeholder="请输入单位名称" size="small" class="org-search" clearable />
       <div class="org-list">
-        <div v-for="item in filteredOrgs" :key="item" :class="['org-item', { active: activeOrg === item }]"
-          @click="activeOrg = item">{{ item }}</div>
+        <div
+          v-for="item in filteredOrgs"
+          :key="item"
+          :class="['org-item', { active: activeOrg === item }]"
+          @click="activeOrg = item"
+        >{{ item }}</div>
       </div>
     </div>
 
@@ -13,12 +17,27 @@
     <div class="main-panel">
       <!-- 顶部搜索操作栏 -->
       <div class="toolbar">
-        <el-input v-model="filters.name" placeholder="姓名" size="small" style="width:150px; margin-right:10px"
-          clearable />
-        <el-input v-model="filters.phone" placeholder="电话" size="small" style="width:150px; margin-right:10px"
-          clearable />
-        <el-select v-model="filters.status" placeholder="账号状态" size="small" style="width:150px; margin-right:10px"
-          clearable>
+        <el-input
+          v-model="filters.name"
+          placeholder="姓名"
+          size="small"
+          style="width:150px; margin-right:10px"
+          clearable
+        />
+        <el-input
+          v-model="filters.phone"
+          placeholder="电话"
+          size="small"
+          style="width:150px; margin-right:10px"
+          clearable
+        />
+        <el-select
+          v-model="filters.status"
+          placeholder="账号状态"
+          size="small"
+          style="width:150px; margin-right:10px"
+          clearable
+        >
           <el-option label="全部" value="" />
           <el-option label="正常" value="1" />
           <el-option label="禁用" value="0" />
@@ -26,13 +45,22 @@
         <el-button type="primary" icon="el-icon-search" style="margin-right:6px" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" style="margin-right:6px" @click="onReset">重置</el-button>
         <el-button type="primary" icon="el-icon-plus" style="margin-right:6px" @click="onAdd">新增</el-button>
-        <el-button type="primary" style="background: #885cf7; border-color: #885cf7; margin-right: 0;"
-          icon="el-icon-link" @click="jumpSystem">跳转到社会单位系统</el-button>
+        <el-button
+          type="primary"
+          style="background: #885cf7; border-color: #885cf7; margin-right: 0;"
+          icon="el-icon-link"
+          @click="jumpSystem"
+        >跳转到社会单位系统</el-button>
       </div>
 
       <!-- 用户表格 -->
-      <el-table :data="filteredData" border style="width: 100%;" :empty-text="' '"
-        header-cell-class-name="table-header">
+      <el-table
+        :data="filteredData"
+        border
+        style="width: 100%;"
+        :empty-text="' '"
+        header-cell-class-name="table-header"
+      >
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="username" label="用户名" align="center" />
         <el-table-column prop="name" label="姓名" align="center" />

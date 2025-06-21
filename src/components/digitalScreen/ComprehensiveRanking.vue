@@ -25,9 +25,9 @@ export default {
   data() {
     return {
       list: [
-        { name: "盛长枫", completed: 0, area: 0, score: 57 },
-        { name: "张晓意", completed: 2, area: 50500, score: 53 },
-        { name: "盛长柏", completed: 0, area: 0, score: 28 }
+        { name: '盛长枫', completed: 0, area: 0, score: 57 },
+        { name: '张晓意', completed: 2, area: 50500, score: 53 },
+        { name: '盛长柏', completed: 0, area: 0, score: 28 }
       ]
     }
   }

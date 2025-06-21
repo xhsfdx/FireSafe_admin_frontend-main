@@ -2,7 +2,7 @@
   <div class="left-panel">
     <div class="card">
       <!-- 業主單位总数区域 -->
-       <h3>业主单位状况</h3>
+      <h3>业主单位状况</h3>
       <TotalOwer />
     </div>
 

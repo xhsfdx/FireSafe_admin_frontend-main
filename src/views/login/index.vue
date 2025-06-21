@@ -12,7 +12,7 @@
 
       <div class="right-panel">
         <div class="logo-section">
-          <img :src="require('@/assets/logo.jpeg')" alt="logo" class="logo" />
+          <img :src="require('@/assets/logo.jpeg')" alt="logo" class="logo">
           <div class="title">四川省消防协会</div>
           <div class="subtitle">消防维保服务管理系统</div>
         </div>
@@ -38,7 +38,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 // import axios from 'axios'

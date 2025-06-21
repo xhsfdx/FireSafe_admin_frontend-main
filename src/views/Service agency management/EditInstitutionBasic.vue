@@ -136,8 +136,9 @@
                 :http-request="customUploadLogo"
                 :on-remove="handleRemoveLogo"
                 :file-list="fileListLogo"
-                list-type="picture-card">
-                <i class="el-icon-plus"></i>
+                list-type="picture-card"
+              >
+                <i class="el-icon-plus" />
               </el-upload>
             </el-form-item>
           </el-col>
@@ -162,7 +163,8 @@
                 :file-list="fileListLicense"
                 list-type="picture-card"
                 :limit="1"
-                :on-exceed="() => $message.warning('最多上传 1 张营业执照')">
+                :on-exceed="() => $message.warning('最多上传 1 张营业执照')"
+              >
                 <i class="el-icon-plus" />
               </el-upload>
             </el-form-item>

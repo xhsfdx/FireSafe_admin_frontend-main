@@ -3,8 +3,8 @@
     <div class="search-filter">
       <div class="filter-item">
         <input
-          type="text"
           v-model="searchParams.projectName"
+          type="text"
           placeholder="输入项目名称搜索"
           class="filter-input"
         >
@@ -40,10 +40,10 @@
       </div>
       <div class="filter-actions">
         <button class="btn btn-primary" @click="handleSearch">
-          <i class="el-icon-search search-icon"></i> 查询
+          <i class="el-icon-search search-icon" /> 查询
         </button>
         <button class="btn btn-secondary" @click="handleReset">
-          <i class="el-icon-refresh reset-icon"></i> 重置
+          <i class="el-icon-refresh reset-icon" /> 重置
         </button>
       </div>
     </div>

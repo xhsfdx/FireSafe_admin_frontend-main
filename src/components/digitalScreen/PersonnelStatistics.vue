@@ -1,6 +1,6 @@
 <template>
   <div class="donut-wrapper" style="margin-top:-18px;">
-    <div ref="echartsDom" style="width: 329px;height: 300px;"/>
+    <div ref="echartsDom" style="width: 329px;height: 300px;" />
   </div>
 </template>
 

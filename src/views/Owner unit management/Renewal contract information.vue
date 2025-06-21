@@ -1,5 +1,5 @@
 <!-- 续签合同信息 -->
- <template>
+<template>
   <div class="renewal-contract-info">
     <!-- 大标题 -->
     <div class="main-title">续签合同</div>
@@ -78,7 +78,7 @@
         <!-- 操作按钮 -->
         <el-row>
           <el-col :span="24" style="text-align:center;margin-top:16px;">
-            <el-button type="primary" size="large" @click="nextStep" class="next-btn">下一步</el-button>
+            <el-button type="primary" size="large" class="next-btn" @click="nextStep">下一步</el-button>
           </el-col>
         </el-row>
       </el-form>
