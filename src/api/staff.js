@@ -16,7 +16,7 @@ export function getAllStaff() {
 
 export function addStaff(data) {
   return request({
-    url: '/vue-element-admin/staff',
+    url: '/staff/create',
     method: 'post',
     data
   })
