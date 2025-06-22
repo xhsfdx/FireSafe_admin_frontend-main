@@ -32,3 +32,27 @@ export function fetchProjectDetail(id) {
   })
 }
 
+// 获取合同详情（用于续签）
+export function getContractDetail(id) {
+  return request({
+    url: `/contracts/${id}/for-renewal`,
+    method: 'get'
+  }).then(response => {
+    // 确保返回正确的数据格式
+    if (response.success && response.data) {
+      return response
+    } else {
+      throw new Error('获取合同详情失败')
+    }
+  })
+}
+
+// 续签合同
+export function renewalContract(data) {
+  return request({
+    url: '/contracts/renewal',
+    method: 'post',
+    data
+  })
+}
+

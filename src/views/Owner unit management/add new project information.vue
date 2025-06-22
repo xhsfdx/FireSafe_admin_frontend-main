@@ -144,3 +144,4 @@ export default {
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
 </style>
+

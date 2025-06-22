@@ -33,7 +33,15 @@
           <span style="color:#409eff">剩余：{{ row.days }}天</span>
         </template>
       </el-table-column>
-      <el-table-column prop="renewStatus" label="续签情况" align="center" />
+      <el-table-column prop="renewStatus" label="续签情况" align="center">
+        <template slot-scope="{ row }">
+          <span v-if="row.renewStatus === '续签合同'" class="renew-status-renewal">{{ row.renewStatus }}</span>
+          <span v-else-if="row.renewStatus === '已续签'" class="renew-status-renewed">{{ row.renewStatus }}</span>
+          <span v-else-if="row.renewStatus === '即将到期'" class="renew-status-expiring">{{ row.renewStatus }}</span>
+          <span v-else-if="row.renewStatus === '已过期'" class="renew-status-expired">{{ row.renewStatus }}</span>
+          <span v-else class="renew-status-normal">{{ row.renewStatus }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">项目详情</el-link>
@@ -58,7 +66,7 @@
 import { fetchContracts, deleteContract } from '@/api/contract'
 
 export default {
-  name: 'UnitManagePage',
+  name: 'UnitProjectManagement',
   data() {
     return {
       filters: {
@@ -76,6 +84,9 @@ export default {
     }
   },
   mounted() {
+    this.loadData()
+  },
+  activated() {
     this.loadData()
   },
   methods: {
@@ -154,15 +165,13 @@ export default {
         name: 'UnitDetail',
         query: { id: row.id } // row.id = 合同id
       })
-    }
-
-    ,
+    },
     // 续签
     onRenew(row) {
-      const { ownerName, entrustName, contractAmount, status, days, renewStatus } = row
+      // 传递合同ID，确保续签时ID不变
       this.$router.push({
         name: 'RenewalPage',
-        query: { ownerName, entrustName, contractAmount, status, days, renewStatus }
+        query: { id: row.id } // 传递合同ID，而不是其他参数
       })
     },
     // 删除
@@ -182,7 +191,6 @@ export default {
       }
     }
   }
-
 }
 </script>
 
@@ -227,5 +235,47 @@ export default {
 .empty-text {
   color: #888;
   font-size: 16px;
+}
+
+/* 续签状态样式 */
+.renew-status-renewal {
+  color: #409eff;
+  font-weight: 600;
+  background: #ecf5ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #b3d8ff;
+}
+
+.renew-status-renewed {
+  color: #67c23a;
+  font-weight: 600;
+  background: #f0f9ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #b3e19d;
+}
+
+.renew-status-expiring {
+  color: #e6a23c;
+  font-weight: 600;
+  background: #fdf6ec;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #f5dab1;
+}
+
+.renew-status-expired {
+  color: #f56c6c;
+  font-weight: 600;
+  background: #fef0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #fbc4c4;
+}
+
+.renew-status-normal {
+  color: #606266;
+  font-weight: 500;
 }
 </style>
