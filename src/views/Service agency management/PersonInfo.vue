@@ -24,8 +24,8 @@
           <el-col :span="12">
             <el-form-item label="* 性别" prop="gender">
               <el-select v-model="formData.gender" placeholder="请选择性别">
-                <el-option label="男" value="male" />
-                <el-option label="女" value="female" />
+                <el-option label="男" value="男"></el-option>
+                <el-option label="女" value="女"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -44,11 +44,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="从业日期" prop="employmentDate">
-              <el-date-picker
-                v-model="formData.employmentDate"
-                type="date"
-                placeholder="请选择从业日期"
-              />
+              <el-date-picker v-model="formData.employmentDate" type="date" placeholder="请选择从业日期" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -75,43 +71,33 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="资质证书">
-              <el-upload
-                class="avatar-uploader"
-                action="YOUR_UPLOAD_URL_FOR_CERTIFICATE"
-                :show-file-list="false"
-                :on-success="handleCertificateUploadSuccess"
-                :before-upload="beforeCertificateUpload"
-              >  <!-- 上传前钩子 -->
+              <el-upload class="avatar-uploader" action="handleCertificateUploadSuccess" :show-file-list="false"
+                :on-success="handleCertificateUploadSuccess" :before-upload="beforeCertificateUpload"> <!-- 上传前钩子 -->
                 <img v-if="certificateImageUrl" :src="certificateImageUrl" class="avatar"> <!-- 预览图片 -->
                 <div v-else class="uploader-icon-text">
-                  <i class="el-icon-camera" />
+                  <i class="el-icon-camera"></i>
                   <span>上传图片</span>
                 </div>
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12" />
+          <el-col :span="12"></el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="* 人员照片">
-              <el-upload
-                class="avatar-uploader"
-                action="YOUR_UPLOAD_URL_FOR_PERSON_PHOTO"
-                :show-file-list="false"
-                :on-success="handlePersonPhotoUploadSuccess"
-                :before-upload="beforePersonPhotoUpload"
-              >  <!-- 上传前钩子 -->
+              <el-upload class="avatar-uploader" action="hand" :show-file-list="false"
+                :on-success="handlePersonPhotoUploadSuccess" :before-upload="beforePersonPhotoUpload"> <!-- 上传前钩子 -->
                 <img v-if="personPhotoUrl" :src="personPhotoUrl" class="avatar"> <!-- 预览图片 -->
                 <div v-else class="uploader-icon-text">
-                  <i class="el-icon-camera" />
+                  <i class="el-icon-camera"></i>
                   <span>上传图片</span>
                 </div>
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12" />
+          <el-col :span="12"></el-col>
         </el-row>
 
       </el-form>
@@ -121,6 +107,8 @@
 
 <script>
 import axios from 'axios'
+import { addStaff } from '@/api/staff'
+import { uploadImage } from '@/api/upload'
 export default {
   data() {
     return {
@@ -180,13 +168,30 @@ export default {
   },
   methods: {
     save() {
-      const people = JSON.parse(localStorage.getItem('people')) || []
-      const index = people.findIndex(p => p.id === this.person.id)
-      if (index !== -1) {
-        people.splice(index, 1, this.person)
-        localStorage.setItem('people', JSON.stringify(people))
-      }
-      this.$router.push({ name: 'personList' })
+      const formData = {
+        name: this.formData.name,
+        gender: this.formData.gender,
+        phone: this.formData.phone,
+        idCard: this.formData.idCard,
+        residentialAddress: this.formData.residentialAddress,
+        age: this.formData.age,
+        employmentDate: this.formData.employmentDate,
+        qualificationLevel: this.formData.qualificationLevel,
+        certificateImageUrl: this.formData.certificateImageUrl,
+        personPhotoUrl: this.formData.personPhotoUrl
+      };
+
+      // Call addStaff to send the form data to the backend
+      addStaff(formData)
+        .then(response => {
+          // Handle successful response (e.g., navigate to the staff list)
+          this.$router.push({ name: 'personList' });
+          this.$message.success('Staff saved successfully!');
+        })
+        .catch(error => {
+          // Handle error
+          this.$message.error('Error saving staff: ' + error.message);
+        });
     },
     // 保存按钮点击事件
     // savePerson() {
@@ -223,18 +228,27 @@ export default {
     // },
 
     // 资质证书上传成功处理
-    handleCertificateUploadSuccess(response, file, fileList) {
-      console.log('资质证书上传成功:', response)
-      // 假设后端返回的数据结构如下:
-      // { code: 200, message: '上传成功', data: { url: '图片访问地址', fileId: '文件ID' } }
-      if (response.code === 200) {
-        this.certificateImageUrl = response.data.url// 设置预览图片URL
-        // 可能需要同时更新 formData 中的照片URL
-        this.formData.certificateImageUrl = response.data.url
-        this.$message.success('资质证书上传成功')
-      } else {
-        this.$message.error('资质证书上传失败: ' + response.message)
-      }
+    handleCertificateUploadSuccess(file) {
+      // Assuming file contains the selected file for upload
+      // Call uploadImage to handle the file upload
+      uploadImage(file)
+        .then(response => {
+          console.log('资质证书上传成功:', response);
+
+          // Handle the response (assuming structure: { code: 200, message: '上传成功', data: { url: '图片访问地址', fileId: '文件ID' } })
+          if (response.code === 200) {
+            this.certificateImageUrl = response.data.url; // Set preview image URL
+            // Also update the formData with the URL
+            this.formData.certificateImageUrl = response.data.url;
+            this.$message.success('资质证书上传成功');
+          } else {
+            this.$message.error('资质证书上传失败: ' + response.message);
+          }
+        })
+        .catch(error => {
+          // Handle upload error
+          this.$message.error('资质证书上传失败: ' + error.message);
+        });
     },
 
     // 资质证书上传前处理
@@ -290,7 +304,7 @@ export default {
 
     // 在组件创建时加载初始数据 (如果需要编辑现有人员信息)
     fetchPersonInfo() {
-    // 这里模拟从后端获取人员信息
+      // 这里模拟从后端获取人员信息
       const personId = this.$route.params.id // 假设从路由参数获取人员ID
       if (personId) {
         axios.get('/api/getPersonInfo/' + personId)
@@ -318,7 +332,8 @@ export default {
 <style scoped>
 .edit-person-info {
   padding: 20px;
-  background-color: #f0f2f5; /* 背景颜色 */
+  background-color: #f0f2f5;
+  /* 背景颜色 */
 }
 
 .page-header {
@@ -329,32 +344,35 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-   border-bottom: 1px solid #e8e8e8; /* 添加底部细线 */
+  border-bottom: 1px solid #e8e8e8;
+  /* 添加底部细线 */
 }
 
 .page-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: bold;
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .form-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 4px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 4px;
 }
 
 /* 调整 Element UI 的一些默认样式 */
 .el-form-item__label {
-  font-weight: bold; /* 标签加粗 */
+  font-weight: bold;
+  /* 标签加粗 */
 }
 
 .el-input .el-input__inner,
 .el-select .el-input__inner,
 .el-date-editor .el-input__inner,
 .el-input-number .el-input__inner {
-    background-color: #f5f7fa; /* 模拟输入框背景色 */
-    border-color: #dcdfe6;
+  background-color: #f5f7fa;
+  /* 模拟输入框背景色 */
+  border-color: #dcdfe6;
 }
 
 /* 自定义头像上传样式 */
@@ -364,13 +382,20 @@ export default {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  width: 100px; /* 上传区域宽度 */
-  height: 100px; /* 上传区域高度 */
-  display: flex; /* flex 布局 */
-  flex-direction: column; /* 垂直排列 */
-  justify-content: center; /* 垂直居中 */
-  align-items: center; /* 水平居中 */
-  text-align: center; /* 文本居中 */
+  width: 100px;
+  /* 上传区域宽度 */
+  height: 100px;
+  /* 上传区域高度 */
+  display: flex;
+  /* flex 布局 */
+  flex-direction: column;
+  /* 垂直排列 */
+  justify-content: center;
+  /* 垂直居中 */
+  align-items: center;
+  /* 水平居中 */
+  text-align: center;
+  /* 文本居中 */
 }
 
 .avatar-uploader::v-deep .el-upload:hover {
@@ -378,23 +403,27 @@ export default {
 }
 
 .uploader-icon-text {
-    color: #8c939d;
-    font-size: 14px; /* 文字大小 */
-     line-height: normal; /* 调整行高 */
+  color: #8c939d;
+  font-size: 14px;
+  /* 文字大小 */
+  line-height: normal;
+  /* 调整行高 */
 }
 
 .uploader-icon-text i {
-    font-size: 28px; /* 相机图标大小 */
-    margin-bottom: 8px; /* 图标和文字之间的间距 */
+  font-size: 28px;
+  /* 相机图标大小 */
+  margin-bottom: 8px;
+  /* 图标和文字之间的间距 */
 }
 
 .avatar {
   width: 100px;
   height: 100px;
   display: block;
-  object-fit: cover; /* 保持图片比例，填充容器 */
+  object-fit: cover;
+  /* 保持图片比例，填充容器 */
 }
 
 /* Puedes ajustar otros estilos según sea necesario */
-
 </style>
