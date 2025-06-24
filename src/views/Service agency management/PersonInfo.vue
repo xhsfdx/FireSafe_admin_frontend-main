@@ -10,12 +10,12 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="* 姓名" prop="name">
-              <el-input v-model="formData.name" placeholder="请输入姓名"></el-input>
+              <el-input v-model="formData.name" placeholder="请输入姓名" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="居住地址" prop="residentialAddress">
-              <el-input v-model="formData.residentialAddress" placeholder="请输入居住地址"></el-input>
+              <el-input v-model="formData.residentialAddress" placeholder="请输入居住地址" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -31,7 +31,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="年龄" prop="age">
-              <el-input-number v-model="formData.age" controls-position="right" :min="0"></el-input-number>
+              <el-input-number v-model="formData.age" controls-position="right" :min="0" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -39,7 +39,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="* 电话" prop="phone">
-              <el-input v-model="formData.phone" placeholder="请输入电话"></el-input>
+              <el-input v-model="formData.phone" placeholder="请输入电话" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -52,16 +52,16 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="身份证号" prop="idCard">
-              <el-input v-model="formData.idCard" placeholder="请输入身份证号"></el-input>
+              <el-input v-model="formData.idCard" placeholder="请输入身份证号" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="* 资质级别" prop="qualificationLevel">
               <el-select v-model="formData.qualificationLevel" placeholder="请选择资质级别">
-                <el-option label="一级注册消防工程师" value="一级注册消防工程师"></el-option>
-                <el-option label="建(构)筑物消防员四级" value="建(构)筑物消防员四级"></el-option>
-                <el-option label="消防设施操作员" value="消防设施操作员"></el-option>
-                <el-option label="其他" value="其他"></el-option>
+                <el-option label="一级注册消防工程师" value="一级注册消防工程师" />
+                <el-option label="建(构)筑物消防员四级" value="建(构)筑物消防员四级" />
+                <el-option label="消防设施操作员" value="消防设施操作员" />
+                <el-option label="其他" value="其他" />
                 <!-- 添加更多资质级别选项 -->
               </el-select>
             </el-form-item>
@@ -161,6 +161,10 @@ export default {
         this.$refs.personForm.clearValidate('personPhoto')
       }
     }
+  },
+  mounted() {
+    // 组件挂载后获取初始数据
+    this.fetchPersonInfo()
   },
   methods: {
     save() {
@@ -321,10 +325,6 @@ export default {
       }
     }
 
-  },
-  mounted() {
-    // 组件挂载后获取初始数据
-    this.fetchPersonInfo()
   }
 }
 </script>

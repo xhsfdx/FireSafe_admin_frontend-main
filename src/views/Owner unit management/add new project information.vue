@@ -6,7 +6,7 @@
         <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
       </div>
       <!-- 基本信息只读 -->
-      <el-form :model="form" ref="form" label-width="130px" class="single-form-row">
+      <el-form ref="form" :model="form" label-width="130px" class="single-form-row">
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="委托单位名称">
@@ -37,8 +37,8 @@
         </el-table-column>
       </el-table>
       <!-- 空表格图片 -->
-      <div class="empty-table" v-if="!projectList.length">
-        <img src="@/assets/无数据.jpg" alt="暂无数据" />
+      <div v-if="!projectList.length" class="empty-table">
+        <img src="@/assets/无数据.jpg" alt="暂无数据">
         <div class="empty-desc">暂无数据</div>
       </div>
       <div style="text-align: center; margin: 30px 0 0 0;">
@@ -69,10 +69,10 @@
 </template>
 
 <script>
-import ProjectFormDialog from './ProjectFormDialog.vue' // 下面会给这个弹窗表单
+import ProjectFormDialog from './ProjectFormDialog.vue'
 
 export default {
-  name: "AddNewProjectInfo",
+  name: 'AddNewProjectInfo',
   components: { ProjectFormDialog },
   props: {
     formData: Object
@@ -93,6 +93,7 @@ export default {
     if (this.formData) {
       this.form.entrustName = this.formData.entrustName || ''
       this.form.creditCode = this.formData.creditCode || ''
+      this.projectList = this.formData.projectList || []
     }
   },
   methods: {
@@ -113,10 +114,8 @@ export default {
     },
     saveProject(project) {
       if (this.editingIndex > -1) {
-        // 编辑
         this.$set(this.projectList, this.editingIndex, { ...project, index: this.editingIndex + 1 })
       } else {
-        // 新增
         this.projectList.push({ ...project, index: this.projectList.length + 1 })
       }
       this.projectDialogVisible = false
@@ -129,6 +128,7 @@ export default {
       this.$emit('prev')
     },
     nextStep() {
+      this.$emit('update', { type: 'project', projectList: this.projectList })
       this.$emit('next')
     }
   }
@@ -144,3 +144,4 @@ export default {
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
 </style>
+

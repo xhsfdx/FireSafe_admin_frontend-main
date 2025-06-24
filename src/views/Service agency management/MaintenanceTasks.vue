@@ -19,11 +19,11 @@
         <div class="search-filter">
           <div class="filter-item">
             <input
-              type="text"
               v-model="searchParams.projectName"
+              type="text"
               placeholder="输入项目名称搜索"
               class="filter-input"
-            />
+            >
           </div>
           <div class="filter-item">
             <el-select v-model="searchParams.statusroutine" placeholder="选择计划类型">
@@ -61,7 +61,7 @@
           />
           <div class="filter-actions">
             <button class="btn btn-primary" icon="el-icon-search" @click="handleSearch">
-              <i class="el-icon-search search-icon"></i> 查询
+              <i class="el-icon-search search-icon" /> 查询
             </button>
             <button class="btn btn-secondary" @click="handleReset">
               <i class="el-icon-refresh reset-icon" /> 重置
@@ -69,34 +69,34 @@
           </div>
         </div>
         <div class="table-container">
-        <table class="data-table">
+          <table class="data-table">
             <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>项目名称</th>
-                    <th>计划类型</th>
-                    <th>任务名称</th>
-                    <th>项目负责人</th>
-                    <th>现场维保人员</th>
-                    <th>任务状态</th>
-                    <th>任务时效</th>
-                    <th>操作</th>
-                </tr>
+              <tr>
+                <th>序号</th>
+                <th>项目名称</th>
+                <th>计划类型</th>
+                <th>任务名称</th>
+                <th>项目负责人</th>
+                <th>现场维保人员</th>
+                <th>任务状态</th>
+                <th>任务时效</th>
+                <th>操作</th>
+              </tr>
             </thead>
             <tbody>
-                <!-- 始终显示无数据状态 -->
-                <tr>
-                    <td colspan="9" class="no-data">
-                        <div class="empty-state">
-                            <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
-                            <p>暂无数据</p>
-                        </div>
-                    </td>
-                </tr>
+              <!-- 始终显示无数据状态 -->
+              <tr>
+                <td colspan="9" class="no-data">
+                  <div class="empty-state">
+                    <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
+                    <p>暂无数据</p>
+                  </div>
+                </td>
+              </tr>
             </tbody>
-        </table>
-         <!-- 可以在这里添加分页组件 -->
-    </div>
+          </table>
+          <!-- 可以在这里添加分页组件 -->
+        </div>
       </div>
 
       <!-- 故障工单 -->
@@ -149,42 +149,42 @@
           </div>
           <div class="filter-actions">
             <button class="btn btn-primary" @click="handleSearch">
-              <i class="el-icon-search search-icon"></i> 查询
+              <i class="el-icon-search search-icon" /> 查询
             </button>
             <button class="btn btn-secondary" @click="handleReset">
-              <i class="el-icon-refresh reset-icon"></i> 重置
+              <i class="el-icon-refresh reset-icon" /> 重置
             </button>
           </div>
         </div>
         <div class="table-container">
-        <table class="data-table">
+          <table class="data-table">
             <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>项目名称</th>
-                    <th>上报时间</th>
-                    <th>工单来源</th>
-                    <th>上报人员</th>
-                    <th>工单时效</th>
-                    <th>工单状态</th>
-                    <th>当前所属人</th>
-                    <th>操作</th>
-                </tr>
+              <tr>
+                <th>序号</th>
+                <th>项目名称</th>
+                <th>上报时间</th>
+                <th>工单来源</th>
+                <th>上报人员</th>
+                <th>工单时效</th>
+                <th>工单状态</th>
+                <th>当前所属人</th>
+                <th>操作</th>
+              </tr>
             </thead>
             <tbody>
-                <!-- 始终显示无数据状态 -->
-                <tr>
-                    <td colspan="9" class="no-data">
-                        <div class="empty-state">
-                            <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
-                            <p>暂无数据</p>
-                        </div>
-                    </td>
-                </tr>
+              <!-- 始终显示无数据状态 -->
+              <tr>
+                <td colspan="9" class="no-data">
+                  <div class="empty-state">
+                    <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
+                    <p>暂无数据</p>
+                  </div>
+                </td>
+              </tr>
             </tbody>
-        </table>
-         <!-- 可以在这里添加分页组件 -->
-    </div>
+          </table>
+          <!-- 可以在这里添加分页组件 -->
+        </div>
       </div>
 
       <!-- 附加维保 -->
@@ -220,10 +220,10 @@
           </div>
           <div class="filter-actions">
             <button class="btn btn-primary" @click="handleSearch">
-              <i class="el-icon-search search-icon"></i> 查询
+              <i class="el-icon-search search-icon" /> 查询
             </button>
             <button class="btn btn-secondary" @click="handleReset">
-              <i class="el-icon-refresh reset-icon"></i> 重置
+              <i class="el-icon-refresh reset-icon" /> 重置
             </button>
           </div>
         </div>
@@ -260,11 +260,11 @@
         <div class="search-filter">
           <div class="filter-item">
             <input
-              type="text"
               v-model="searchParams.projectName"
+              type="text"
               placeholder="输入项目名称搜索"
               class="filter-input"
-            />
+            >
           </div>
           <div class="filter-item">
             <el-select
@@ -290,11 +290,11 @@
           </div>
           <div class="filter-actions">
             <button class="btn btn-primary" @click="handleSearch">
-              <i class="el-icon-search search-icon"></i> 查询
+              <i class="el-icon-search search-icon" /> 查询
               <!-- <i class="search-icon"/> 查询 -->
             </button>
             <button class="btn btn-secondary" @click="handleReset">
-              <i class="el-icon-refresh reset-icon"></i> 重置
+              <i class="el-icon-refresh reset-icon" /> 重置
             </button>
           </div>
         </div>

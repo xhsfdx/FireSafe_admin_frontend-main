@@ -53,7 +53,7 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-        
+
         const { roles, name } = data
 
         // roles must be a non-empty array

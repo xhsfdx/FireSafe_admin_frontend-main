@@ -9,23 +9,26 @@
       >
         <div :class="['step-bg', { 'highlight': idx === activeIndex }]">
           <div class="step-icon">
-            <img :src="step.icon" alt="" />
+            <img :src="step.icon" alt="">
           </div>
           <span>{{ step.label }}</span>
           <div class="step-number" :class="{ active: idx === activeIndex }">{{ idx + 1 }}</div>
         </div>
         <template v-if="idx < steps.length - 1">
-          <div class="step-arrow"></div>
+          <div class="step-arrow" />
         </template>
       </div>
     </div>
     <!-- 内容区（按步切换） -->
     <div class="step-content">
-      <component :is="steps[activeIndex].component"
-                 :form-data="formData"
-                 @next="handleNext"
-                 @prev="handlePrev"
-                 @update="updateFormData"
+      <component
+        :is="steps[activeIndex].component"
+        :form-data="formData"
+        :key="'step-' + activeIndex"
+        @next="handleNext"
+        @prev="handlePrev"
+        @update="updateFormData"
+        @submit="handleSubmit"
       />
     </div>
   </div>
@@ -34,7 +37,9 @@
 <script>
 import AddNewContractInfo from './add new contract information.vue'
 import AddNewProjectInfo from './add new project information.vue'
-import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import DispatchStaff from './addnewdispatchStaff.vue'
+import { mapActions } from 'vuex'
+import { createContract } from '@/api/contract'
 
 export default {
   name: 'AddContractStep',
@@ -42,8 +47,11 @@ export default {
   data() {
     return {
       activeIndex: 0,
-      // 统一传递表单数据
+      // 统一数据中心
       formData: {},
+      contractForm: {},
+      projectForm: {},
+      staffForm: {},
       steps: [
         {
           label: '新增合同信息',
@@ -67,8 +75,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('contractSubmit', ['submitContract']),
+
     handleNext(payload) {
-      // payload 可选，提交校验，更新表单数据
       if (this.activeIndex < this.steps.length - 1) {
         this.activeIndex++
       }
@@ -79,7 +88,49 @@ export default {
       }
     },
     updateFormData(data) {
-      this.formData = { ...this.formData, ...data }
+      console.log('收到子页面update:', data)
+      if (data.type === 'contract' || (data.contractName && data.contractNo)) {
+        this.contractForm = { ...this.contractForm, ...data }
+      } else if (data.type === 'project' || data.projectList) {
+        this.projectForm = { ...this.projectForm, ...data }
+      } else if (data.type === 'staff' || data.dispatchStaffList) {
+        this.staffForm = { ...this.staffForm, ...data }
+      }
+    },
+    handleSubmit() {
+      // 取第一个项目（或你想选的项目）
+      const project = (this.projectForm.projectList && this.projectForm.projectList[0]) || {}
+      const projectInfo = {
+        name: project.name,
+        ownerCompany: project.ownerName,
+        address: project.address,
+        district: project.area,
+        contactPerson: project.linkman,
+        contactPhone: project.phone,
+        // 你可以根据需要补充其他字段
+      }
+
+      const payload = {
+        ...this.contractForm,
+        ...this.staffForm,
+        projectInfo,
+        // 你可以根据需要补充buildings等其他字段
+      }
+
+      // 校验
+      if (!projectInfo.name || !projectInfo.ownerCompany) {
+        this.$message.error('请补全项目信息')
+        return
+      }
+
+      createContract(payload)
+        .then(() => {
+          this.$message.success('提交成功')
+          this.$router.push('/contract/list')
+        })
+        .catch(() => {
+          this.$message.error('提交失败')
+        })
     }
   }
 }
@@ -172,3 +223,4 @@ export default {
   padding: 0 0 24px 0;
 }
 </style>
+

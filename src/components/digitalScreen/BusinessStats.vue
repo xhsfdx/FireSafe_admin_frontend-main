@@ -5,7 +5,8 @@
         v-for="(item, index) in tabs"
         :key="index"
         :class="{'active': activeTab === item}"
-        @click="activeTab = item">
+        @click="activeTab = item"
+      >
         {{ item }}
       </span>
     </div>
@@ -14,7 +15,7 @@
       <div ref="echarts" class="echarts" />
       <div class="info">
         <div v-for="item in tabStatuses[activeTab]" :key="item.name" class="info-item">
-          <span :style="{ background: item.color }" class="dot"></span>{{ item.name }}
+          <span :style="{ background: item.color }" class="dot" />{{ item.name }}
           <span>{{ item.value }}</span>条
         </div>
       </div>

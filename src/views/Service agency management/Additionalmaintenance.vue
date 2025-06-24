@@ -194,15 +194,15 @@ export default {
         timeliness: '',
         source: ''
       }
-    };
+    }
   },
   methods: {
     selectTab(tabValue) {
-      this.currentTab = tabValue;
-      this.handleReset();
+      this.currentTab = tabValue
+      this.handleReset()
     },
     handleSearch() {
-      console.log('执行搜索:', this.searchParams);
+      console.log('执行搜索:', this.searchParams)
     },
     handleReset() {
       this.searchParams = {
@@ -211,10 +211,10 @@ export default {
         status: '',
         timeliness: '',
         source: ''
-      };
+      }
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -270,7 +270,6 @@ export default {
   height: 36px; /* 统一高度 */
 }
 
-
 .filter-actions {
   display: flex;
   gap: 10px; /* 按钮之间的间隔 */
@@ -313,7 +312,6 @@ export default {
     /* 这里可以添加背景图片或使用图标字体 */
     content: ""; /* 必要，否则伪元素不显示 */
 }
-
 
 /* 表格样式 */
 .table-container {

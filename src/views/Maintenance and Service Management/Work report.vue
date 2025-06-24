@@ -2,24 +2,42 @@
   <div class="report-download-page">
     <!-- 查询栏 -->
     <div class="search-bar">
-      <el-input v-model="filters.projectName" placeholder="输入项目名称搜索" style="width: 220px; margin-right: 10px"
-        clearable />
+      <el-input
+        v-model="filters.projectName"
+        placeholder="输入项目名称搜索"
+        style="width: 220px; margin-right: 10px"
+        clearable
+      />
       <el-input v-model="filters.reporter" placeholder="输入上报人员搜索" style="width: 220px; margin-right: 10px" clearable />
       <el-select v-model="filters.type" placeholder="选择上报类型" style="width: 180px; margin-right: 10px" clearable>
         <el-option label="全部" value="" />
         <el-option label="类型一" value="类型一" />
         <el-option label="类型二" value="类型二" />
       </el-select>
-      <el-date-picker v-model="filters.dateRange" type="daterange" range-separator=" - " start-placeholder="开始日期"
-        end-placeholder="结束日期" style="width: 300px; margin-right: 10px" value-format="yyyy-MM-dd" clearable />
+      <el-date-picker
+        v-model="filters.dateRange"
+        type="daterange"
+        range-separator=" - "
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        style="width: 300px; margin-right: 10px"
+        value-format="yyyy-MM-dd"
+        clearable
+      />
       <el-button type="primary" icon="el-icon-search" style="margin-right:8px" @click="onSearch">查询</el-button>
       <el-button icon="el-icon-refresh" style="margin-right:8px" @click="onReset">重置</el-button>
       <el-button type="success" style="margin-right:0; font-weight:bold" @click="onDownload">一键下载所选报告</el-button>
     </div>
 
     <!-- 表格 -->
-    <el-table :data="pagedData" border style="width: 100%; margin-top: 12px;"
-      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }" :empty-text="' '" @selection-change="onSelectionChange">
+    <el-table
+      :data="pagedData"
+      border
+      style="width: 100%; margin-top: 12px;"
+      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
+      :empty-text="' '"
+      @selection-change="onSelectionChange"
+    >
       <el-table-column type="selection" width="48" align="center" />
       <el-table-column type="index" label="序号" width="60" align="center" />
       <el-table-column prop="projectName" label="项目名称" align="center" />

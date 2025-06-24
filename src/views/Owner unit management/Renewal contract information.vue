@@ -1,27 +1,21 @@
 <!-- 续签合同信息 -->
- <template>
-  <div class="renewal-contract-info">
-    <!-- 大标题 -->
-    <div class="main-title">续签合同</div>
-    <!-- 内容区 -->
+<template>
+  <div class="contract-info-root">
+    <div class="title-bar">续签合同</div>
     <div class="form-card">
-      <div class="form-section-title">合同信息</div>
-      <el-form :model="form" label-width="120px" class="contract-form" :inline="false">
-        <el-row :gutter="24">
+      <!-- 合同信息 -->
+      <div class="section-title">合同信息</div>
+      <el-form ref="form" :model="form" :rules="rules" label-width="112px" class="double-form-row">
+        <el-row :gutter="48">
+          <!-- 左栏 -->
           <el-col :span="12">
-            <el-form-item label="委托单位名称" required>
-              <el-input v-model="form.orgName" placeholder="请输入委托单位名称" />
+            <el-form-item label="委托单位名称" prop="entrustName" required>
+              <el-input v-model="form.entrustName" placeholder="请输入委托单位名称" />
             </el-form-item>
             <el-form-item label="合同时间" required>
-              <el-date-picker
-                v-model="form.date"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                value-format="yyyy-MM-dd"
-                style="width: 100%;"
-              />
+              <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 140px" />
+              <span class="date-sep">-</span>
+              <el-date-picker v-model="form.dateEnd" type="date" placeholder="结束日期" style="width: 140px" />
             </el-form-item>
             <el-form-item label="合同名称">
               <el-input v-model="form.contractName" placeholder="请输入合同名称" />
@@ -30,141 +24,495 @@
               <el-input v-model="form.contractNo" placeholder="请输入合同编号" />
             </el-form-item>
             <el-form-item label="付款周期">
-              <el-select v-model="form.payPeriod" placeholder="请选择">
+              <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%">
+                <el-option label="月" value="月" />
+                <el-option label="季" value="季" />
                 <el-option label="半年" value="半年" />
-                <el-option label="一年" value="一年" />
-                <el-option label="季度" value="季度" />
+                <el-option label="年" value="年" />
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="统一社会信用代码" required>
-              <el-input v-model="form.uscc" placeholder="请输入统一社会信用代码" />
+            <el-form-item label="维保建筑类型">
+              <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%">
+                <el-option label="高层" value="高层" />
+                <el-option label="地下" value="地下" />
+                <el-option label="人员密集场所" value="人员密集场所" />
+                <el-option label="易燃易爆场所" value="易燃易爆场所" />
+                <el-option label="居民住宅" value="居民住宅" />
+                <el-option label="商住一体" value="商住一体" />
+                <el-option label="文物古建筑" value="文物古建筑" />
+                <el-option label="医院" value="医院" />
+                <el-option label="学校" value="学校" />
+                <el-option label="政府机关" value="政府机关" />
+                <el-option label="酒店宾馆" value="酒店宾馆" />
+                <el-option label="加油站" value="加油站" />
+                <el-option label="停车场" value="停车场" />
+                <el-option label="厂房仓库" value="厂房仓库" />
+                <el-option label="其他" value="其他" />
+              </el-select>
             </el-form-item>
-            <el-form-item label="维保方式" required>
-              <el-select v-model="form.maintType" placeholder="请选择">
+            <el-form-item label="设计单位">
+              <el-input v-model="form.designOrg" placeholder="请输入设计单位" />
+            </el-form-item>
+            <el-form-item label="备注说明">
+              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }"
+                placeholder="请输入备注说明" />
+            </el-form-item>
+          </el-col>
+          <!-- 右栏 -->
+          <el-col :span="12">
+            <el-form-item label="统一社会信用代码" prop="creditCode" required>
+              <el-input v-model="form.creditCode" placeholder="请输入统一社会信用代码" />
+            </el-form-item>
+            <el-form-item label="维保方式" prop="maintType" required>
+              <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%">
                 <el-option label="系统维保" value="系统维保" />
-                <el-option label="综合维保" value="综合维保" />
+                <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
-              <el-input-number
-                v-model="form.area"
-                :step="100"
-                :min="0"
-                controls-position="right"
-                style="width: 170px;"
-              />
-              <span style="margin-left:8px;">㎡</span>
+              <el-input-number v-model="form.maintArea" :min="0" style="width: 130px" />
+              <span class="unit-text">㎡</span>
             </el-form-item>
             <el-form-item label="合同金额">
-              <el-input-number
-                v-model="form.amount"
-                :step="1000"
-                :min="0"
-                controls-position="right"
-                style="width: 170px;"
-              />
-              <span style="margin-left:8px;">元</span>
+              <el-input-number v-model="form.amount" :min="0" style="width: 130px" />
+              <span class="unit-text">元</span>
             </el-form-item>
             <el-form-item label="收款提醒">
-              <el-radio-group v-model="form.notify">
-                <el-radio :label="false">关闭</el-radio>
-                <el-radio :label="true">开启</el-radio>
+              <el-radio-group v-model="form.remind">
+                <el-radio :label="1">开通</el-radio>
+                <el-radio :label="0">关闭</el-radio>
               </el-radio-group>
+              <span class="remind-tip">(默认为收款提醒消息推送至维保项目负责人)</span>
             </el-form-item>
-          </el-col>
-        </el-row>
-        <!-- 操作按钮 -->
-        <el-row>
-          <el-col :span="24" style="text-align:center;margin-top:16px;">
-            <el-button type="primary" size="large" @click="nextStep" class="next-btn">下一步</el-button>
+            <el-form-item label="调试单位">
+              <el-input v-model="form.debugOrg" placeholder="请输入调试单位" />
+            </el-form-item>
+            <el-form-item label="验收备案">
+              <el-input v-model="form.recordOrg" placeholder="请输入验收备案单位全称" />
+            </el-form-item>
+            <el-form-item label="合同文件">
+              <el-upload action="#" :show-file-list="false" style="display:inline-block">
+                <el-button size="mini">+ 上传合同文件</el-button>
+              </el-upload>
+              <span class="upload-tips">上传支持: DOCX、PDF、PNG、JPG等格式文件</span>
+            </el-form-item>
           </el-col>
         </el-row>
       </el-form>
+
+      <!-- 建筑信息 -->
+      <div class="section-title" style="margin-top:32px;">
+        <span style="color:#f56c6c;">*</span> 建筑信息
+        <span class="tip">(注：建筑物面积请填写纯数字，例如:0.00)</span>
+      </div>
+      <el-table :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
+        <el-table-column prop="name" label="* 建筑信息" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.name" placeholder="请输入建筑名称" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="area" label="* 建筑面积(m²)" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.area" placeholder="请输入建筑面积" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="floor" label="* 建筑层数" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.floor" placeholder="请输入建筑层数" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="height" label="* 建筑高度(m)" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.height" placeholder="请输入建筑高度" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" align="center">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.remark" placeholder="请输入备注" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="80">
+          <template slot-scope="scope">
+            <el-button v-if="buildingList.length > 1" type="text" style="color:#f56c6c"
+              @click="removeRow(scope.$index)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="text-align: left; margin-bottom: 18px;">
+        <el-button type="text" style="font-size: 16px; color: #409EFF;" @click="addRow">
+          <i class="el-icon-plus" /> 新增内容
+        </el-button>
+      </div>
+
+      <!-- 合同维保内容 -->
+      <div class="section-title" style="margin-top:28px;">
+        合同维保内容
+      </div>
+      <el-row :gutter="14">
+        <!-- 左侧树形列表 + 全选 -->
+        <el-col :span="6">
+          <div style="margin-bottom:12px;">
+            <el-checkbox v-model="treeCheckAll" @change="handleCheckAll" style="margin-left:2px;">一键全选</el-checkbox>
+          </div>
+          <el-tabs v-model="activeTab" class="tab-tree">
+            <el-tab-pane label="平台标准系统" name="standard">
+              <el-tree ref="maintTree" :data="maintTree" show-checkbox node-key="id" :default-checked-keys="checkedKeys"
+                :expand-on-click-node="false" @check="handleTreeCheck" />
+            </el-tab-pane>
+            <el-tab-pane label="自建标准系统" name="custom">
+              <div class="tab-empty">暂无内容</div>
+            </el-tab-pane>
+          </el-tabs>
+        </el-col>
+        <!-- 右侧表格展示 -->
+        <el-col :span="18">
+          <el-table :data="checkedMaintList" border style="width:100%;">
+            <el-table-column type="index" label="序号" width="55" align="center" />
+            <el-table-column prop="system" label="消防系统/设施" align="center" />
+            <el-table-column prop="item" label="维保项目" align="center" />
+            <el-table-column prop="content" label="检测内容" align="center" />
+            <el-table-column prop="period" label="维保周期" align="center" />
+            <el-table-column prop="standard" label="规范" align="center" />
+          </el-table>
+          <div v-if="checkedMaintList.length === 0" class="empty-box">
+            <img :src="require('@/assets/无数据.jpg')" style="width:128px;opacity:0.7;margin-top:20px;">
+            <div style="color:#888;margin-top:8px;">暂无数据</div>
+          </div>
+        </el-col>
+      </el-row>
+
+      <!-- 下一步 -->
+      <div style="text-align: center; margin: 38px 0 12px 0;">
+        <el-button type="primary" size="large" style="width: 160px;font-size:18px;" @click="nextStep">下一步</el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'RenewalContractInformation',
+  name: 'RenewalContractInfo',
+  props: {
+    formData: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
       form: {
-        orgName: 'Cell C',
-        date: ['2026-05-29', '2026-05-29'],
-        contractName: 'VDS',
-        contractNo: '',
-        payPeriod: '半年',
-        uscc: '91440101304662708A',
-        maintType: '系统维保',
-        area: 3000,
-        amount: 20000,
-        notify: false
-      }
+        entrustName: '', dateStart: '', dateEnd: '', contractName: '', contractNo: '',
+        payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
+        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: ''
+      },
+      rules: {
+        entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
+        creditCode: [{ required: true, message: '请输入统一社会信用代码', trigger: 'blur' }],
+        maintType: [{ required: true, message: '请选择维保方式', trigger: 'change' }]
+      },
+      buildingList: [{ name: '', area: '', floor: '', height: '', remark: '' }],
+      activeTab: 'standard',
+      maintTree: [],
+      checkedKeys: [],
+      checkedMaintList: [],
+      treeCheckAll: false
     }
   },
+  watch: {
+    formData: {
+      handler(newData) {
+        if (!newData || !Object.keys(newData).length) return
+
+        console.log('合同信息页接收数据:', newData)
+
+        this.form = {
+          ...this.form,
+          entrustName: newData.entrustName || '',
+          creditCode: newData.creditCode || '',
+          contractName: newData.contractName || '',
+          contractNo: newData.contractNo || '',
+          payCycle: newData.payCycle || '',
+          buildType: newData.buildType || '',
+          maintType: newData.maintType || '',
+          maintArea: newData.maintArea || '',
+          amount: newData.amount || '',
+          dateStart: newData.dateStart || '',
+          dateEnd: newData.dateEnd || '',
+          remind: newData.remind !== undefined ? newData.remind : 0,
+          designOrg: newData.designOrg || '',
+          debugOrg: newData.debugOrg || '',
+          recordOrg: newData.recordOrg || '',
+          remark: newData.remark || ''
+        }
+
+        if (newData.buildingList && newData.buildingList.length > 0) {
+          this.buildingList = JSON.parse(JSON.stringify(newData.buildingList))
+        }
+
+        if (newData.checkedMaintList && newData.checkedMaintList.length > 0) {
+          this.checkedMaintList = JSON.parse(JSON.stringify(newData.checkedMaintList))
+        }
+        
+        this.syncTreeSelection() // 数据变化后，尝试同步
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.loadMaintainTree()
+  },
   methods: {
+    syncTreeSelection() {
+      // 确保树已加载且有已选列表
+      if (this.maintTree.length > 0 && this.checkedMaintList.length > 0) {
+        this.setCheckedKeysFromMaintList()
+      }
+    },
+    transformToTree(data) {
+      // period: 1 => '月检'
+      const getPeriodLabel = (p) => {
+        if (!p) return ''
+        if (p == 1) return '月检'
+        if (p == 12) return '年检'
+        return `每${p}月`
+      }
+      return data.map(system => ({
+        id: system.id,
+        label: system.name,
+        children: (system.children || []).map(project => ({
+          id: project.id,
+          label: project.projectName,
+          children: (project.children || []).map(item => ({
+            id: item.id,
+            label: item.content,
+            data: {
+              system: system.name,
+              item: project.projectName,
+              content: item.content,
+              period: getPeriodLabel(item.period),
+              standard: item.attention || '',
+            }
+          }))
+        }))
+      }))
+    },
+    async loadMaintainTree() {
+      try {
+        const res = await fetch('/maintainTree.json')
+        const rawData = await res.json()
+        this.maintTree = this.transformToTree(rawData)
+        this.syncTreeSelection() // 树加载后，尝试同步
+      } catch (err) {
+        this.$message.error('加载维保项目失败')
+      }
+    },
+    handleTreeCheck(checkedKeys, { checkedNodes }) {
+      this.checkedKeys = checkedKeys
+      this.updateCheckedMaintList()
+      // 控制全选
+      const allIds = this.getAllLeafIds(this.maintTree)
+      this.treeCheckAll = checkedKeys.length === allIds.length
+    },
+    // 全选
+    handleCheckAll(val) {
+      const getAllLeafIds = (nodes, arr = []) => {
+        nodes.forEach(n => {
+          if (n.children && n.children.length) {
+            getAllLeafIds(n.children, arr)
+          } else {
+            arr.push(n.id)
+          }
+        })
+        return arr
+      }
+      if (val) {
+        const allIds = getAllLeafIds(this.maintTree)
+        this.checkedKeys = allIds
+        this.$refs.maintTree.setCheckedKeys(allIds)
+      } else {
+        this.checkedKeys = []
+        this.$refs.maintTree.setCheckedKeys([])
+      }
+      this.updateCheckedMaintList()
+    },
+    // 提取所有叶子节点id
+    getAllLeafIds(nodes, arr = []) {
+      nodes.forEach(n => {
+        if (n.children && n.children.length) {
+          this.getAllLeafIds(n.children, arr)
+        } else {
+          arr.push(n.id)
+        }
+      })
+      return arr
+    },
+    // 生成右侧表格完整内容
+    updateCheckedMaintList() {
+      const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
+      this.checkedMaintList = checkedNodes
+        .filter(n => !n.children)
+        .map(n => n.data ? n.data : {
+          system: n.label,
+          item: '', content: '', period: '', standard: ''
+        })
+    },
     nextStep() {
-      this.$emit('next')
+      this.$refs.form.validate(valid => {
+        if (!valid) return
+        const data = {
+          contractName: this.form.contractName,
+          contractNo: this.form.contractNo,
+          entrustName: this.form.entrustName,
+          creditCode: this.form.creditCode,
+          payCycle: this.form.payCycle,
+          buildType: this.form.buildType,
+          maintType: this.form.maintType,
+          maintArea: this.form.maintArea,
+          amount: this.form.amount,
+          dateStart: this.form.dateStart,
+          dateEnd: this.form.dateEnd,
+          remind: this.form.remind,
+          designOrg: this.form.designOrg,
+          debugOrg: this.form.debugOrg,
+          recordOrg: this.form.recordOrg,
+          remark: this.form.remark,
+          buildingList: this.buildingList,
+          checkedMaintList: this.checkedMaintList,
+          type: 'contract'
+        }
+        this.$emit('update', data)
+        this.$emit('next')
+      })
+    },
+    addRow() {
+      this.buildingList.push({ name: '', area: '', floor: '', height: '', remark: '' })
+    },
+    removeRow(idx) {
+      this.buildingList.splice(idx, 1)
+    },
+    getAllLeafNodes(nodes, result = []) {
+      for (const node of nodes) {
+        if (node.children && node.children.length > 0) {
+          this.getAllLeafNodes(node.children, result);
+        } else if (node.data) {
+          result.push(node);
+        }
+      }
+      return result;
+    },
+    setCheckedKeysFromMaintList() {
+      this.$nextTick(() => {
+        if (!this.$refs.maintTree) return;
+
+        const allLeafNodes = this.getAllLeafNodes(this.maintTree);
+        const checkedKeysSet = new Set();
+        
+        const checkedItemKeySet = new Set(this.checkedMaintList.map(item => `${item.system}|${item.item}|${item.content}`));
+
+        allLeafNodes.forEach(node => {
+          if (node.data) {
+            const nodeKey = `${node.data.system}|${node.data.item}|${node.data.content}`;
+            if (checkedItemKeySet.has(nodeKey)) {
+              checkedKeysSet.add(node.id);
+            }
+          }
+        });
+        
+        const checkedKeys = Array.from(checkedKeysSet);
+        this.checkedKeys = checkedKeys;
+        this.$refs.maintTree.setCheckedKeys(checkedKeys);
+        
+        console.log('维保内容已根据传入数据自动勾选:', checkedKeys);
+      });
     }
   }
 }
 </script>
 
 <style scoped>
-.renewal-contract-info {
-  background: #fafbfc;
-  min-height: 100vh;
-  padding-bottom: 32px;
+.contract-info-root {
+  width: 100%;
+  padding: 0 16px 26px 16px;
+  background: #f9fbfd;
 }
-.main-title {
+
+.title-bar {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1976d2;
   text-align: center;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1888fe;
-  margin: 24px 0 18px 0;
+  margin: 28px 0 16px 0;
   letter-spacing: 2px;
 }
+
 .form-card {
-  margin: 0 auto;
   background: #fff;
-  border-radius: 10px;
-  max-width: 98%;
-  padding: 22px 28px 28px 28px;
-  box-shadow: 0 4px 24px #e3f2ff30;
+  border-radius: 12px;
+  padding: 34px 28px 28px 28px;
+  margin: 0 auto;
+  max-width: 1520px;
+  box-shadow: 0 4px 16px #e0ebff22;
 }
-.form-section-title {
-  background: #e8f3fe;
+
+.section-title {
+  font-size: 19px;
+  font-weight: bold;
   color: #222;
-  font-size: 22px;
-  font-weight: 700;
-  padding: 16px 0 16px 18px;
-  border-radius: 8px 8px 0 0;
-  margin-bottom: 26px;
+  margin-bottom: 16px;
+  letter-spacing: 1.5px;
 }
-.contract-form >>> .el-form-item__label {
-  font-size: 17px;
-  color: #222;
-  font-weight: 600;
+
+.double-form-row {
+  margin-top: 10px;
 }
-.contract-form >>> .el-input__inner,
-.contract-form >>> .el-input-number__inner {
+
+.unit-text {
+  margin-left: 8px;
+  color: #666;
+}
+
+.date-sep {
+  margin: 0 12px;
+  color: #aaa;
   font-size: 16px;
-  height: 40px;
 }
-.next-btn {
-  width: 180px;
-  height: 48px;
-  font-size: 20px;
-  background: #1888fe;
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-  letter-spacing: 10px;
+
+.upload-tips {
+  font-size: 13px;
+  color: #888;
+  margin-left: 14px;
 }
-.next-btn:hover {
-  background: #157de6;
+
+.remind-tip {
+  color: #888;
+  margin-left: 10px;
+  font-size: 13px;
+}
+
+.tip {
+  font-size: 13px;
+  color: #888;
+  margin-left: 14px;
+}
+
+.building-table>>>th,
+.building-table>>>td {
+  font-size: 15px;
+}
+
+.tab-tree {
+  background: #fff;
+  min-height: 320px;
+}
+
+.tab-empty {
+  color: #888;
+  text-align: center;
+  padding: 30px 0;
+}
+
+.empty-box {
+  text-align: center;
+  margin-top: 38px;
 }
 </style>

@@ -11,15 +11,15 @@
             <span class="required">*</span> 电话号码:
           </label>
           <input
-            type="text"
             id="phone"
             v-model="account.phone"
-             placeholder="请输入电话号码"
+            type="text"
+            placeholder="请输入电话号码"
             required
             class="form-input readonly-input"
             readonly="readonly"
             value="13890873478"
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -27,13 +27,13 @@
             <span class="required">*</span> 用户名:
           </label>
           <input
-            type="text"
             id="username"
             v-model="account.username"
+            type="text"
             placeholder="请输入用户名"
             required
             class="form-input"
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -41,13 +41,13 @@
             <span class="required">*</span> 密码:
           </label>
           <input
-            type="password"
             id="password"
             v-model="account.password"
-             placeholder="请输入密码"
+            type="password"
+            placeholder="请输入密码"
             required
             class="form-input"
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -55,13 +55,13 @@
             <span class="required">*</span> 确认密码:
           </label>
           <input
-            type="password"
             id="confirmPassword"
             v-model="account.confirmPassword"
+            type="password"
             placeholder="请确认密码"
             required
             class="form-input"
-          />
+          >
         </div>
 
         <div class="form-actions">
@@ -253,7 +253,6 @@ export default {
     background-color: #f5f7fa; /* 禁用或只读输入框背景色 */
     cursor: not-allowed; /* 鼠标样式 */
 }
-
 
 /* 底部操作按钮区域 */
 .form-actions {
