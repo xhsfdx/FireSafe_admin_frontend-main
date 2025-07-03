@@ -1,11 +1,14 @@
 <template>
   <div class="map-dialog-container">
     <div class="search-box">
-      <el-input
+      <el-autocomplete
         id="map-search-input"
         v-model="searchKeyword"
+        :fetch-suggestions="querySearch"
         placeholder="输入关键字搜索地点"
+        @select="handleSelect"
         clearable
+        style="width: 100%"
       />
       <div id="search-result-panel" />
     </div>
@@ -34,6 +37,12 @@
 <script>
 export default {
   name: 'MapDialog',
+  props: {
+    address: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     const self = this;
     return {
@@ -65,26 +74,76 @@ export default {
         },
       ],
       geocoder: null,
+      autoComplete: null,
+      placeSearch: null
     };
   },
+  watch: {
+    address(newVal) {
+      if (newVal) {
+        this.locateByAddress(newVal)
+      }
+    }
+  },
+  mounted() {
+    if (this.address) {
+      this.locateByAddress(this.address)
+      this.searchKeyword = this.address
+    }
+  },
   methods: {
+    // 高德自动补全
+    querySearch(queryString, cb) {
+      if (!window.AMap) return cb([])
+      if (!this.autoComplete) {
+        this.autoComplete = new window.AMap.Autocomplete({ city: '全国' })
+      }
+      this.autoComplete.search(queryString, (status, result) => {
+        if (status === 'complete' && result.tips) {
+          cb(result.tips.filter(t => t.location))
+        } else {
+          cb([])
+        }
+      })
+    },
+    handleSelect(item) {
+      if (item.location) {
+        const lng = item.location.lng
+        const lat = item.location.lat
+        this.center = [lng, lat]
+        this.markerPosition = [lng, lat]
+        this.selectedAddress = item.address + item.name
+        this.selectedLocation = {
+          address: this.selectedAddress,
+          longitude: lng,
+          latitude: lat
+        }
+      } else if (item.name) {
+        // 没有location时用geocoder查
+        this.locateByAddress(item.name)
+      }
+    },
+    locateByAddress(address) {
+      if (!this.geocoder) return
+      this.geocoder.getLocation(address, (status, result) => {
+        if (status === 'complete' && result.geocodes && result.geocodes.length) {
+          const { location, formattedAddress } = result.geocodes[0]
+          this.center = [location.lng, location.lat]
+          this.markerPosition = [location.lng, location.lat]
+          this.selectedAddress = formattedAddress
+          this.selectedLocation = {
+            address: formattedAddress,
+            longitude: location.lng,
+            latitude: location.lat
+          }
+        }
+      })
+    },
     initSearch(map) {
       const AMap = window.AMap;
-      const autoComplete = new AMap.Autocomplete({
-        input: 'map-search-input',
-      });
-
-      const placeSearch = new AMap.PlaceSearch({
-        map: map,
-        panel: 'search-result-panel',
-      });
-
-      autoComplete.on('select', (e) => {
-        placeSearch.setCity(e.poi.adcode);
-        placeSearch.search(e.poi.name);
-      });
-
-      placeSearch.on('listElementClick', (e) => {
+      this.placeSearch = new AMap.PlaceSearch({ map: map, panel: 'search-result-panel' });
+      // 这里不再用autoComplete.on('select')，而是用el-autocomplete
+      this.placeSearch.on('listElementClick', (e) => {
         const { lng, lat } = e.data.location;
         this.center = [lng, lat];
         this.markerPosition = [lng, lat];
@@ -96,7 +155,6 @@ export default {
         };
       });
     },
-
     getAddressByLngLat(lnglat) {
       this.geocoder.getAddress(lnglat, (status, result) => {
         if (status === 'complete' && result.regeocode) {
@@ -112,7 +170,6 @@ export default {
         }
       });
     },
-
     handleConfirm() {
       if (!this.selectedLocation) {
         this.$message.warning('请先在地图上选择一个地点');

@@ -159,19 +159,30 @@ export default {
               index: 1
           }] : [],
 
-          // 维保人员
+          // 维保人员 - 确保有初始数据
           dispatchStaffList: res.data.maintainPersons ? [{
-              ownerUnit: (res.data.project && res.data.project.ownerCompany) || '',
+              index: 1,
+              owner: (res.data.project && res.data.project.ownerCompany) || '',
               projectName: (res.data.project && res.data.project.name) || '',
-              techLeader: res.data.maintainPersons.technical,
-              projectLeader: res.data.maintainPersons.leader,
-              onSiteStaff: res.data.maintainPersons.maintainers || []
-          }] : [],
+              techManager: res.data.maintainPersons.technical || '',
+              projManager: res.data.maintainPersons.leader || '',
+              worker: Array.isArray(res.data.maintainPersons.maintainers) ? res.data.maintainPersons.maintainers.join('、') : '',
+              maintainPersons: res.data.maintainPersons
+          }] : [{
+              index: 1,
+              owner: (res.data.project && res.data.project.ownerCompany) || '',
+              projectName: (res.data.project && res.data.project.name) || '',
+              techManager: '',
+              projManager: '',
+              worker: '',
+              maintainPersons: null
+          }],
           
           originalContractId: originalId // 保存原合同ID用于续签
         }
         
         console.log('统一的formData已加载:', this.formData)
+        console.log('dispatchStaffList数据:', this.formData.dispatchStaffList)
 
       } catch (e) {
         console.error('加载合同数据失败:', e)
@@ -193,88 +204,101 @@ export default {
       // 直接将子组件的更新合并到统一的formData中
       this.formData = { ...this.formData, ...data }
       console.log('formData 已更新:', this.formData)
+      console.log('dispatchStaffList 当前状态:', this.formData.dispatchStaffList)
     },
-    async handleSubmit() {
-      // 准备项目信息
-      const project = (this.formData.projectList && this.formData.projectList[0]) || {}
-      const projectInfo = {
-        name: project.name,
-        ownerCompany: project.ownerName,
-        address: project.address,
-        district: project.area,
-        contactPerson: project.linkman,
-        contactPhone: project.phone,
+    async handleSubmit(personnelData) {
+      if (personnelData) {
+        this.updateFormData(personnelData);
       }
+      await this.$nextTick();
+      const projectData = (this.formData.projectList && this.formData.projectList[0]) || {};
+      const cleanBuildings = (this.formData.buildingList || []).map(b => ({
+        name: b.name,
+        area: b.area,
+        floors: b.floor || b.floors || '',
+        height: b.height
+      }))
+      
+      // 修复 maintainItems 组装逻辑 - 确保是字符串数组
+      const maintainItems = (this.formData.checkedMaintList || [])
+        .map(item => {
+          // 如果 item 是对象且有 content 字段，提取 content
+          if (typeof item === 'object' && item !== null && item.content) {
+            return item.content;
+          }
+          // 如果 item 是字符串
+          if (typeof item === 'string') {
+            return item;
+          }
+          return null;
+        })
+        .filter(item => item && item.trim()); // 过滤空字符串和 null
 
-      // 准备维保人员信息
-      const staffInfo = (this.formData.dispatchStaffList && this.formData.dispatchStaffList[0]) || {};
-      const maintainPersons = {
-        technical: staffInfo.techLeader?._id || staffInfo.techLeader,
-        leader: staffInfo.projectLeader?._id || staffInfo.projectLeader,
-        maintainers: Array.isArray(staffInfo.onSiteStaff) 
-          ? staffInfo.onSiteStaff.map(s => s._id || s)
-          : [],
-      };
-
-      // 构建最终提交的 payload
       const payload = {
-        ...this.formData,
-        projectInfo,
-        maintainPersons,
-        originalContractId: this.contractId,
+        name: this.formData.contractName,
+        code: this.formData.contractNo,
+        clientCompany: this.formData.entrustName,
+        creditCode: this.formData.creditCode,
+        payCycle: this.formData.payCycle,
+        warrantyType: this.formData.buildType,
+        warrantyMethod: this.formData.maintType,
+        warrantyArea: this.formData.maintArea,
+        amount: this.formData.amount,
+        startDate: this.formData.dateStart,
+        endDate: this.formData.dateEnd,
+        autoNotice: this.formData.remind,
+        designCompany: this.formData.designOrg,
+        debugCompany: this.formData.debugOrg,
+        checkCompany: this.formData.recordOrg,
+        note: this.formData.remark,
+        fileUrls: [],
+        buildings: cleanBuildings,
+        maintainItems,
+        projectInfo: projectData
+          ? {
+              name: projectData.name,
+              companyname: projectData.ownerName,
+              address: projectData.address,
+              district: projectData.area,
+              position: '',
+              ownerCompany: projectData.ownerName,
+              contactPerson: projectData.linkman,
+              contactPhone: projectData.phone,
+              logoUrl: '',
+              entranceReportUrl: ''
+            }
+          : null,
+        maintainPersons: this.formData.dispatchStaffList
+          ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p)
+          : [],
+        originalContractId: this.contractId
+      };
+      if (!payload.startDate || !payload.endDate) {
+        this.$message.error('请填写合同时间');
+        this.activeIndex = 0;
+        return;
       }
-      // 清理不再需要的数据
-      delete payload.dispatchStaffList;
-
-      // 校验
-      if (!payload.dateStart || !payload.dateEnd) {
-        this.$message.error('请填写合同时间')
-        this.activeIndex = 0
-        return
+      if (!payload.projectInfo.name || !payload.projectInfo.ownerCompany) {
+        this.$message.error('请补全项目信息');
+        return;
       }
-
-      if (!projectInfo.name || !projectInfo.ownerCompany) {
-        this.$message.error('请补全项目信息')
-        return
-      }
-
       try {
         console.log('提交续签数据:', payload)
+        console.log('maintainItems 数据:', maintainItems)
         await renewalContract(payload)
         this.$message.success('续签提交成功')
-        this.$router.push('/contract/list')
+        this.$router.push({ name: 'UnitProjectManagement' })
       } catch (e) {
         console.error('续签提交失败:', e)
         this.$message.error('续签提交失败')
       }
     },
     getStepFormData() {
-      // 根据当前步骤返回相应的数据
-      const baseData = {
-        // 基础信息，所有步骤都需要
-        entrustName: this.formData.entrustName || '',
-        creditCode: this.formData.creditCode || '',
-        originalContractId: this.formData.originalContractId
-      }
-      
-      switch (this.activeIndex) {
-        case 0: // 合同信息步骤
-          return {
-            ...baseData,
-            ...this.formData
-          }
-        case 1: // 项目信息步骤
-          return {
-            ...baseData,
-            ...this.formData
-          }
-        case 2: // 维保人员步骤
-          return {
-            ...baseData,
-            ...this.formData
-          }
-        default:
-          return baseData
+      // 统一把id等关键信息传递下去
+      return {
+        ...this.formData,
+        contractId: this.contractId, // 合同id
+        projectIds: (this.formData.projectList || []).map(p => p.id).filter(Boolean)
       }
     }
   }

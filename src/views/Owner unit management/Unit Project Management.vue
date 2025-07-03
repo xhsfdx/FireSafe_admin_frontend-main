@@ -27,7 +27,7 @@
           <span style="color:#409eff">{{ row.status }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="contractAmount" label="合同金额" align="center" /> <!-- 新增这一行 -->
+      <el-table-column prop="contractAmount" label="合同金额" align="center" />
       <el-table-column prop="days" label="当前合同时间" align="center">
         <template slot-scope="{ row }">
           <span style="color:#409eff">剩余：{{ row.days }}天</span>
@@ -35,15 +35,13 @@
       </el-table-column>
       <el-table-column prop="renewStatus" label="续签情况" align="center">
         <template slot-scope="{ row }">
-          <span v-if="row.renewStatus === '续签合同'" class="renew-status-renewal">{{ row.renewStatus }}</span>
-          <span v-else-if="row.renewStatus === '已续签'" class="renew-status-renewed">{{ row.renewStatus }}</span>
-          <span v-else-if="row.renewStatus === '即将到期'" class="renew-status-expiring">{{ row.renewStatus }}</span>
-          <span v-else-if="row.renewStatus === '已过期'" class="renew-status-expired">{{ row.renewStatus }}</span>
-          <span v-else class="renew-status-normal">{{ row.renewStatus }}</span>
+          <el-tag :type="getRenewStatusTagType(row.renewStatus)" effect="dark" size="small">
+            {{ row.renewStatus }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="180" align="center">
-        <template slot-scope="{ row }">
+        <template slot-scope="{ row, $index }">
           <el-link type="primary" @click="viewDetail(row)">项目详情</el-link>
           <el-link type="success" style="margin:0 8px" @click="onRenew(row)">续签</el-link>
           <el-link type="danger" @click="onDelete(row)">删除</el-link>
@@ -104,15 +102,19 @@ export default {
         const res = await fetchContracts(params)
         if (res.success) {
           const list = res.data || []
-          this.tableData = list.map(item => ({
-            id: item._id,
-            ownerName: item.project?.ownerCompany || '',
-            entrustName: item.clientCompany || '',
-            status: item.status || '',
-            contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '',
-            days: item.endDate ? this.getRemainDays(item.endDate) : '',
-            renewStatus: item.renewStatus || ''
-          }))
+
+          this.tableData = list.map(item => {
+            const days = item.endDate ? this.getRemainDays(item.endDate) : ''
+            return {
+              id: item._id,
+              ownerName: item.project?.ownerCompany || '',
+              entrustName: item.clientCompany || '',
+              status: item.status || '',
+              contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '',
+              days: days,
+              renewStatus: item.renewStatus || '未续签'
+            }
+          })
           // 分页信息
           if (res.pagination) {
             this.pagination.total = res.pagination.total
@@ -138,6 +140,12 @@ export default {
       const diff = Math.ceil((end - now) / (1000 * 3600 * 24))
       return diff > 0 ? diff : 0
     },
+    getRenewStatusTagType(status) {
+      if (status === '待续签') return 'warning'
+      if (status === '可续签') return 'primary'
+      if (status === '已续签') return 'success'
+      return 'info'
+    },
     // 翻页事件
     handlePageChange(page) {
       this.pagination.page = page
@@ -160,10 +168,9 @@ export default {
     },
     // 查看详情
     viewDetail(row) {
-      // 传合同id
       this.$router.push({
         name: 'UnitDetail',
-        query: { id: row.id } // row.id = 合同id
+        query: { id: row.id }
       })
     },
     // 续签
@@ -235,47 +242,5 @@ export default {
 .empty-text {
   color: #888;
   font-size: 16px;
-}
-
-/* 续签状态样式 */
-.renew-status-renewal {
-  color: #409eff;
-  font-weight: 600;
-  background: #ecf5ff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #b3d8ff;
-}
-
-.renew-status-renewed {
-  color: #67c23a;
-  font-weight: 600;
-  background: #f0f9ff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #b3e19d;
-}
-
-.renew-status-expiring {
-  color: #e6a23c;
-  font-weight: 600;
-  background: #fdf6ec;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #f5dab1;
-}
-
-.renew-status-expired {
-  color: #f56c6c;
-  font-weight: 600;
-  background: #fef0f0;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #fbc4c4;
-}
-
-.renew-status-normal {
-  color: #606266;
-  font-weight: 500;
 }
 </style>
