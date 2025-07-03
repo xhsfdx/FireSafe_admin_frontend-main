@@ -362,7 +362,10 @@ export const asyncRoutes = [
         path: 'project',
         name: 'UnitProject',
         component: () => import('@/views/Owner unit management/Unit Project Management.vue'),
-        meta: { title: '单位项目管理' }
+        meta: {
+          title: '单位项目管理',
+          roles: ['superadmin', 'admin', 'editor']
+        }
       },
       {
         path: 'plan',
@@ -437,18 +440,24 @@ export const asyncRoutes = [
 
       // 原有隐藏页
       {
-        path: 'unit-detail',
+        path: 'UnitDetail',
         name: 'UnitDetail',
         hidden: true,
         component: () => import('@/views/Owner unit management/UnitDetail.vue'),
-        meta: { title: '项目详情', noCache: true, activeMenu: '/owner/project' }
+        meta: {
+          title: '项目详情',
+          roles: ['superadmin', 'admin', 'editor']
+        }
       },
       {
-        path: 'detail',
-        name: 'Detail',
+        path: 'look_ContractDetail_View',
+        name: 'ContractDetailView',
         hidden: true,
-        component: () => import('@/views/Owner unit management/Detail.vue'),
-        meta: { title: '项目与合同具体详情', noCache: true, activeMenu: '/owner/project' }
+        component: () => import('@/views/Owner unit management/look_ContractDetail_View.vue'),
+        meta: {
+          title: '合同完整详情',
+          roles: ['superadmin', 'admin', 'editor']
+        }
       },
 
       {

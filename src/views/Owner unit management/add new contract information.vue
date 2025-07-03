@@ -12,11 +12,23 @@
               <el-input v-model="form.entrustName" placeholder="请输入委托单位名称" />
             </el-form-item>
             <el-form-item label="合同时间" required>
-              <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 140px" />
-              <span class="date-sep">-</span>
-              <el-date-picker v-model="form.dateEnd" type="date" placeholder="结束日期" style="width: 140px" />
+              <div style="display: flex; align-items: center;">
+                <el-date-picker
+                  v-model="form.dateStart"
+                  type="date"
+                  placeholder="开始日期"
+                  style="width: 160px"
+                />
+                <span style="margin: 0 12px;">-</span>
+                <el-date-picker
+                  v-model="form.dateEnd"
+                  type="date"
+                  placeholder="结束日期"
+                  style="width: 160px"
+                />
+              </div>
             </el-form-item>
-            <el-form-item label="合同名称">
+            <el-form-item label="合同名称" prop="contractName" required>
               <el-input v-model="form.contractName" placeholder="请输入合同名称" />
             </el-form-item>
             <el-form-item label="合同编号">
@@ -114,17 +126,17 @@
         </el-table-column>
         <el-table-column prop="area" label="* 建筑面积(m²)" align="center">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.area" placeholder="请输入建筑面积" />
+            <el-input-number v-model="scope.row.area" :min="0" :step="0.01" style="width: 160px" placeholder="请输入建筑面积" />
           </template>
         </el-table-column>
         <el-table-column prop="floor" label="* 建筑层数" align="center">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.floor" placeholder="请输入建筑层数" />
+            <el-input-number v-model="scope.row.floor" :min="0" style="width: 120px" placeholder="请输入建筑层数" />
           </template>
         </el-table-column>
         <el-table-column prop="height" label="* 建筑高度(m)" align="center">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.height" placeholder="请输入建筑高度" />
+            <el-input-number v-model="scope.row.height" :min="0" :step="0.01" style="width: 160px" placeholder="请输入建筑高度" />
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" align="center">
@@ -139,7 +151,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div style="text-align: left; margin-bottom: 18px;">
+      <div style="text-align: center; margin-bottom: 18px;">
         <el-button type="text" style="font-size: 16px; color: #409EFF;" @click="addRow">
           <i class="el-icon-plus" /> 新增内容
         </el-button>
@@ -206,6 +218,9 @@ export default {
       },
       rules: {
         entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
+        contractName: [{ required: true, message: '请输入合同名称', trigger: 'blur' }],
+        dateStart: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
+        dateEnd: [{ required: true, message: '请选择结束日期', trigger: 'change' }],
         creditCode: [{ required: true, message: '请输入统一社会信用代码', trigger: 'blur' }],
         maintType: [{ required: true, message: '请选择维保方式', trigger: 'change' }]
       },
@@ -274,7 +289,7 @@ export default {
         this.$message.error('加载维保项目失败')
       }
     },
-    handleTreeCheck(checkedKeys, { checkedNodes }) {
+    handleTreeCheck(data, { checkedKeys }) {
       this.checkedKeys = checkedKeys
       this.updateCheckedMaintList()
       // 控制全选
@@ -347,8 +362,7 @@ export default {
           recordOrg: this.form.recordOrg,
           remark: this.form.remark,
           buildingList: this.buildingList,
-          checkedMaintList: this.checkedMaintList,
-          type: 'contract'
+          checkedMaintList: this.checkedMaintList
         }
         this.$emit('update', data)
         this.$emit('next')
@@ -454,4 +468,5 @@ export default {
   margin-top: 38px;
 }
 </style>
+
 

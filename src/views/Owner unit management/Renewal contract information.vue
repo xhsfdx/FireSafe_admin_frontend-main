@@ -196,6 +196,10 @@ export default {
     formData: {
       type: Object,
       default: () => ({})
+    },
+    contractId: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -248,24 +252,39 @@ export default {
         if (newData.buildingList && newData.buildingList.length > 0) {
           this.buildingList = JSON.parse(JSON.stringify(newData.buildingList))
         }
-
-        if (newData.checkedMaintList && newData.checkedMaintList.length > 0) {
-          this.checkedMaintList = JSON.parse(JSON.stringify(newData.checkedMaintList))
-        }
         
-        this.syncTreeSelection() // 数据变化后，尝试同步
+        this.checkedMaintList = newData.checkedMaintList || []
+        this.$nextTick(() => {
+          this.updateCheckedKeysFromList()
+        })
       },
+      immediate: true,
       deep: true
     }
   },
-  mounted() {
-    this.loadMaintainTree()
+  async created() {
+    await this.loadMaintainTree()
+    this.updateCheckedKeysFromList()
+    if (this.contractId) {
+      this.fetchContractDetail(this.contractId)
+    }
   },
   methods: {
-    syncTreeSelection() {
-      // 确保树已加载且有已选列表
-      if (this.maintTree.length > 0 && this.checkedMaintList.length > 0) {
-        this.setCheckedKeysFromMaintList()
+    updateCheckedKeysFromList() {
+      if (!this.maintTree.length || !this.checkedMaintList.length) {
+        this.checkedKeys = []
+        return
+      }
+
+      const leafNodes = this.getAllLeafNodes(this.maintTree)
+      const listKeys = new Set(this.checkedMaintList.map(item => item.content))
+      
+      this.checkedKeys = leafNodes
+        .filter(node => listKeys.has(node.label))
+        .map(node => node.id)
+
+      if (this.$refs.maintTree) {
+        this.$refs.maintTree.setCheckedKeys(this.checkedKeys)
       }
     },
     transformToTree(data) {
@@ -301,17 +320,16 @@ export default {
         const res = await fetch('/maintainTree.json')
         const rawData = await res.json()
         this.maintTree = this.transformToTree(rawData)
-        this.syncTreeSelection() // 树加载后，尝试同步
+        this.updateCheckedKeysFromList()
       } catch (err) {
         this.$message.error('加载维保项目失败')
       }
     },
-    handleTreeCheck(checkedKeys, { checkedNodes }) {
-      this.checkedKeys = checkedKeys
+    handleTreeCheck(checkedNode, { checkedNodes, halfCheckedNodes }) {
+      this.checkedKeys = checkedNodes
+        .filter(n => !n.children || n.children.length === 0)
+        .map(n => n.id)
       this.updateCheckedMaintList()
-      // 控制全选
-      const allIds = this.getAllLeafIds(this.maintTree)
-      this.treeCheckAll = checkedKeys.length === allIds.length
     },
     // 全选
     handleCheckAll(val) {
@@ -335,54 +353,57 @@ export default {
       }
       this.updateCheckedMaintList()
     },
-    // 提取所有叶子节点id
-    getAllLeafIds(nodes, arr = []) {
+    // 提取所有叶子节点
+    getAllLeafNodes(nodes, arr = []) {
       nodes.forEach(n => {
         if (n.children && n.children.length) {
-          this.getAllLeafIds(n.children, arr)
+          this.getAllLeafNodes(n.children, arr)
         } else {
-          arr.push(n.id)
+          arr.push(n)
         }
       })
       return arr
     },
     // 生成右侧表格完整内容
     updateCheckedMaintList() {
-      const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
-      this.checkedMaintList = checkedNodes
-        .filter(n => !n.children)
-        .map(n => n.data ? n.data : {
-          system: n.label,
-          item: '', content: '', period: '', standard: ''
+      // 获取所有被选中的节点 id（包括半选）
+      const checkedIds = [
+        ...this.$refs.maintTree.getCheckedKeys(true),
+        ...this.$refs.maintTree.getHalfCheckedKeys()
+      ]
+      // 递归收集所有被选中节点的所有子孙节点中有 data 字段的节点
+      const collectAllCheckedDataNodes = (nodes, arr = []) => {
+        nodes.forEach(n => {
+          if (checkedIds.includes(n.id)) {
+            // 只要被选中，递归收集其所有子孙节点的 data
+            const collectDescendantData = (node) => {
+              if (node.data) arr.push(node.data)
+              if (node.children && node.children.length) {
+                node.children.forEach(child => collectDescendantData(child))
+              }
+            }
+            collectDescendantData(n)
+          } else if (n.children && n.children.length) {
+            collectAllCheckedDataNodes(n.children, arr)
+          }
         })
+        return arr
+      }
+      // 去重（防止多层嵌套重复）
+      const allData = collectAllCheckedDataNodes(this.maintTree)
+      this.checkedMaintList = Array.from(new Set(allData.map(d => JSON.stringify(d)))).map(s => JSON.parse(s))
     },
     nextStep() {
-      this.$refs.form.validate(valid => {
-        if (!valid) return
-        const data = {
-          contractName: this.form.contractName,
-          contractNo: this.form.contractNo,
-          entrustName: this.form.entrustName,
-          creditCode: this.form.creditCode,
-          payCycle: this.form.payCycle,
-          buildType: this.form.buildType,
-          maintType: this.form.maintType,
-          maintArea: this.form.maintArea,
-          amount: this.form.amount,
-          dateStart: this.form.dateStart,
-          dateEnd: this.form.dateEnd,
-          remind: this.form.remind,
-          designOrg: this.form.designOrg,
-          debugOrg: this.form.debugOrg,
-          recordOrg: this.form.recordOrg,
-          remark: this.form.remark,
-          buildingList: this.buildingList,
-          checkedMaintList: this.checkedMaintList,
-          type: 'contract'
-        }
-        this.$emit('update', data)
-        this.$emit('next')
-      })
+      // 确保传递完整的表单数据，包括 dispatchStaffList
+      const updateData = {
+        ...this.form,
+        buildingList: this.buildingList,
+        checkedMaintList: this.checkedMaintList
+      }
+      
+      console.log('合同信息页面 nextStep 传递数据:', updateData)
+      this.$emit('update', updateData)
+      this.$emit('next')
     },
     addRow() {
       this.buildingList.push({ name: '', area: '', floor: '', height: '', remark: '' })
@@ -390,41 +411,16 @@ export default {
     removeRow(idx) {
       this.buildingList.splice(idx, 1)
     },
-    getAllLeafNodes(nodes, result = []) {
-      for (const node of nodes) {
-        if (node.children && node.children.length > 0) {
-          this.getAllLeafNodes(node.children, result);
-        } else if (node.data) {
-          result.push(node);
-        }
+    async fetchContractDetail(id) {
+      // 伪代码：实际请替换为你的API调用
+      if (!this.$api || !this.$api.getContractDetail) return;
+      const res = await this.$api.getContractDetail(id)
+      if (res && res.data) {
+        this.form = { ...this.form, ...res.data }
+        this.buildingList = res.data.buildings || []
+        this.checkedMaintList = res.data.maintainItems || []
       }
-      return result;
     },
-    setCheckedKeysFromMaintList() {
-      this.$nextTick(() => {
-        if (!this.$refs.maintTree) return;
-
-        const allLeafNodes = this.getAllLeafNodes(this.maintTree);
-        const checkedKeysSet = new Set();
-        
-        const checkedItemKeySet = new Set(this.checkedMaintList.map(item => `${item.system}|${item.item}|${item.content}`));
-
-        allLeafNodes.forEach(node => {
-          if (node.data) {
-            const nodeKey = `${node.data.system}|${node.data.item}|${node.data.content}`;
-            if (checkedItemKeySet.has(nodeKey)) {
-              checkedKeysSet.add(node.id);
-            }
-          }
-        });
-        
-        const checkedKeys = Array.from(checkedKeysSet);
-        this.checkedKeys = checkedKeys;
-        this.$refs.maintTree.setCheckedKeys(checkedKeys);
-        
-        console.log('维保内容已根据传入数据自动勾选:', checkedKeys);
-      });
-    }
   }
 }
 </script>

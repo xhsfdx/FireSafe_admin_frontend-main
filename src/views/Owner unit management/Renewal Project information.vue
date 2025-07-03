@@ -79,6 +79,10 @@ export default {
     formData: {
       type: Object,
       default: () => ({})
+    },
+    projectIds: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -91,6 +95,11 @@ export default {
       projectDialogVisible: false,
       currentProject: null,
       editingIndex: -1
+    }
+  },
+  created() {
+    if (this.projectIds && this.projectIds.length) {
+      this.fetchProjects(this.projectIds)
     }
   },
   watch: {
@@ -115,6 +124,12 @@ export default {
     }
   },
   methods: {
+    async fetchProjects(ids) {
+      // 伪代码：实际请替换为你的API调用
+      if (!this.$api || !this.$api.getProjectDetail) return;
+      const projects = await Promise.all(ids.map(id => this.$api.getProjectDetail(id)))
+      this.projectList = projects.map(res => res.data)
+    },
     addProject() {
       this.currentProject = null
       this.editingIndex = -1
@@ -143,10 +158,13 @@ export default {
       this.editingIndex = -1
     },
     prevStep() {
+      this.$emit('update', { projectList: this.projectList })
       this.$emit('prev')
     },
     nextStep() {
-      this.$emit('update', { type: 'project', projectList: this.projectList })
+      const updateData = { projectList: this.projectList }
+      console.log('项目信息页面 nextStep 传递数据:', updateData)
+      this.$emit('update', updateData)
       this.$emit('next')
     }
   }
