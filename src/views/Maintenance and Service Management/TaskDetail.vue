@@ -111,92 +111,157 @@
 </template>
 
 <script>
+import { getMaintainTask } from '@/api/maintainTask'
+
 export default {
   name: 'TaskDetailPage',
   data() {
     return {
-      // 默认 mock 数据
+      taskId: null,
+      loading: false,
+      // 任务信息
       taskInfo: {
-        time: '2025-06-01 01:10:00',
+        time: '',
         statusIndex: 0,
-        projectName: 'ue',
-        planType: '月',
-        taskName: '2025年6月任务',
-        owner: '小学',
-        status: '待处理',
+        projectName: '',
+        planType: '',
+        taskName: '',
+        owner: '',
+        status: '',
         score: 0,
-        worker: '黎建军',
-        principal: '王蕾',
+        worker: '',
+        principal: '',
         method: '系统维保',
         maintenance: '暂无',
-        comment: '暂无',
-        total: 1,
-        unchecked: 1,
+        comment: '',
+        total: 0,
+        unchecked: 0,
         checked: 0,
         faults: 0,
         replace: 0
       },
       // 左树数据
-      treeData: [
-        {
-          id: 1,
-          label: '消防供配电设施',
-          icon: 'el-icon-folder-opened',
-          children: [
-            { id: 11, label: '消防配电柜', detail: true },
-            { id: 12, label: '自备发电机组' }
-          ]
-        }
-      ],
-      // 默认右表内容（可以做成随树节点变化而变化）
-      tableData: [
-        { content: '消防电源主电源、备用电源工作状态', result: '未检测' },
-        { content: '消防设备末端配电切换装置工作状态', result: '未检测' },
-        { content: '试验主、备电切换功能', result: '未检测' }
-      ]
+      treeData: [],
+      // 默认右表内容
+      tableData: [],
+      // 任务详情数据
+      taskData: null
     }
   },
-  created() {
-    const taskId = this.$route.params.id
-    this.mockLoad(taskId)
+  mounted() {
+    this.taskId = this.$route.params.id
+    this.loadData()
   },
   methods: {
-    mockLoad(taskId) {
-      if (taskId === '1909761xxxx') {
-        this.taskInfo = {
-          time: '2025-04-15 11:30:00',
-          statusIndex: 5,
-          projectName: '高坪汽...',
-          planType: '月',
-          taskName: '2025年4月任务',
-          owner: '小学',
-          status: '已完成',
-          score: 5,
-          worker: '黎建军',
-          principal: '王蕾',
-          method: '系统维保',
-          maintenance: '设备已全部维护',
-          comment: '服务到位，态度好',
-          total: 1,
-          unchecked: 0,
-          checked: 1,
-          faults: 0,
-          replace: 0
-        }
+    // 加载数据
+    async loadData() {
+      if (!this.taskId) {
+        this.$message.error('任务ID不存在')
+        return
       }
-      // 你可以根据不同id设置不同tableData/treeData
+
+      this.loading = true
+      try {
+        const res = await getMaintainTask(this.taskId)
+        if (res.success) {
+          this.taskData = res.data
+          this.formatTaskInfo(res.data)
+          this.buildTreeData(res.data)
+        } else {
+          this.$message.error(res.message || '获取任务详情失败')
+        }
+      } catch (e) {
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
+    },
+    // 格式化任务信息
+    formatTaskInfo(data) {
+      const maintainers = data.maintainPersons?.maintainers || []
+      const leader = data.maintainPersons?.leader
+      const technical = data.maintainPersons?.technical
+
+      this.taskInfo = {
+        time: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '',
+        statusIndex: this.getStatusIndex(data.status),
+        projectName: data.projectName || '',
+        planType: data.planType || '',
+        taskName: `${data.taskMonth}任务`,
+        owner: data.project?.ownerCompany || '',
+        status: data.status || '',
+        score: data.rating || 0,
+        worker: maintainers.length > 0 ? maintainers[0].name : '',
+        principal: leader?.name || '',
+        method: '系统维保',
+        maintenance: data.maintainResult || '暂无',
+        comment: data.ratingComment || '',
+        total: data.totalCheckCount || 0,
+        unchecked: (data.totalCheckCount || 0) - (data.passedCount || 0),
+        checked: data.passedCount || 0,
+        faults: data.abnormalCount || 0,
+        replace: data.replacedCount || 0
+      }
+    },
+    // 获取状态索引
+    getStatusIndex(status) {
+      const statusMap = {
+        '已派发': 0,
+        '已到达': 1,
+        '处理中': 2,
+        '已提交': 3,
+        '已完成': 4,
+        '已评价': 5
+      }
+      return statusMap[status] || 0
+    },
+    // 构建树形数据
+    buildTreeData(data) {
+      if (data.details && data.details.length > 0) {
+        // 根据任务项构建树形结构
+        const categories = {}
+        data.details.forEach(item => {
+          if (!categories[item.category]) {
+            categories[item.category] = {
+              id: item.category,
+              label: item.category,
+              icon: 'el-icon-folder-opened',
+              children: []
+            }
+          }
+          categories[item.category].children.push({
+            id: item._id,
+            label: item.device,
+            detail: true,
+            item: item
+          })
+        })
+        this.treeData = Object.values(categories)
+      } else {
+        // 默认树形数据
+        this.treeData = [
+          {
+            id: 1,
+            label: '消防供配电设施',
+            icon: 'el-icon-folder-opened',
+            children: [
+              { id: 11, label: '消防配电柜', detail: true },
+              { id: 12, label: '自备发电机组' }
+            ]
+          }
+        ]
+      }
     },
     showFieldDetail(data) {
       this.$message.info('展示“现场详情”弹窗')
     },
     onTreeSelect(node) {
-      // 可联动不同节点加载不同检测内容
-      if (node && node.label === '自备发电机组') {
+      if (node && node.item) {
+        // 根据选中的任务项显示检测内容
         this.tableData = [
-          { content: '发电机启动装置外观及工作状态', result: '未检测' },
-          { content: '试验发电机自动、手动启动功能', result: '未检测' }
+          { content: node.item.maintainContent, result: '未检测' }
         ]
-      } else if (node && node.label === '消防配电柜') {
+      } else {
+        // 默认检测内容
         this.tableData = [
           { content: '消防电源主电源、备用电源工作状态', result: '未检测' },
           { content: '消防设备末端配电切换装置工作状态', result: '未检测' },
@@ -208,10 +273,9 @@ export default {
       this.$message.info('设置')
     },
     toFaultDetail() {
-      // 假设你要带任务ID参数，也可以携带其它参数
       this.$router.push({
         name: 'FaultListDetail',
-        query: { taskId: this.taskInfo.taskId }
+        query: { taskId: this.taskId }
       })
     }
   }

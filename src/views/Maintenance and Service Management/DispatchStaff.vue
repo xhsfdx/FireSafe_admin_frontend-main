@@ -98,24 +98,24 @@
 
 <script>
 import avatar1 from '@/assets/avatar-1.jpg'
+import { getStaffList } from '@/api/staff'
+import { getMaintainTask, assignMaintainers } from '@/api/maintainTask'
+
 export default {
   name: 'DispatchStaff',
   data() {
     return {
       activeTab: 'technical',
       search: '',
-      staffList: [
-        { id: 1, name: '张', title: '一级注册消防工程师', assignedCount: 4, avatar: avatar1 },
-        { id: 2, name: 'ljh', title: '一级注册消防工程师', assignedCount: 4, avatar: avatar1 },
-        { id: 3, name: '陈xx', title: '一级注册消防工程师', assignedCount: 5, avatar: avatar1 },
-        { id: 4, name: '邱峰', title: '一级注册消防工程师', assignedCount: 6, avatar: avatar1 },
-        { id: 5, name: '黎建军', title: '消防设施操作员', assignedCount: 4, avatar: avatar1 }
-      ],
+      staffList: [],
       selected: {
         technical: null,
         leader: null,
         maintainer: [] // ✅ 一定要这样
       },
+      taskId: null,
+      taskData: null,
+      loading: false,
 
       roleMap: {
         technical: '技术负责人',
@@ -129,7 +129,54 @@ export default {
       return this.staffList.filter(p => p.name.includes(this.search))
     }
   },
+  mounted() {
+    this.taskId = this.$route.params.id
+    this.loadData()
+  },
   methods: {
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        // 加载员工列表
+        const staffRes = await getStaffList()
+        if (staffRes.success) {
+          this.staffList = staffRes.data.map(staff => ({
+            id: staff._id,
+            name: staff.name,
+            title: staff.position || '消防工程师',
+            assignedCount: staff.assignedProjects || 0,
+            avatar: avatar1
+          }))
+        }
+
+        // 加载任务数据
+        if (this.taskId) {
+          const taskRes = await getMaintainTask(this.taskId)
+          if (taskRes.success) {
+            this.taskData = taskRes.data
+            // 设置已选择的人员
+            if (taskRes.data.maintainPersons) {
+              const persons = taskRes.data.maintainPersons
+              if (persons.technical) {
+                this.selected.technical = this.staffList.find(s => s.id === persons.technical)
+              }
+              if (persons.leader) {
+                this.selected.leader = this.staffList.find(s => s.id === persons.leader)
+              }
+              if (persons.maintainers && persons.maintainers.length > 0) {
+                this.selected.maintainer = persons.maintainers.map(id => 
+                  this.staffList.find(s => s.id === id)
+                ).filter(Boolean)
+              }
+            }
+          }
+        }
+      } catch (e) {
+        this.$message.error('加载数据失败')
+      }
+      this.loading = false
+    },
     isSelected(role, person) {
       if (role === 'maintainer') {
         return this.selected.maintainer.some(p => p.id === person.id)
@@ -154,21 +201,29 @@ export default {
         this.selected[role] = null
       }
     },
-    submit() {
+    async submit() {
       if (!this.selected.technical || !this.selected.leader || this.selected.maintainer.length === 0) {
         this.$message.error('请选择技术负责人、项目负责人和至少一名现场维保人员')
         return
       }
-      const result = {
-        projectName: this.data && this.data.projectName ? this.data.projectName : '',
-        maintainPersons: {
-          technical: this.selected.technical?.name || '',
-          leader: this.selected.leader?.name || '',
-          maintainer: this.selected.maintainer.map(p => p.name)
+
+      try {
+        const maintainPersons = {
+          technical: this.selected.technical.id,
+          leader: this.selected.leader.id,
+          maintainers: this.selected.maintainer.map(p => p.id)
         }
+
+        const res = await assignMaintainers(this.taskId, { maintainPersons })
+        if (res.success) {
+          this.$message.success('人员分配成功')
+          this.$router.go(-1)
+        } else {
+          this.$message.error(res.message || '分配失败')
+        }
+      } catch (e) {
+        this.$message.error('网络异常或接口出错')
       }
-      console.log('弹窗保存返回:', result)
-      this.$emit('submit', result)
     }
   }
 }

@@ -368,6 +368,15 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'payment',
+        name: 'PaymentManagement',
+        component: () => import('@/views/Owner unit management/Payment Management.vue'),
+        meta: {
+          title: '结款管理',
+          roles: ['superadmin', 'admin', 'editor']
+        }
+      },
+      {
         path: 'plan',
         name: 'MaintenancePlan',
         component: () => import('@/views/Owner unit management/Maintenance Plan Management.vue'),

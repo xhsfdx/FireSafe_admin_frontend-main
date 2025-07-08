@@ -113,6 +113,8 @@
 </template>
 
 <script>
+import { getMaintainTasks, deleteMaintainTask } from '@/api/maintainTask'
+
 export default {
   name: 'PlanTaskPage',
   data() {
@@ -124,18 +126,17 @@ export default {
         taskTimeliness: '',
         taskDate: []
       },
-      tableData: [
-        { projectName: 'ue', planType: '月', taskName: '2025年6月任务', taskId: '1928861xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '待处理', timeliness: '正常', platform: '未上传' },
-        { projectName: '高坪汽...', planType: '月', taskName: '2025年6月任务', taskId: '1928861xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '待处理', timeliness: '正常', platform: '未上传' },
-        { projectName: '高坪汽...', planType: '月', taskName: '2025年5月任务', taskId: '1917627xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '待处理', timeliness: '已逾期', platform: '未上传' },
-        { projectName: 'ue', planType: '月', taskName: '2025年5月任务', taskId: '1917627xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '待处理', timeliness: '已逾期', platform: '未上传' },
-        { projectName: 'ue', planType: '月', taskName: '2025年4月任务', taskId: '1914375xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '处理中', timeliness: '已逾期', platform: '未上传' },
-        { projectName: '高坪汽...', planType: '月', taskName: '2025年4月任务', taskId: '1909761xxxx', principal: '王蕾', worker: '黎建军', taskStatus: '已完成', timeliness: '正常', platform: '未上传' }
-      ],
+      tableData: [],
       filteredData: [],
       pagedData: [],
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      loading: false,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     }
   },
   watch: {
@@ -143,18 +144,60 @@ export default {
       this.updatePagedData()
     }
   },
-  created() {
-    this.filteredData = this.tableData
-    this.updatePagedData()
+  mounted() {
+    this.loadData()
+  },
+  activated() {
+    this.loadData()
   },
   methods: {
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        }
+        if (this.filters.projectName) params.projectName = this.filters.projectName
+        if (this.filters.planType) params.planType = this.filters.planType
+        if (this.filters.taskStatus) params.status = this.filters.taskStatus
+        if (this.filters.taskTimeliness) params.timeliness = this.filters.taskTimeliness
+
+        const res = await getMaintainTasks(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          this.filteredData = this.tableData
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.tableData = []
+          this.filteredData = []
+          this.pagination.total = 0
+          this.$message.error(res.message || '获取数据失败')
+        }
+      } catch (e) {
+        this.tableData = []
+        this.filteredData = []
+        this.pagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
+      this.updatePagedData()
+    },
     viewDetail(row) {
-      this.$router.push({ name: 'TaskDetail' }) // 建议加参数: { name: 'TaskDetail', params: { id: row.taskId } }
+      this.$router.push({ 
+        name: 'TaskDetail',
+        params: { id: row._id }
+      })
     },
     dispatchWorker(row) {
       this.$router.push({
         name: 'DispatchStaff',
-        params: { id: row.taskId }
+        params: { id: row._id }
       })
     },
     viewReport(row) {
@@ -162,27 +205,31 @@ export default {
       const url = row.reportUrl || '/Routine Maintenance Reports/高坪汽车站消防维保服务2025年4月任务.pdf'
       window.open(url, '_blank')
     },
-    onDelete(row) {
-      this.$message.warning('删除')
+    async onDelete(row) {
+      try {
+        await this.$confirm(`确定删除「${row.projectName}」的维护任务吗？`, '提示', { type: 'warning' })
+        const res = await deleteMaintainTask(row._id)
+        if (res.success) {
+          this.$message.success('删除成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '删除失败')
+        }
+      } catch (err) {
+        // 用户取消无需处理
+      }
     },
     onSetting() {
       this.$message.info('设置')
     },
     onSearch() {
-      this.filteredData = this.tableData.filter(item => {
-        return (!this.filters.projectName || item.projectName.includes(this.filters.projectName)) &&
-          (!this.filters.planType || item.planType === this.filters.planType) &&
-          (!this.filters.taskStatus || item.taskStatus === this.filters.taskStatus) &&
-          (!this.filters.taskTimeliness || item.timeliness === this.filters.taskTimeliness)
-      })
-      this.currentPage = 1
-      this.updatePagedData()
+      this.pagination.page = 1
+      this.loadData()
     },
     onReset() {
       this.filters = { projectName: '', planType: '', taskStatus: '', taskTimeliness: '', taskDate: [] }
-      this.filteredData = this.tableData
-      this.currentPage = 1
-      this.updatePagedData()
+      this.pagination.page = 1
+      this.loadData()
     },
     updatePagedData() {
       const start = (this.currentPage - 1) * this.pageSize

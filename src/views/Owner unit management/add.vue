@@ -81,8 +81,10 @@ export default {
   },
   methods: {
     handleNext() {
+      console.log('handleNext called, current activeStep:', this.activeStep)
       if (this.activeStep < 2) {
         this.activeStep++
+        console.log('activeStep increased to:', this.activeStep)
       }
     },
     handlePrev() {
@@ -97,24 +99,24 @@ export default {
       try {
         console.log('Final data to be submitted:', this.formData)
 
-        // 数据转换层，适配后端接口
+        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType);
         const payload = {
           // 合同信息
           name: this.formData.contractName,
           code: this.formData.contractNo,
           clientCompany: this.formData.entrustName,
           creditCode: this.formData.creditCode,
-          payCycle: this.formData.payCycle,
-          warrantyType: this.formData.buildType, // 注意字段名映射
-          warrantyMethod: this.formData.maintType,
+          payCycle: isOneTime ? undefined : this.formData.payCycle,
+          warrantyType: isOneTime ? undefined : this.formData.buildType,
+          warrantyMethod: isOneTime ? undefined : this.formData.maintType,
           warrantyArea: this.formData.maintArea,
           amount: this.formData.amount,
           startDate: this.formData.dateStart,
           endDate: this.formData.dateEnd,
           autoNotice: this.formData.remind,
-          designCompany: this.formData.designOrg,
-          debugCompany: this.formData.debugOrg,
-          checkCompany: this.formData.recordOrg,
+          designOrg: this.formData.designOrg,
+          debugOrg: this.formData.debugOrg,
+          recordOrg: this.formData.recordOrg,
           note: this.formData.remark,
           fileUrls: [], // 假设文件上传逻辑会填充这里
 
@@ -138,7 +140,18 @@ export default {
                 logoUrl: '',
                 entranceReportUrl: ''
               }
-            : null,
+            : (isOneTime ? {
+                name: this.formData.contractName || '一次性合同项目',
+                companyname: this.formData.entrustName,
+                address: '',
+                district: '',
+                position: '',
+                ownerCompany: this.formData.entrustName,
+                contactPerson: '',
+                contactPhone: '',
+                logoUrl: '',
+                entranceReportUrl: ''
+              } : null),
 
           // 维保人员
           maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p) : []

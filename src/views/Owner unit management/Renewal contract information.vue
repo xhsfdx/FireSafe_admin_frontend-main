@@ -12,6 +12,17 @@
             <el-form-item label="委托单位名称" prop="entrustName" required>
               <el-input v-model="form.entrustName" placeholder="请输入委托单位名称" />
             </el-form-item>
+            <el-form-item label="合同种类" prop="contractType" required>
+              <el-select v-model="form.contractType" placeholder="请选择合同种类" style="width: 100%" @change="handleContractTypeChange">
+                <el-option label="施工" value="施工" />
+                <el-option label="评估" value="评估" />
+                <el-option label="检测" value="检测" />
+                <el-option label="项目维保" value="项目维保" />
+              </el-select>
+              <div v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
+                <i class="el-icon-info"></i> 一次性合同仅需填写基本信息，维保相关内容将自动清空
+              </div>
+            </el-form-item>
             <el-form-item label="合同时间" required>
               <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 140px" />
               <span class="date-sep">-</span>
@@ -24,7 +35,7 @@
               <el-input v-model="form.contractNo" placeholder="请输入合同编号" />
             </el-form-item>
             <el-form-item label="付款周期">
-              <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%">
+              <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="月" value="月" />
                 <el-option label="季" value="季" />
                 <el-option label="半年" value="半年" />
@@ -32,7 +43,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="维保建筑类型">
-              <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%">
+              <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="高层" value="高层" />
                 <el-option label="地下" value="地下" />
                 <el-option label="人员密集场所" value="人员密集场所" />
@@ -64,13 +75,13 @@
               <el-input v-model="form.creditCode" placeholder="请输入统一社会信用代码" />
             </el-form-item>
             <el-form-item label="维保方式" prop="maintType" required>
-              <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%">
+              <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="系统维保" value="系统维保" />
                 <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
-              <el-input-number v-model="form.maintArea" :min="0" style="width: 130px" />
+              <el-input-number v-model="form.maintArea" :min="0" style="width: 130px" :disabled="['施工', '评估', '检测'].includes(form.contractType)" />
               <span class="unit-text">㎡</span>
             </el-form-item>
             <el-form-item label="合同金额">
@@ -78,7 +89,7 @@
               <span class="unit-text">元</span>
             </el-form-item>
             <el-form-item label="收款提醒">
-              <el-radio-group v-model="form.remind">
+              <el-radio-group v-model="form.remind" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-radio :label="1">开通</el-radio>
                 <el-radio :label="0">关闭</el-radio>
               </el-radio-group>
@@ -104,8 +115,9 @@
       <div class="section-title" style="margin-top:32px;">
         <span style="color:#f56c6c;">*</span> 建筑信息
         <span class="tip">(注：建筑物面积请填写纯数字，例如:0.00)</span>
+        <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-      <el-table :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
+              <el-table v-if="!['施工', '评估', '检测'].includes(form.contractType)" :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
         <el-table-column prop="name" label="* 建筑信息" align="center">
           <template slot-scope="scope">
             <el-input v-model="scope.row.name" placeholder="请输入建筑名称" />
@@ -138,7 +150,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div style="text-align: left; margin-bottom: 18px;">
+      <div v-if="form.contractType !== '一次性合同'" style="text-align: left; margin-bottom: 18px;">
         <el-button type="text" style="font-size: 16px; color: #409EFF;" @click="addRow">
           <i class="el-icon-plus" /> 新增内容
         </el-button>
@@ -147,8 +159,9 @@
       <!-- 合同维保内容 -->
       <div class="section-title" style="margin-top:28px;">
         合同维保内容
+        <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-      <el-row :gutter="14">
+              <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
         <!-- 左侧树形列表 + 全选 -->
         <el-col :span="6">
           <div style="margin-bottom:12px;">
@@ -206,11 +219,12 @@ export default {
     return {
       form: {
         entrustName: '', dateStart: '', dateEnd: '', contractName: '', contractNo: '',
-        payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
+        contractType: '', payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
         amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: ''
       },
       rules: {
         entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
+        contractType: [{ required: true, message: '请选择合同种类', trigger: 'change' }],
         creditCode: [{ required: true, message: '请输入统一社会信用代码', trigger: 'blur' }],
         maintType: [{ required: true, message: '请选择维保方式', trigger: 'change' }]
       },
@@ -232,6 +246,7 @@ export default {
         this.form = {
           ...this.form,
           entrustName: newData.entrustName || '',
+          contractType: newData.contractType || '',
           creditCode: newData.creditCode || '',
           contractName: newData.contractName || '',
           contractNo: newData.contractNo || '',
@@ -315,6 +330,29 @@ export default {
         }))
       }))
     },
+    handleContractTypeChange(value) {
+      if (['施工', '评估', '检测'].includes(value)) {
+        // 一次性合同时，其他字段默认无
+        this.form.payCycle = ''
+        this.form.buildType = ''
+        this.form.maintType = ''
+        this.form.maintArea = ''
+        this.form.remind = 0
+        this.form.designOrg = ''
+        this.form.debugOrg = ''
+        this.form.recordOrg = ''
+        this.form.remark = ''
+        // 清空建筑信息
+        this.buildingList = [{ name: '', area: '', floor: '', height: '', remark: '' }]
+        // 清空维保内容
+        this.checkedMaintList = []
+        this.checkedKeys = []
+        if (this.$refs.maintTree) {
+          this.$refs.maintTree.setCheckedKeys([])
+        }
+      }
+      // 项目维保保持原有逻辑
+    },
     async loadMaintainTree() {
       try {
         const res = await fetch('/maintainTree.json')
@@ -394,16 +432,30 @@ export default {
       this.checkedMaintList = Array.from(new Set(allData.map(d => JSON.stringify(d)))).map(s => JSON.parse(s))
     },
     nextStep() {
-      // 确保传递完整的表单数据，包括 dispatchStaffList
-      const updateData = {
-        ...this.form,
-        buildingList: this.buildingList,
-        checkedMaintList: this.checkedMaintList
+      // 如果是一次性合同，临时移除维保方式的验证规则
+      const originalRules = { ...this.rules }
+      if (['施工', '评估', '检测'].includes(this.form.contractType)) {
+        this.rules.maintType = []
+        this.form.maintType = '' // 确保维保方式为空
       }
       
-      console.log('合同信息页面 nextStep 传递数据:', updateData)
-      this.$emit('update', updateData)
-      this.$emit('next')
+      this.$refs.form.validate(valid => {
+        // 恢复原始验证规则
+        this.rules = originalRules
+        
+        if (!valid) return
+        
+        // 确保传递完整的表单数据，包括 dispatchStaffList
+        const updateData = {
+          ...this.form,
+          buildingList: this.buildingList,
+          checkedMaintList: this.checkedMaintList
+        }
+        
+        console.log('合同信息页面 nextStep 传递数据:', updateData)
+        this.$emit('update', updateData)
+        this.$emit('next')
+      })
     },
     addRow() {
       this.buildingList.push({ name: '', area: '', floor: '', height: '', remark: '' })
@@ -510,5 +562,20 @@ export default {
 .empty-box {
   text-align: center;
   margin-top: 38px;
+}
+
+/* 一次性合同禁用字段样式 */
+.contract-info-root :deep(.el-select.is-disabled .el-input__inner) {
+  background-color: #f5f7fa;
+  color: #c0c4cc;
+}
+
+.contract-info-root :deep(.el-input-number.is-disabled .el-input__inner) {
+  background-color: #f5f7fa;
+  color: #c0c4cc;
+}
+
+.contract-info-root :deep(.el-radio.is-disabled .el-radio__label) {
+  color: #c0c4cc;
 }
 </style>
