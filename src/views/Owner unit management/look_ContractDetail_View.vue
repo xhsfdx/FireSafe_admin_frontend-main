@@ -1,6 +1,6 @@
 <template>
   <div class="add-page-container">
-    <el-card class="box-card">
+    <el-card class="box-card" v-loading="loading">
       <!-- Custom Steps -->
       <div class="custom-steps">
         <div class="step-item" :class="{ 'active': activeStep === 0, 'completed': activeStep > 0 }">
@@ -37,7 +37,7 @@
       <div class="step-content">
         <LookContractInfoView
           v-show="activeStep === 0"
-          :data="formData"
+          :form-data="formData"
           @next="handleNext"
           @update="updateFormData"
         />
@@ -98,21 +98,24 @@ export default {
           const item = res.data
           // 适配合同信息
           const formData = {
-            entrustName: item.clientCompany || '',
-            contractName: item.name || '',
-            contractNo: item.code || '',
+            // 合同基本信息
+            clientCompany: item.clientCompany || '',
+            name: item.name || '',
+            code: item.code || '',
             payCycle: item.payCycle || '',
-            buildType: item.warrantyType || '',
-            maintType: item.warrantyMethod || '',
-            maintArea: item.warrantyArea || '',
+            warrantyType: item.warrantyType || '',
+            warrantyMethod: item.warrantyMethod || '',
+            warrantyArea: item.warrantyArea || '',
             amount: item.amount || '',
-            dateStart: item.startDate || '',
-            dateEnd: item.endDate || '',
-            remind: item.autoNotice ? 1 : 0,
-            designOrg: item.designCompany || '',
-            debugOrg: item.debugCompany || '',
-            recordOrg: item.checkCompany || '',
-            remark: item.note || '',
+            startDate: item.startDate || '',
+            endDate: item.endDate || '',
+            autoNotice: item.autoNotice || false,
+            designCompany: item.designCompany || '',
+            debugCompany: item.debugCompany || '',
+            checkCompany: item.checkCompany || '',
+            note: item.note || '',
+            creditCode: item.creditCode || '',
+            // 建筑信息
             buildingList: (item.buildings || []).map(b => ({
               name: b.name,
               area: b.area,
@@ -120,6 +123,7 @@ export default {
               height: b.height,
               remark: b.remark || ''
             })),
+            // 维保内容
             checkedMaintList: item.maintainItems || [],
             // 项目信息
             projectList: item.project ? [{
@@ -138,6 +142,7 @@ export default {
           this.$message.error(res.message || '获取合同详情失败')
         }
       } catch (err) {
+        console.error('加载合同详情失败:', err)
         this.$message.error('网络请求失败')
       } finally {
         this.loading = false
@@ -158,7 +163,7 @@ export default {
     },
     async submitAll() {
       // 这里可以根据需要处理最终提交逻辑
-      this.$message.success('编辑完成！')
+      this.$message.success('查看完成！')
       this.$router.back()
     }
   }

@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import { getFaultRecords, deleteFaultRecord } from '@/api/faultRecord'
+
 export default {
   name: 'WorkOrderPage',
   data() {
@@ -94,21 +96,17 @@ export default {
         status: '',
         timeliness: ''
       },
-      tableData: [
-        {
-          projectName: '高坪汽车站',
-          reportTime: '2025-04-20 14:50:38',
-          source: '例行转故障',
-          reporter: '邱峰',
-          timeliness: '已逾期',
-          status: '已完成',
-          owner: '邱峰'
-        }
-      ],
+      tableData: [],
       filteredData: [],
       pagedData: [],
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      loading: false,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     }
   },
   watch: {
@@ -116,29 +114,60 @@ export default {
       this.updatePagedData()
     }
   },
-  created() {
-    this.filteredData = this.tableData
-    this.updatePagedData()
+  mounted() {
+    this.loadData()
+  },
+  activated() {
+    this.loadData()
   },
   methods: {
-    onSearch() {
-      // 这里只做演示过滤，你可以改成实际接口
-      this.filteredData = this.tableData.filter(item => {
-        return (!this.filters.projectName || item.projectName.includes(this.filters.projectName)) &&
-          (!this.filters.owner || item.owner.includes(this.filters.owner)) &&
-          (!this.filters.reporter || item.reporter.includes(this.filters.reporter)) &&
-          (!this.filters.source || item.source === this.filters.source) &&
-          (!this.filters.status || item.status === this.filters.status) &&
-          (!this.filters.timeliness || item.timeliness === this.filters.timeliness)
-      })
-      this.currentPage = 1
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        }
+        if (this.filters.projectName) params.projectName = this.filters.projectName
+        if (this.filters.owner) params.owner = this.filters.owner
+        if (this.filters.reporter) params.reporter = this.filters.reporter
+        if (this.filters.source) params.source = this.filters.source
+        if (this.filters.status) params.status = this.filters.status
+        if (this.filters.timeliness) params.timeliness = this.filters.timeliness
+
+        const res = await getFaultRecords(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          this.filteredData = this.tableData
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.tableData = []
+          this.filteredData = []
+          this.pagination.total = 0
+          this.$message.error(res.message || '获取数据失败')
+        }
+      } catch (e) {
+        this.tableData = []
+        this.filteredData = []
+        this.pagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
       this.updatePagedData()
+    },
+    onSearch() {
+      this.pagination.page = 1
+      this.loadData()
     },
     onReset() {
       this.filters = { projectName: '', owner: '', reporter: '', source: '', status: '', timeliness: '' }
-      this.filteredData = this.tableData
-      this.currentPage = 1
-      this.updatePagedData()
+      this.pagination.page = 1
+      this.loadData()
     },
     updatePagedData() {
       const start = (this.currentPage - 1) * this.pageSize
@@ -149,10 +178,9 @@ export default {
       this.updatePagedData()
     },
     viewDetail(row) {
-      // 跳转并携带工单id（这里假设 row 里有 orderId 或 id 字段）
       this.$router.push({
         name: 'FaultOrderDetail',
-        params: { id: row.taskId } // 或 row.id，看你的实际字段名
+        params: { id: row._id }
       })
     },
     viewFaultOrderReport(row) {
@@ -160,8 +188,19 @@ export default {
       const url = row.reportUrl || '/FaultOrderReports/高坪汽车站消防维保服务故障维修记录表668939350289752064.pdf'
       window.open(url, '_blank')
     },
-    onDelete(row) {
-      this.$message.warning('删除')
+    async onDelete(row) {
+      try {
+        await this.$confirm(`确定删除「${row.projectName}」的故障记录吗？`, '提示', { type: 'warning' })
+        const res = await deleteFaultRecord(row._id)
+        if (res.success) {
+          this.$message.success('删除成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '删除失败')
+        }
+      } catch (err) {
+        // 用户取消无需处理
+      }
     },
     onSetting() {
       this.$message.info('设置')

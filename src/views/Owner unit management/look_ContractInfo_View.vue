@@ -17,7 +17,7 @@
               <el-input :value="formData.name" disabled />
             </el-form-item>
             <el-form-item label="合同编号">
-              <el-input :value="formData.contractNo" disabled />
+              <el-input :value="formData.code" disabled />
             </el-form-item>
             <el-form-item label="付款周期">
               <el-select :value="formData.payCycle" style="width: 100%" disabled>
@@ -28,7 +28,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="维保建筑类型">
-              <el-select :value="formData.buildType" style="width: 100%" disabled>
+              <el-select :value="formData.warrantyType" style="width: 100%" disabled>
                 <el-option label="高层" value="高层" />
                 <el-option label="地下" value="地下" />
                 <el-option label="人员密集场所" value="人员密集场所" />
@@ -47,10 +47,10 @@
               </el-select>
             </el-form-item>
             <el-form-item label="设计单位">
-              <el-input :value="formData.designOrg" disabled />
+              <el-input :value="formData.designCompany" disabled />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input :value="formData.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" disabled />
+              <el-input :value="formData.note" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -58,13 +58,13 @@
               <el-input :value="formData.creditCode" disabled />
             </el-form-item>
             <el-form-item label="维保方式">
-              <el-select :value="formData.maintType" style="width: 100%" disabled>
+              <el-select :value="formData.warrantyMethod" style="width: 100%" disabled>
                 <el-option label="系统维保" value="系统维保" />
                 <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
-              <el-input-number :value="formData.maintArea" style="width: 130px" disabled />
+              <el-input-number :value="formData.warrantyArea" style="width: 130px" disabled />
               <span class="unit-text">㎡</span>
             </el-form-item>
             <el-form-item label="合同金额">
@@ -72,16 +72,16 @@
               <span class="unit-text">元</span>
             </el-form-item>
             <el-form-item label="收款提醒">
-              <el-radio-group :value="formData.remind" disabled>
+              <el-radio-group :value="formData.autoNotice ? 1 : 0" disabled>
                 <el-radio :label="1">开通</el-radio>
                 <el-radio :label="0">关闭</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="调试单位">
-              <el-input :value="formData.debugOrg" disabled />
+              <el-input :value="formData.debugCompany" disabled />
             </el-form-item>
             <el-form-item label="验收备案">
-              <el-input :value="formData.recordOrg" disabled />
+              <el-input :value="formData.checkCompany" disabled />
             </el-form-item>
             <el-form-item label="合同文件">
               <el-button size="mini" disabled>查看合同文件</el-button>

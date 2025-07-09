@@ -56,3 +56,21 @@ export function renewalContract(data) {
   })
 }
 
+// 审核合同 - 通过
+export function approveContract(id, data) {
+  return request({
+    url: `/contracts/${id}/approve`,
+    method: 'put',
+    data
+  })
+}
+
+// 审核合同 - 不通过
+export function rejectContract(id, data) {
+  return request({
+    url: `/contracts/${id}/reject`,
+    method: 'put',
+    data
+  })
+}
+

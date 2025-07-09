@@ -80,51 +80,138 @@
 </template>
 
 <script>
+import { getFaultRecord } from '@/api/faultRecord'
+
 export default {
   data() {
     return {
+      faultId: null,
+      loading: false,
       steps: [
-        { title: '已派发', time: '2025-04-20 14:50:38', person: '邱峰' },
-        { title: '已接单', time: '2025-04-20 14:52:02', person: '邱峰' },
-        { title: '已到达', time: '', person: '邱峰' },
-        { title: '完成', time: '2025-04-22 01:19:21', person: '邱峰' },
-        { title: '已评价', time: '2025-04-22 01:25:38', person: '王蕾' }
+        { title: '已派发', time: '', person: '' },
+        { title: '已接单', time: '', person: '' },
+        { title: '已到达', time: '', person: '' },
+        { title: '完成', time: '', person: '' },
+        { title: '已评价', time: '', person: '' }
       ],
       order: {
-        orderNo: '668939350289752064',
-        projectName: '高坪汽车站消防维保服务',
-        reportTime: '2025-04-20 14:50:38',
-        source: '例行转故障',
-        finishTime: '2025-04-21',
-        reportPerson: '邱峰 15228141726',
-        status: '已完成',
-        unitName: '高坪汽车站',
+        orderNo: '',
+        projectName: '',
+        reportTime: '',
+        source: '',
+        finishTime: '',
+        reportPerson: '',
+        status: '',
+        unitName: '',
         method: '系统维保',
-        taskName: '2025年4月任务',
-        rating: 4,
-        comment: 'good'
+        taskName: '',
+        rating: 0,
+        comment: ''
       },
       fault: {
-        system: '消防供配电设施',
-        project: '消防配电柜',
-        desc: '电源损坏',
-        testContent: '消防电源主电源、备用电源工作状态',
-        photos: [
-          require('@/assets/fault1.jpg'), // 换成你自己的图片路径
-          require('@/assets/fault2.jpg')
-        ]
+        system: '',
+        project: '',
+        desc: '',
+        testContent: '',
+        photos: []
       },
       handle: {
-        time: '2025-04-22 01:19:21',
-        person: '邱峰 15228141726',
+        time: '',
+        person: '',
         photo: '暂无',
-        overtime: '00天01小时19分钟',
-        desc: '暂无',
-        remark: '已线下沟通处理'
+        overtime: '',
+        desc: '',
+        remark: ''
       },
-      records: [
-        { assignTime: '2025-04-20 14:50:38', assignPerson: '邱峰', assignedTo: '邱峰', acceptPerson: '邱峰', acceptTime: '2025-04-20 14:52:02' }
+      records: []
+    }
+  },
+  mounted() {
+    this.faultId = this.$route.params.id
+    this.loadData()
+  },
+  methods: {
+    // 加载数据
+    async loadData() {
+      if (!this.faultId) {
+        this.$message.error('故障记录ID不存在')
+        return
+      }
+
+      this.loading = true
+      try {
+        const res = await getFaultRecord(this.faultId)
+        if (res.success) {
+          this.formatData(res.data)
+        } else {
+          this.$message.error(res.message || '获取故障详情失败')
+        }
+      } catch (e) {
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
+    },
+    // 格式化数据
+    formatData(data) {
+      // 格式化工单信息
+      this.order = {
+        orderNo: data._id,
+        projectName: data.task?.projectName || '',
+        reportTime: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '',
+        source: data.source || '人工上报',
+        finishTime: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '',
+        reportPerson: data.reporter || '',
+        status: data.resolved ? '已完成' : '未完成',
+        unitName: data.task?.project?.ownerCompany || '',
+        method: '系统维保',
+        taskName: data.task?.taskMonth ? `${data.task.taskMonth}任务` : '',
+        rating: 0,
+        comment: ''
+      }
+
+      // 格式化故障信息
+      this.fault = {
+        system: data.taskItem?.category || '',
+        project: data.taskItem?.device || '',
+        desc: data.description || '',
+        testContent: data.taskItem?.maintainContent || '',
+        photos: []
+      }
+
+      // 格式化处理信息
+      this.handle = {
+        time: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '',
+        person: data.resolvedBy || '',
+        photo: '暂无',
+        overtime: this.calculateOvertime(data.createdAt, data.resolvedAt),
+        desc: data.resolution || '',
+        remark: ''
+      }
+
+      // 构建步骤信息
+      this.buildSteps(data)
+    },
+    // 计算逾期时间
+    calculateOvertime(createdAt, resolvedAt) {
+      if (!createdAt || !resolvedAt) return ''
+      const created = new Date(createdAt)
+      const resolved = new Date(resolvedAt)
+      const diff = resolved - created
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      return `${days}天${hours}小时${minutes}分钟`
+    },
+    // 构建步骤信息
+    buildSteps(data) {
+      const steps = [
+        { title: '已派发', time: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '', person: data.reporter || '' },
+        { title: '已接单', time: '', person: '' },
+        { title: '已到达', time: '', person: '' },
+        { title: '完成', time: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '', person: data.resolvedBy || '' },
+        { title: '已评价', time: '', person: '' }
       ]
+      this.steps = steps
     }
   }
 }

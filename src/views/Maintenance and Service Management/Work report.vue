@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import { getMaintainTasks } from '@/api/maintainTask'
+
 export default {
   name: 'ReportDownloadPage',
   data() {
@@ -75,11 +77,17 @@ export default {
         type: '',
         dateRange: []
       },
-      tableData: [], // 表格数据
+      tableData: [],
       pagedData: [],
       selectedRows: [],
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      loading: false,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     }
   },
   watch: {
@@ -87,19 +95,54 @@ export default {
       this.updatePagedData()
     }
   },
-  created() {
-    this.updatePagedData()
+  mounted() {
+    this.loadData()
+  },
+  activated() {
+    this.loadData()
   },
   methods: {
-    onSearch() {
-      // 实际开发这里过滤或请求接口
-      this.currentPage = 1
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        }
+        if (this.filters.projectName) params.projectName = this.filters.projectName
+        if (this.filters.reporter) params.reporter = this.filters.reporter
+        if (this.filters.type) params.type = this.filters.type
+
+        const res = await getMaintainTasks(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.tableData = []
+          this.pagination.total = 0
+          this.$message.error(res.message || '获取数据失败')
+        }
+      } catch (e) {
+        this.tableData = []
+        this.pagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
       this.updatePagedData()
+    },
+    onSearch() {
+      this.pagination.page = 1
+      this.loadData()
     },
     onReset() {
       this.filters = { projectName: '', reporter: '', type: '', dateRange: [] }
-      this.currentPage = 1
-      this.updatePagedData()
+      this.pagination.page = 1
+      this.loadData()
     },
     updatePagedData() {
       const start = (this.currentPage - 1) * this.pageSize
@@ -116,7 +159,10 @@ export default {
       }
     },
     viewDetail(row) {
-      this.$message.info('查看详情')
+      this.$router.push({
+        name: 'TaskDetail',
+        params: { id: row._id }
+      })
     },
     onSetting() {
       this.$message.info('设置')

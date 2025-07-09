@@ -4,6 +4,9 @@
       <div class="section-title">合同关联项目信息</div>
       <div class="tips">
         <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
+        <div v-if="isOneTimeContract" style="color: #409EFF; margin-top: 8px;">
+          <i class="el-icon-info"></i> 一次性合同可以跳过项目信息，直接进入下一步
+        </div>
       </div>
       <!-- 基本信息只读 -->
       <el-form ref="form" :model="form" label-width="130px" class="single-form-row">
@@ -89,6 +92,11 @@ export default {
       editingIndex: -1
     }
   },
+  computed: {
+    isOneTimeContract() {
+      return this.formData && ['施工', '评估', '检测'].includes(this.formData.contractType)
+    }
+  },
   watch: {
     formData: {
       handler(newVal) {
@@ -139,7 +147,20 @@ export default {
       this.$emit('prev')
     },
     nextStep() {
-      this.$emit('update', { projectList: this.projectList })
+      // 如果是一次性合同且没有项目信息，创建一个默认项目
+      let projectList = this.projectList
+      if (this.isOneTimeContract && this.projectList.length === 0) {
+        projectList = [{
+          ownerName: this.form.entrustName,
+          name: this.formData.contractName || '一次性合同项目',
+          address: '',
+          area: '',
+          linkman: '',
+          phone: '',
+          index: 1
+        }]
+      }
+      this.$emit('update', { projectList: projectList })
       this.$emit('next')
     }
   }
