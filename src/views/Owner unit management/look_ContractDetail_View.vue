@@ -7,7 +7,7 @@
           <div class="icon-container">
             <i class="el-icon-document" />
           </div>
-          <span>新增合同信息</span>
+          <span>合同信息</span>
           <div class="step-number-container">
             <div class="step-number">1</div>
           </div>
@@ -17,7 +17,7 @@
           <div class="icon-container">
             <i class="el-icon-folder-opened" />
           </div>
-          <span>新增项目信息</span>
+          <span>项目信息</span>
           <div class="step-number-container">
             <div class="step-number">2</div>
           </div>
@@ -27,7 +27,7 @@
           <div class="icon-container">
             <i class="el-icon-user" />
           </div>
-          <span>配置维保人员</span>
+          <span>维保人员</span>
           <div class="step-number-container">
             <div class="step-number">3</div>
           </div>
@@ -35,20 +35,20 @@
       </div>
 
       <div class="step-content">
-        <AddNewContractInformation
+        <LookContractInfoView
           v-show="activeStep === 0"
           :data="formData"
           @next="handleNext"
           @update="updateFormData"
         />
-        <AddNewProjectInformation
+        <LookProjectInfoView
           v-show="activeStep === 1"
           :form-data="formData"
           @next="handleNext"
           @prev="handlePrev"
           @update="updateFormData"
         />
-        <AddNewDispatchStaff
+        <LookNewDispatchStaff
           v-show="activeStep === 2"
           :form-data="formData"
           @prev="handlePrev"
@@ -61,25 +61,88 @@
 </template>
 
 <script>
-import AddNewContractInformation from './add new contract information.vue'
-import AddNewProjectInformation from './add new project information.vue'
-import AddNewDispatchStaff from './addnewdispatchStaff.vue'
-import { createContract } from '@/api/contract'
+import LookContractInfoView from './look_ContractInfo_View.vue'
+import LookProjectInfoView from './look_ProjectInfo_View.vue'
+import LookNewDispatchStaff from './look_newdispatchStaff.vue'
+import { fetchProjectDetail } from '@/api/contract'
 
 export default {
-  name: 'AddContractPage',
+  name: 'LookContractDetailView',
   components: {
-    AddNewContractInformation,
-    AddNewProjectInformation,
-    AddNewDispatchStaff
+    LookContractInfoView,
+    LookProjectInfoView,
+    LookNewDispatchStaff
   },
   data() {
     return {
       activeStep: 0,
-      formData: {}
+      formData: {},
+      loading: false
     }
   },
+  created() {
+    this.loadContractDetails()
+  },
   methods: {
+    async loadContractDetails() {
+      const id = this.$route.query.id
+      if (!id) {
+        this.$message.error('未找到合同ID')
+        this.$router.back()
+        return
+      }
+      this.loading = true
+      try {
+        const res = await fetchProjectDetail(id)
+        if (res.success && res.data) {
+          const item = res.data
+          // 适配合同信息
+          const formData = {
+            entrustName: item.clientCompany || '',
+            contractName: item.name || '',
+            contractNo: item.code || '',
+            payCycle: item.payCycle || '',
+            buildType: item.warrantyType || '',
+            maintType: item.warrantyMethod || '',
+            maintArea: item.warrantyArea || '',
+            amount: item.amount || '',
+            dateStart: item.startDate || '',
+            dateEnd: item.endDate || '',
+            remind: item.autoNotice ? 1 : 0,
+            designOrg: item.designCompany || '',
+            debugOrg: item.debugCompany || '',
+            recordOrg: item.checkCompany || '',
+            remark: item.note || '',
+            buildingList: (item.buildings || []).map(b => ({
+              name: b.name,
+              area: b.area,
+              floor: b.floors || b.floor,
+              height: b.height,
+              remark: b.remark || ''
+            })),
+            checkedMaintList: item.maintainItems || [],
+            // 项目信息
+            projectList: item.project ? [{
+              ownerName: item.project.ownerCompany || '',
+              name: item.project.name || '',
+              address: item.project.address || '',
+              area: item.project.district || '',
+              linkman: item.project.contactPerson || '',
+              phone: item.project.contactPhone || ''
+            }] : [],
+            // 维保人员
+            dispatchStaffList: item.maintainPersons || []
+          }
+          this.formData = formData
+        } else {
+          this.$message.error(res.message || '获取合同详情失败')
+        }
+      } catch (err) {
+        this.$message.error('网络请求失败')
+      } finally {
+        this.loading = false
+      }
+    },
     handleNext() {
       if (this.activeStep < 2) {
         this.activeStep++
@@ -94,68 +157,9 @@ export default {
       this.formData = { ...this.formData, ...data }
     },
     async submitAll() {
-      try {
-        console.log('Final data to be submitted:', this.formData)
-
-        // 数据转换层，适配后端接口
-        const payload = {
-          // 合同信息
-          name: this.formData.contractName,
-          code: this.formData.contractNo,
-          clientCompany: this.formData.entrustName,
-          creditCode: this.formData.creditCode,
-          payCycle: this.formData.payCycle,
-          warrantyType: this.formData.buildType, // 注意字段名映射
-          warrantyMethod: this.formData.maintType,
-          warrantyArea: this.formData.maintArea,
-          amount: this.formData.amount,
-          startDate: this.formData.dateStart,
-          endDate: this.formData.dateEnd,
-          autoNotice: this.formData.remind,
-          designCompany: this.formData.designOrg,
-          debugCompany: this.formData.debugOrg,
-          checkCompany: this.formData.recordOrg,
-          note: this.formData.remark,
-          fileUrls: [], // 假设文件上传逻辑会填充这里
-
-          // 建筑信息
-          buildings: this.formData.buildingList,
-
-          // 维保项目 (提取ID)
-          maintainItems: this.formData.checkedMaintList ? this.formData.checkedMaintList.map(item => item.id).filter(id => id) : [],
-
-          // 项目信息 (取第一个项目作为主项目)
-          projectInfo: this.formData.projectList && this.formData.projectList.length > 0
-            ? {
-                name: this.formData.projectList[0].name,
-                companyname: this.formData.projectList[0].ownerName,
-                address: this.formData.projectList[0].address,
-                district: this.formData.projectList[0].area,
-                position: '', // 根据需要填充
-                ownerCompany: this.formData.projectList[0].ownerName,
-                contactPerson: this.formData.projectList[0].linkman,
-                contactPhone: this.formData.projectList[0].phone,
-                logoUrl: '',
-                entranceReportUrl: ''
-              }
-            : null,
-
-          // 维保人员
-          maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p) : []
-        }
-
-        console.log('Payload sent to backend:', payload)
-        
-        const res = await createContract(payload) // 使用转换后的 payload
-        if (res.success) {
-          this.$message.success('新增合同成功！')
-          this.$router.push({ name: 'UnitProjectManagement' }) // Redirect to the list page
-        } else {
-          this.$message.error(res.message || '提交失败，请检查填写内容')
-        }
-      } catch (err) {
-        this.$message.error('请求失败，请稍后重试')
-      }
+      // 这里可以根据需要处理最终提交逻辑
+      this.$message.success('编辑完成！')
+      this.$router.back()
     }
   }
 }
@@ -236,4 +240,4 @@ export default {
   background-color: #ccc;
   margin: 0 10px;
 }
-</style>
+</style> 

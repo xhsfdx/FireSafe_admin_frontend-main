@@ -28,14 +28,14 @@
       >
         <el-table-column type="selection" width="50" />
         <el-table-column prop="index" label="序号" width="70" align="center" />
-        <el-table-column prop="owner" label="业主单位名称" width="120" align="center" />
+        <el-table-column prop="ownerName" label="业主单位名称" width="120" align="center" />
         <el-table-column prop="projectName" label="项目名称" width="120" align="center" />
-        <el-table-column prop="techManager" label="维保技术负责人" align="center" />
-        <el-table-column prop="projManager" label="维保项目负责人" align="center" />
-        <el-table-column prop="worker" label="现场维保人员" align="center" />
+        <el-table-column prop="techLeader" label="维保技术负责人" align="center" />
+        <el-table-column prop="projectLeader" label="维保项目负责人" align="center" />
+        <el-table-column prop="onSiteStaff" label="现场维保人员" align="center" />
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
-            <el-link type="primary" style="font-size: 15px;">详情</el-link>
+            <el-button type="text" @click="handleConfig(scope.row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -45,33 +45,109 @@
         <el-button class="create-btn" type="primary" @click="finishCreate">完成创建</el-button>
       </div>
     </div>
+    <el-dialog
+      title="配置维保人员"
+      :visible.sync="showDialog"
+      width="700px"
+      @close="showDialog = false"
+      destroy-on-close
+    >
+      <DispatchStaff
+        :data="currentRow"
+        @submit="onDialogConfirm"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
 export default {
   name: 'RenewwalConfigureMaintenancePersonnel',
+  components: { DispatchStaff },
+  props: {
+    formData: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
       filter: { project: '' },
-      tableData: [
-        {
-          index: 1,
-          owner: '小学',
-          projectName: '1',
-          techManager: '邱峰',
-          projManager: '王蕾',
-          worker: '黎建军'
-        }
-      ]
+      tableData: [],
+      currentRow: null,
+      showDialog: false
     }
+  },
+  watch: {
+    formData: {
+      handler(newVal) {
+        if (newVal && newVal.projectList) {
+          if (newVal.dispatchStaffList && newVal.dispatchStaffList.length) {
+            this.tableData = JSON.parse(JSON.stringify(newVal.dispatchStaffList))
+          } else {
+            this.tableData = newVal.projectList.map((p, idx) => ({
+              index: idx + 1,
+              ownerName: p.ownerName || newVal.entrustName || '',
+              projectName: p.name,
+              techLeader: '',
+              projectLeader: '',
+              onSiteStaff: '',
+              maintainPersons: { technical: '', leader: '', maintainer: [] }
+            }))
+          }
+        }
+      },
+      immediate: true,
+      deep: true
+    }
+  },
+  created() {
+    console.log('Renewwal Configure maintenance personnel 组件已创建')
+    console.log('初始 formData:', this.formData)
+    console.log('初始 tableData:', this.tableData)
   },
   methods: {
     onSearch() {},
     onReset() { this.filter.project = '' },
     onOneClick() { this.$message.success('已一键配置（模拟）') },
     prevStep() { this.$emit('prev') },
-    finishCreate() { this.$emit('finish') }
+    handleConfig(row) {
+      this.currentRow = { ...row }
+      this.showDialog = true
+    },
+    onDialogConfirm(newData) {
+      const index = this.tableData.findIndex(item => item.projectName === this.currentRow.projectName)
+      if (index !== -1) {
+        const maintainPersons = {
+          technical: newData.maintainPersons.technical || '',
+          leader: newData.maintainPersons.leader || '',
+          maintainer: Array.isArray(newData.maintainPersons.maintainer) ? newData.maintainPersons.maintainer.filter(Boolean) : []
+        }
+        const updatedRow = {
+          ...this.tableData[index],
+          techLeader: maintainPersons.technical,
+          projectLeader: maintainPersons.leader,
+          onSiteStaff: (maintainPersons.maintainer || []).join('、'),
+          maintainPersons
+        }
+        this.$set(this.tableData, index, updatedRow)
+        this.$emit('update', { dispatchStaffList: this.tableData })
+      }
+      this.showDialog = false
+    },
+    finishCreate() {
+      const cleanTableData = this.tableData.map(row => ({
+        ...row,
+        maintainPersons: {
+          technical: row.maintainPersons?.technical || '',
+          leader: row.maintainPersons?.leader || '',
+          maintainer: Array.isArray(row.maintainPersons?.maintainer) ? row.maintainPersons.maintainer.filter(Boolean) : []
+        }
+      }))
+      this.$emit('update', { dispatchStaffList: cleanTableData })
+      this.$emit('submit', { dispatchStaffList: cleanTableData })
+    }
   }
 }
 </script>

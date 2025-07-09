@@ -165,13 +165,9 @@ export default {
           technical: this.selected.technical?.name || '',
           leader: this.selected.leader?.name || '',
           maintainer: this.selected.maintainer.map(p => p.name)
-        },
-        technical: this.selected.technical || null,
-        leader: this.selected.leader || null,
-        maintainer: this.selected.maintainer || []
+        }
       }
       console.log('弹窗保存返回:', result)
-      this.$emit('confirm', result)
       this.$emit('submit', result)
     }
   }
