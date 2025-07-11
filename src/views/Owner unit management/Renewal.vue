@@ -9,18 +9,18 @@
         <!-- 主卡片 -->
         <div class="step-card">
           <span class="step-title">{{ step.label }}</span>
-          <i :class="['step-icon', step.icon]"></i>
+          <i :class="['step-icon', step.icon]" />
           <!-- 右侧蓝角+数字 -->
-          <div class="step-corner" v-if="idx <= current">
+          <div v-if="idx <= current" class="step-corner">
             <span>{{ idx + 1 }}</span>
           </div>
-          <div class="step-corner grey" v-else>
+          <div v-else class="step-corner grey">
             <span>{{ idx + 1 }}</span>
           </div>
         </div>
         <!-- 箭头 -->
-        <div class="arrow-wrap" v-if="idx < steps.length - 1">
-          <svg width="92" height="6"><path d="M0 3h85l6-3v6z" fill="#b8d7f6"/></svg>
+        <div v-if="idx < steps.length - 1" class="arrow-wrap">
+          <svg width="92" height="6"><path d="M0 3h85l6-3v6z" fill="#b8d7f6" /></svg>
         </div>
       </div>
     </div>

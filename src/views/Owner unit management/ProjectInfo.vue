@@ -1,6 +1,6 @@
 <template>
   <div class="project-info-root">
-    <el-form :model="form" label-width="110px" :rules="rules" ref="projectForm" class="project-form">
+    <el-form ref="projectForm" :model="form" label-width="110px" :rules="rules" class="project-form">
       <!-- 上方两栏 -->
       <el-row :gutter="38">
         <el-col :span="12">
@@ -25,7 +25,7 @@
         <el-col :span="12" style="display: flex; flex-direction: column;">
           <el-form-item label="项目定位" required class="map-form-item" label-width="110px">
             <div class="map-block">
-              <div id="amapContainer" style="width:100%;height:320px;border-radius:8px;overflow:hidden"></div>
+              <div id="amapContainer" style="width:100%;height:320px;border-radius:8px;overflow:hidden" />
             </div>
           </el-form-item>
           <el-form-item label="项目区域" label-width="110px" required style="margin-bottom:0;">
@@ -48,7 +48,7 @@
           </el-form-item>
           <el-form-item label="项目/单位logo">
             <el-upload class="logo-uploader" action="#" :show-file-list="false">
-              <i class="el-icon-camera logo-upload-icon"></i>
+              <i class="el-icon-camera logo-upload-icon" />
               <div class="el-upload__text">上传图片</div>
             </el-upload>
           </el-form-item>
@@ -74,7 +74,7 @@ export default {
         owner: '小学',
         linkman: '我算了',
         phone: '17683231030',
-        lnglat: [106.115, 30.803], // 可存地图坐标
+        lnglat: [106.115, 30.803] // 可存地图坐标
       },
       rules: {
         name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
@@ -84,7 +84,7 @@ export default {
         phone: [{ required: true, message: '请输入电话', trigger: 'blur' }]
       },
       amap: null,
-      marker: null,
+      marker: null
     }
   },
   mounted() {
@@ -108,12 +108,12 @@ export default {
       this.amap = new window.AMap.Map('amapContainer', {
         resizeEnable: true,
         zoom: 15,
-        center: this.form.lnglat,
+        center: this.form.lnglat
       })
       this.marker = new window.AMap.Marker({
         position: this.form.lnglat,
         draggable: true,
-        cursor: "move"
+        cursor: 'move'
       })
       this.amap.add(this.marker)
 

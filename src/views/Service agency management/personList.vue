@@ -70,9 +70,6 @@ export default {
       page: 1
     }
   },
-  created() {
-    this.loadData()
-  },
   computed: {
     total() {
       return this.filteredList.length
@@ -85,6 +82,9 @@ export default {
       if (phone) result = result.filter(p => p.phone.includes(phone))
       return result
     }
+  },
+  created() {
+    this.loadData()
   },
   methods: {
     loadData() {

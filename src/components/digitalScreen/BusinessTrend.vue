@@ -1,109 +1,128 @@
 <template>
   <div class="business-trend">
-    <div ref="chart" style="width: 100%; height: 250px;" />
+    <div ref="chart" style="width: auto; height: 300px;" />
   </div>
 </template>
 
 <script>
 import echarts from 'echarts'
-import { color } from 'echarts/lib/export'
 
 export default {
   name: 'BusinessTrend',
+  data() {
+    return {
+      myChart: null,
+      baseData: [0, 3, 1, 0, 4, 4, 5],
+      pulseState: true,
+      timer: null
+    }
+  },
   mounted() {
     this.initChart()
+    this.startPulseAnimation()
+  },
+  beforeDestroy() {
+    if (this.timer) clearInterval(this.timer)
   },
   methods: {
     initChart() {
       const chartDom = this.$refs.chart
-      const myChart = echarts.init(chartDom)
+      this.myChart = echarts.init(chartDom)
 
       const option = {
-        // title: { text: '业务趋势', left: 'center' },rgba(0, 0, 0, 0.7)#00bcd4
+        backgroundColor: 'rgba(0, 20, 40, 0.3)', // 深色背景
         tooltip: {
           trigger: 'axis',
-          backgroundColor: 'black',
-          textStyle: { color: '#ffffff' }
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          textStyle: { color: '#00ffff', fontFamily: 'Orbitron' }
         },
         xAxis: {
           name: '月',
           type: 'category',
           data: ['0', '1', '2', '3', '4', '5', '6'],
-          boundaryGap: false
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#00ffff', width: 2 } },
+          axisLabel: { color: '#00ffff', fontFamily: 'Orbitron' },
+          splitLine: { show: false }
         },
         yAxis: {
           name: '个数',
           type: 'value',
-          splitLine: { show: false }
+          axisLine: { lineStyle: { color: '#00ffff', width: 2 } },
+          axisLabel: { color: '#00ffff', fontFamily: 'Orbitron' },
+          splitLine: { lineStyle: { color: 'rgba(0,255,255,0.1)' } }
         },
         series: [
           {
             name: '数据量',
-            type: 'line', // 折线图类型
+            type: 'line',
             smooth: true,
-            symbol: 'circle', // 数据点标记为圆形
-            symbolSize: 6, // 数据点大小为8px
+            symbol: 'circle',
+            symbolSize: 8,
             itemStyle: {
-              color: '#ffeb3b',
-              borderWidth: 2,
-              borderColor: '#00bcd4'
-            },
-            lineStyle: { // 线条样式
-              width: 3,
-              color: '#00bcd4',
-              shadowColor: 'rgba(0,188,212,0.5)',
+              color: '#00ffff',
+              borderColor: '#00ffff',
               shadowBlur: 10,
-              shadowOffsetY: 3
+              shadowColor: '#00ffff'
             },
-            areaStyle: { // 面积渐变效果
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: [
-                  { offset: 0, color: 'rgba(0, 188, 212, 0.7)' },
-                  { offset: 1, color: 'rgba(0, 188, 212, 0.3)' }
-                ]
-              }
+            lineStyle: {
+              width: 3,
+              color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                { offset: 0, color: '#00ffff' },
+                { offset: 1, color: '#00bcd4' }
+              ]),
+              shadowColor: 'rgba(0,255,255,0.5)',
+              shadowBlur: 15
             },
-            emphasis: { // 高亮样式
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(0,255,255,0.4)' },
+                { offset: 1, color: 'rgba(0,255,255,0)' }
+              ])
+            },
+            emphasis: {
               itemStyle: {
-                color: '#ffeb3b',
-                borderColor: '#ff9800'
+                color: '#ffffff',
+                borderColor: '#00ffff',
+                borderWidth: 2,
+                shadowBlur: 20,
+                shadowColor: '#00ffff'
               }
             },
-            data: [0, 3, 1, 0, 4, 4, 5]
-            // markPoint: {
-            //   data: [{
-            //     type: 'max',
-            //     name: '峰值',
-            //     symbolOffset: [0, -20] // 上移标记点
-            //   }],
-            //   symbolSize: 25,
-            //   label: {
-            //     color: '#333',
-            //     fontSize: 12,
-            //     backgroundColor: '#ffeb3b',
-            //     padding: [3, 5],
-            //     borderRadius: 4
-            //   }
-            // }
+            data: this.baseData
           }
         ]
       }
-      myChart.setOption(option)
+      this.myChart.setOption(option)
+    },
+    startPulseAnimation() {
+      this.timer = setInterval(() => {
+        // 1. 切换脉冲大小
+        this.pulseState = !this.pulseState
+        const pulseSize = this.pulseState ? 8 : 12
+
+        // 2. 更新数据点大小，保持线条不动
+        this.myChart.setOption({
+          series: [
+            {
+              data: this.baseData,
+              symbolSize: pulseSize // 通过 symbolSize 改变数据点大小
+            }
+          ]
+        })
+      }, 500) // 每0.5秒更新一次数据点大小
     }
   }
 }
-
 </script>
 
 <style scoped>
 .business-trend {
-  background: linear-gradient(to bottom, rgb(240, 248, 255),rgb(173, 216, 230));
-  width: 100%;
-  height: auto;
+  width: auto;
+  background: rgba(0, 20, 40, 0.3);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.2);
+  padding: 8px;
 }
 </style>

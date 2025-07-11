@@ -2,18 +2,18 @@
   <div class="left-panel">
     <div class="card">
       <!-- 業主單位总数区域 -->
-       <h3>业主单位状况</h3>
+      <h3 class="tech-title">业主单位状况</h3>
       <TotalOwer />
     </div>
 
     <div class="card">
-      <h3>任务统计</h3>
+      <h3 class="tech-title">任务统计</h3>
       <BusinessStats />
       <!-- <div id="task-ring" style="height: 180px;"></div> -->
     </div>
 
     <div class="card">
-      <h3>业务趋势</h3>
+      <h3 class="tech-title">业务趋势</h3>
       <BusinessTrend />
     </div>
   </div>
@@ -91,98 +91,44 @@ export default {
 
 .card {
   height: auto;
-  background: #003366;
+  background: rgba(0, 20, 40, 0.6);
   color: #fff;
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 8px;
   /* overflow: visible; */
 }
-.ower {
+/* .ower {
   padding: 20px;
   background: #c8d8ee;
-}
+} */
 
-.total-unit {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 30px;
-}
-
-.total-unit-icon {
-  font-size: 30px;
-  color: #5caaff;
-  background-color: green;
-  padding: 20px;
-  border-radius: 50%;
-  margin-left: 8px;
-}
-
-.total-unit-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: -10px;
-}
-
-.total-unit-info span {
-  font-size: 30px;
-  color: white;
-  font-weight: bold;
-  background-color: green;
-  padding: 10px 20px;
-  border-radius: 10px;
-}
-.total-unit-info .total-word {
-  font-size: 15px;
-  color: #fff;
-  margin-top: 30px;
-  white-space: nowrap;
-}
-
-.statistics {
-  display: flex;
-  /* grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); */
-  justify-content: space-around;
-  margin-bottom: -2px;
-}
-
-.statistics .item {
-  min-width: 0;
+.tech-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #00f7ff;
   text-align: center;
-  align-items: baseline;
-  /* background-color: #4e0404; */
+  text-shadow:
+    0 0 10px rgba(0, 247, 255, 0.5), 
+    0 0 20px rgba(0, 247, 255, 0.7), 
+    0 0 30px rgba(0, 247, 255, 0.9);
+  letter-spacing: 2px;
+  animation: techGlow 1.5s infinite alternate;
+  margin-bottom: 20px;
 }
 
-.statistics .item div:first-child {
-  font-size: 30px;
-  color: rgb(221, 11, 11);
-  margin-bottom: 5px;
-}
-
-.statistics .item div:last-child {
-  color:rgb(67, 60, 60);
-  margin-bottom: 5px;
-}
-
-@media (max-width: 768px) {
-  .left-panel {
-    width: 100%;
-    padding-right: 0;
+@keyframes techGlow {
+  0% {
+    text-shadow:
+      0 0 10px rgba(0, 247, 255, 0.5),
+      0 0 20px rgba(0, 247, 255, 0.7),
+      0 0 30px rgba(0, 247, 255, 0.9);
   }
-
-  .total-unit {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .statistics {
-    flex-direction: column;
-  }
-
-  .statistics .item {
-    width: 100%;
+  100% {
+    text-shadow:
+      0 0 20px rgba(0, 247, 255, 1), 
+      0 0 30px rgba(0, 247, 255, 1.2), 
+      0 0 40px rgba(0, 247, 255, 1.5);
   }
 }
 </style>

@@ -1,21 +1,21 @@
 <!-- 续签配置维保人员 -->
- <template>
+<template>
   <div class="renewal-maintain-staff">
     <!-- 顶部步骤栏插槽由父页面控制，这里只做内容区 -->
     <div class="main-card">
       <!-- 顶部操作栏 -->
       <div class="table-tools">
         <el-input
+          v-model="filter.project"
           class="search-input"
           placeholder="输入项目名称搜索"
-          v-model="filter.project"
           clearable
           size="medium"
         />
         <el-button type="primary" icon="el-icon-search" class="ml8" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" class="ml8" @click="onReset">重置</el-button>
         <el-button type="success" class="ml8" style="background:#3ccf4d;border:none;font-size:16px;" @click="onOneClick">
-          <i class="el-icon-link" style="margin-right:4px;"></i>一键配置勾选项目
+          <i class="el-icon-link" style="margin-right:4px;" />一键配置勾选项目
         </el-button>
       </div>
       <!-- 表格区域 -->
@@ -26,13 +26,13 @@
         style="margin-top:18px"
         height="420px"
       >
-        <el-table-column type="selection" width="50"/>
-        <el-table-column prop="index" label="序号" width="70" align="center"/>
-        <el-table-column prop="owner" label="业主单位名称" width="120" align="center"/>
-        <el-table-column prop="projectName" label="项目名称" width="120" align="center"/>
-        <el-table-column prop="techManager" label="维保技术负责人" align="center"/>
-        <el-table-column prop="projManager" label="维保项目负责人" align="center"/>
-        <el-table-column prop="worker" label="现场维保人员" align="center"/>
+        <el-table-column type="selection" width="50" />
+        <el-table-column prop="index" label="序号" width="70" align="center" />
+        <el-table-column prop="owner" label="业主单位名称" width="120" align="center" />
+        <el-table-column prop="projectName" label="项目名称" width="120" align="center" />
+        <el-table-column prop="techManager" label="维保技术负责人" align="center" />
+        <el-table-column prop="projManager" label="维保项目负责人" align="center" />
+        <el-table-column prop="worker" label="现场维保人员" align="center" />
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
             <el-link type="primary" style="font-size: 15px;">详情</el-link>
@@ -50,7 +50,7 @@
 
 <script>
 export default {
-  name: "RenewwalConfigureMaintenancePersonnel",
+  name: 'RenewwalConfigureMaintenancePersonnel',
   data() {
     return {
       filter: { project: '' },

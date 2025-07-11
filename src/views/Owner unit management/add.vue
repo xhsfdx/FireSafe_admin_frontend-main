@@ -9,23 +9,25 @@
       >
         <div :class="['step-bg', { 'highlight': idx === activeIndex }]">
           <div class="step-icon">
-            <img :src="step.icon" alt="" />
+            <img :src="step.icon" alt="">
           </div>
           <span>{{ step.label }}</span>
           <div class="step-number" :class="{ active: idx === activeIndex }">{{ idx + 1 }}</div>
         </div>
         <template v-if="idx < steps.length - 1">
-          <div class="step-arrow"></div>
+          <div class="step-arrow" />
         </template>
       </div>
     </div>
     <!-- 内容区（按步切换） -->
     <div class="step-content">
-      <component :is="steps[activeIndex].component"
-                 :form-data="formData"
-                 @next="handleNext"
-                 @prev="handlePrev"
-                 @update="updateFormData"
+      <component
+        :is="steps[activeIndex].component"
+        :form-data="formData"
+        @next="handleNext"
+        @prev="handlePrev"
+        @update="updateFormData"
+        @submit="handleSubmit"
       />
     </div>
   </div>
@@ -34,7 +36,9 @@
 <script>
 import AddNewContractInfo from './add new contract information.vue'
 import AddNewProjectInfo from './add new project information.vue'
-import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import DispatchStaff from './addnewdispatchStaff.vue'
+import { mapActions } from 'vuex'
+import { createContract } from '@/api/contract'
 
 export default {
   name: 'AddContractStep',
@@ -42,7 +46,7 @@ export default {
   data() {
     return {
       activeIndex: 0,
-      // 统一传递表单数据
+      // 统一数据中心
       formData: {},
       steps: [
         {
@@ -67,8 +71,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('contractSubmit', ['submitContract']),
+
     handleNext(payload) {
-      // payload 可选，提交校验，更新表单数据
       if (this.activeIndex < this.steps.length - 1) {
         this.activeIndex++
       }
@@ -80,6 +85,26 @@ export default {
     },
     updateFormData(data) {
       this.formData = { ...this.formData, ...data }
+    },
+    handleSubmit() {
+      // 2024-06-09 修正：合并所有子页面数据，优先使用projectForm中的projectName和ownerName，提交前校验
+      const payload = {
+        ...this.contractForm,
+        ...this.projectForm,
+        ...this.staffForm
+      }
+      if (!payload.projectName || !payload.ownerName) {
+        this.$message.error('请补全项目信息')
+        return
+      }
+      createContract(payload)
+        .then(() => {
+          this.$message.success('提交成功')
+          this.$router.push('/contract/list')
+        })
+        .catch(() => {
+          this.$message.error('提交失败')
+        })
     }
   }
 }

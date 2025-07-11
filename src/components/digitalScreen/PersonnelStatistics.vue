@@ -1,12 +1,11 @@
 <template>
   <div class="donut-wrapper" style="margin-top:-18px;">
-    <div ref="echartsDom" style="width: 329px;height: 300px;"/>
+    <div ref="echartsDom" style="width: 329px;height: 300px;" />
   </div>
 </template>
 
 <script>
 import echarts from 'echarts'
-import { color } from 'echarts/lib/export'
 
 export default {
   name: 'PersonStatistics',
@@ -17,52 +16,84 @@ export default {
     initChart() {
       const chart = echarts.init(this.$refs.echartsDom)
       const option = {
-        color: ['#ff9f7f', '#47e9cc', '#37c9cc'], // 按设计调整主体块的颜色
+        backgroundColor: 'rgba(0, 20, 40, 0.3)', // 深色背景
+        color: [
+          new echarts.graphic.RadialGradient(0.5, 0.5, 0.8, [
+            { offset: 0, color: '#00ffff' },
+            { offset: 1, color: '#008bff' }
+          ]),
+          new echarts.graphic.RadialGradient(0.5, 0.5, 0.8, [
+            { offset: 0, color: '#00d9ff' },
+            { offset: 1, color: '#007d99' }
+          ]),
+          new echarts.graphic.RadialGradient(0.5, 0.5, 0.8, [
+            { offset: 0, color: '#00ff90' },
+            { offset: 1, color: '#00c27a' }
+          ])
+        ],
         title: {
           text: '岗位占比',
           left: 'center',
           top: 20,
           textStyle: {
-            color: '#000',
-            fontSize: 18,
+            color: '#00ffff',
+            fontSize: 20,
             fontWeight: 'bold',
-            fontFamily: 'Microsoft YaHei'
+            fontFamily: 'Orbitron'
           }
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{b} : {c}人'
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderColor: '#00ffff',
+          borderWidth: 1,
+          textStyle: {
+            color: '#00ffff',
+            fontFamily: 'Orbitron'
+          },
+          formatter: '{b}<br/>{c}人 ({d}%)'
         },
         legend: {
           orient: 'horizontal',
-          bottom: 20,
-          itemWidth: 14,
-          itemHeight: 14,
+          bottom: 10,
           textStyle: {
-            color: '#000',
+            color: '#00ffff',
             fontSize: 14,
-            fontFamily: 'Microsoft YaHei'
-          }
+            fontFamily: 'Orbitron'
+          },
+          itemWidth: 14,
+          itemHeight: 14
         },
         series: [
           {
             name: '人员统计',
             type: 'pie',
-            radius: ['30%', '45%'],
+            radius: ['35%', '55%'],
+            avoidLabelOverlap: false,
             label: {
               show: true,
+              color: '#ffffff',
               fontSize: 14,
-              color: 'black',
-              fontFamily: 'Microsoft YaHei',
+              fontFamily: 'Orbitron',
               formatter: '{name|{b}}\n{value|{c}}人',
               rich: {
-                name: { color: 'black', fontSize: 14, fontFamily: 'Microsoft YaHei' },
-                value: { color: '#47e9cc', fontSize: 18, fontFamily: 'Microsoft YaHei' }
+                name: { color: '#00ffff', fontSize: 14 },
+                value: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' }
               }
             },
             labelLine: {
-              length: 10,
-              length2: 20
+              length: 15,
+              length2: 20,
+              lineStyle: {
+                color: '#00ffff'
+              }
+            },
+            emphasis: {
+              scale: true,
+              itemStyle: {
+                shadowBlur: 30,
+                shadowColor: '#00ffff'
+              }
             },
             data: [
               { value: 1, name: '项目负责人' },
@@ -76,7 +107,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style scoped>
@@ -84,8 +114,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(255, 255, 255);
+  background: rgba(0, 20, 40, 0.3);
   border-radius: 20px;
-  box-shadow: 0px 4px 10px #a5c9ff;
+  box-shadow: 0 0 30px rgba(0,255,255,0.6);
+  border: 1px solid rgba(0,255,255,0.2);
 }
 </style>
+

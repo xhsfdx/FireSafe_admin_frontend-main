@@ -1,14 +1,14 @@
 <template>
   <div class="person-card">
     <div class="top-section">
-      <img class="avatar" :src="require('@/assets/person.png')" alt="头像" >
+      <img class="avatar" :src="require('@/assets/person.png')" alt="头像">
       <div class="text-info">
         <div class="name">{{ person.name }}</div>
         <div class="phone">{{ person.phone }}</div>
         <div class="title">{{ person.title }}</div>
       </div>
     </div>
-    <div class="divider"></div>
+    <div class="divider" />
     <div class="action-links">
       <span @click="goTo('PersonInfo')">人员信息</span>
       <span @click="goTo('ServiceUnit')">服务单位</span>

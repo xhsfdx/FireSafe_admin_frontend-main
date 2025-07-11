@@ -31,7 +31,7 @@
                 default-expand-all
               />
             </el-tab-pane>
-            <el-tab-pane label="自建标准系统" name="custom"></el-tab-pane>
+            <el-tab-pane label="自建标准系统" name="custom" />
           </el-tabs>
         </el-col>
         <el-col :span="18">

@@ -31,60 +31,81 @@ export default {
     return {
       list: [
         { id: 1, name: '任慧媛', project: '项目有限责任公司', time: '16:12:43' },
-        { id: 2, name: '张晓蕾', project: '项目有限责任公司', time: '14:39:56' }
+        { id: 2, name: '张晓蕾', project: '项目有限责任公司', time: '14:39:56' },
+        { id: 3, name: '张三', project: '项目有限责任公司', time: '19:12:43' },
+        { id: 4, name: '李四', project: '项目有限责任公司', time: '21:39:56' }
       ]
     }
   }
 }
-
 </script>
 
 <style scoped>
+/* 背景+荧光边框 */
 .punch-wrapper {
   width: auto;
-  /* margin: 20px; */
   padding: 20px;
-  background: #edf7ff;
-  border-radius: 20px;
-  color: #003366;
-  font-size: 14px;
+  background: rgba(0, 20, 40, 0.3);
+  border-radius: 16px;
+  color: #00ffff;
+  font-size: 16px;
   font-weight: 500;
-  font-family: "Microsoft YaHei", sans-serif;
-  box-shadow: 0px 4px 10px #a5c9ff;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 30px rgba(0,255,255,0.6);
+  border: 1px solid rgba(0,255,255,0.3);
 }
 
+/* 标题发光 */
 .punch-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   margin-bottom: 15px;
-  color: #003366;
-  text-shadow: 1px 1px 2px #cce5ff;
+  color: #00ffff;
+  text-shadow: 0 0 6px #00ffff;
+  text-align: center;
 }
 
+/* 表格基础 */
 .punch-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
-  color: #003366;
+  font-size: 12px;
+  color: #00ffff;
 }
 
+/* 表头荧光背景 */
 .punch-table th {
-  background: #cce5ff;
+  background: rgba(0,255,255,0.1);
   padding: 10px;
   font-weight: bold;
-  color: #003366;
-  border-bottom: 1px solid #a5c9ff;
+  color: #00ffff;
+  border-bottom: 1px solid rgba(0,255,255,0.3);
+  text-shadow: 0 0 4px #00ffff;
 }
 
+/* 表格内容 */
 .punch-table td {
   padding: 10px;
-  border-bottom: 1px solid #cce5ff;
+  border-bottom: 1px solid rgba(0,255,255,0.1);
   text-align: center;
-  background: #edf7ff;
+  background: rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
 }
 
+/* 鼠标悬浮行 */
 .punch-table tbody tr:hover {
-  background: #cce5ff;
-  transition: all 0.3s ease;
+  background: rgba(0,255,255,0.1);
+  box-shadow: inset 0 0 10px rgba(0,255,255,0.3);
+  transform: scale(1.02);
+}
+
+/* 表格边框细线 */
+.punch-table th,
+.punch-table td {
+  border-right: 1px solid rgba(0,255,255,0.1);
+}
+.punch-table th:last-child,
+.punch-table td:last-child {
+  border-right: none;
 }
 </style>

@@ -1,5 +1,5 @@
 <!-- 续签项目信息 -->
- <template>
+<template>
   <div class="renewal-project-info">
     <!-- 内容区 -->
     <div class="project-info-card">
@@ -27,13 +27,13 @@
         <span class="section-tip">(提示：请完整填写当前合同下的所有关联项目信息。)</span>
       </div>
       <el-table :data="tableData" border class="data-table">
-        <el-table-column prop="index" label="序号" align="center" width="70"/>
-        <el-table-column prop="owner" label="业主单位名称" align="center" width="120"/>
-        <el-table-column prop="projectName" label="项目名称" align="center" width="120"/>
-        <el-table-column prop="projectAddr" label="项目地址" align="center"/>
-        <el-table-column prop="projectRegion" label="项目区域" align="center" width="140"/>
-        <el-table-column prop="contact" label="项目单位联系人" align="center" width="120"/>
-        <el-table-column prop="phone" label="联系人电话" align="center" width="130"/>
+        <el-table-column prop="index" label="序号" align="center" width="70" />
+        <el-table-column prop="owner" label="业主单位名称" align="center" width="120" />
+        <el-table-column prop="projectName" label="项目名称" align="center" width="120" />
+        <el-table-column prop="projectAddr" label="项目地址" align="center" />
+        <el-table-column prop="projectRegion" label="项目区域" align="center" width="140" />
+        <el-table-column prop="contact" label="项目单位联系人" align="center" width="120" />
+        <el-table-column prop="phone" label="联系人电话" align="center" width="130" />
         <el-table-column label="操作" align="center" width="110">
           <template slot-scope="scope">
             <el-link type="primary" style="margin-right:6px;">详情</el-link>
@@ -46,7 +46,7 @@
       </div>
       <!-- 底部按钮 -->
       <div class="bottom-btns">
-        <el-button @click="prevStep" class="prev-btn">上一步</el-button>
+        <el-button class="prev-btn" @click="prevStep">上一步</el-button>
         <el-button type="primary" class="next-btn" @click="nextStep">下一步</el-button>
       </div>
     </div>
@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: "RenewalProjectInformation",
+  name: 'RenewalProjectInformation',
   data() {
     return {
       form: {

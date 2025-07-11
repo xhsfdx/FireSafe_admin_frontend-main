@@ -6,7 +6,7 @@
         <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
       </div>
       <!-- 基本信息只读 -->
-      <el-form :model="form" ref="form" label-width="130px" class="single-form-row">
+      <el-form ref="form" :model="form" label-width="130px" class="single-form-row">
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="委托单位名称">
@@ -23,8 +23,8 @@
       <!-- 表格部分 -->
       <el-table :data="projectList" style="width:100%;margin-top:14px;" border :empty-text="' '">
         <el-table-column prop="index" label="序号" width="70" align="center" />
-        <el-table-column prop="ownerName" label="业主单位名称" align="center" />
         <el-table-column prop="name" label="项目名称" align="center" />
+        <el-table-column prop="ownerName" label="业主单位名称" align="center" />
         <el-table-column prop="address" label="项目地址" align="center" />
         <el-table-column prop="area" label="项目区域" align="center" />
         <el-table-column prop="linkman" label="项目单位联系人" align="center" />
@@ -37,8 +37,8 @@
         </el-table-column>
       </el-table>
       <!-- 空表格图片 -->
-      <div class="empty-table" v-if="!projectList.length">
-        <img src="@/assets/无数据.jpg" alt="暂无数据" />
+      <div v-if="!projectList.length" class="empty-table">
+        <img src="@/assets/无数据.jpg" alt="暂无数据">
         <div class="empty-desc">暂无数据</div>
       </div>
       <div style="text-align: center; margin: 30px 0 0 0;">
@@ -69,10 +69,10 @@
 </template>
 
 <script>
-import ProjectFormDialog from './ProjectFormDialog.vue' // 下面会给这个弹窗表单
+import ProjectFormDialog from './ProjectFormDialog.vue'
 
 export default {
-  name: "AddNewProjectInfo",
+  name: 'AddNewProjectInfo',
   components: { ProjectFormDialog },
   props: {
     formData: Object
@@ -93,6 +93,7 @@ export default {
     if (this.formData) {
       this.form.entrustName = this.formData.entrustName || ''
       this.form.creditCode = this.formData.creditCode || ''
+      this.projectList = this.formData.projectList || []
     }
   },
   methods: {
@@ -112,12 +113,16 @@ export default {
       })
     },
     saveProject(project) {
+      // 2024-06-09 修正：强制补充name和ownerName字段，防止后端校验失败
+      const safeProject = {
+        ...project,
+        name: project.name || '',
+        ownerName: project.ownerName || ''
+      }
       if (this.editingIndex > -1) {
-        // 编辑
-        this.$set(this.projectList, this.editingIndex, { ...project, index: this.editingIndex + 1 })
+        this.$set(this.projectList, this.editingIndex, { ...safeProject, index: this.editingIndex + 1 })
       } else {
-        // 新增
-        this.projectList.push({ ...project, index: this.projectList.length + 1 })
+        this.projectList.push({ ...safeProject, index: this.projectList.length + 1 })
       }
       this.projectDialogVisible = false
     },
@@ -129,6 +134,13 @@ export default {
       this.$emit('prev')
     },
     nextStep() {
+      // 2024-06-09 emit时带上projectName和ownerName字段，保证父页面能直接获取
+      const first = this.projectList[0] || {}
+      this.$emit('update', {
+        projectList: this.projectList,
+        projectName: first.name || '',
+        ownerName: first.ownerName || ''
+      })
       this.$emit('next')
     }
   }

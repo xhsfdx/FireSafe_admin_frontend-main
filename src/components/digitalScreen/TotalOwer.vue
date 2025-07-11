@@ -1,33 +1,30 @@
 <template>
-  <!-- <div style="font-size: 20px; text-align: left; margin-bottom: 10px;">业主单位概况</div> -->
   <div class="ower">
+    <div id="particles-js"></div>
     <div class="total-unit">
       <div class="total-unit-icon">
-        <i class="el-icon-user-solid" /><!-- 这可以换为你的 icon -->
+        <i class="el-icon-user-solid" />
       </div>
       <div class="total-unit-info">
         <span>{{ totalUnits }}</span>
-        <div class="total-word">家业主单位
-        </div>
+        <div class="total-word">家业主单位</div>
       </div>
     </div>
-    <!-- 统计区域 -->
     <div class="statistics">
-      <div class="item" style="background: radial-gradient(circle, #9fd163, #c5e9a4); margin-left: -10px;">
+      <div class="item sci-fi-card">
         <div>{{ todayChecked }}</div>
         <div>当日打卡数</div>
       </div>
-      <div class="item" style="background: radial-gradient(circle, #f3e5ff, #d9b3ff);">
+      <div class="item sci-fi-card">
         <div>{{ todayCompleted }}</div>
         <div>当日完成数</div>
       </div>
-      <div class="item" style="background: radial-gradient(circle, #fff9cc, #ffeb99); margin-right: -10px;">
+      <div class="item sci-fi-card">
         <div>{{ todayReviews }}</div>
         <div>当日评价数</div>
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -40,76 +37,149 @@ export default {
       todayCompleted: 3,
       todayReviews: 2
     }
+  },
+  mounted() {
+    this.initParticles()
+  },
+  methods: {
+    initParticles() {
+      if (typeof particlesJS === 'undefined') {
+        console.error('particles.js is not loaded!');
+        return;
+      }
+
+      particlesJS('particles-js', {
+        particles: {
+          number: {
+            value: 120, // 粒子数量
+            density: { enable: true, value_area: 800 }
+          },
+          color: { value: '#00ffff' }, // 粒子颜色
+          shape: {
+            type: 'circle',
+            stroke: { width: 0, color: '#000' }
+          },
+          opacity: {
+            value: 0.9,
+            random: false
+          },
+          size: {
+            value: 4,
+            random: true
+          },
+          line_linked: {
+            enable: false // 彻底关闭线条
+          },
+          move: {
+            enable: true,
+            speed: 1.5,
+            direction: 'none',
+            out_mode: 'out'
+          }
+        },
+        interactivity: {
+          events: {
+            onhover: { enable: true, mode: 'repulse' }, // 悬停时粒子分散
+            onclick: { enable: true, mode: 'push' } // 点击时生成粒子
+          },
+          modes: {
+            repulse: { distance: 100 },
+            push: { particles_nb: 4 }
+          }
+        },
+        retina_detect: true
+      });
+    }
+
   }
 }
 </script>
 
-<style>
+<style scoped>
 .ower {
   padding: 20px;
-  background: #c8d8ee;
+  background: rgba(0, 20, 40, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+}
+
+/* 粒子背景层 */
+#particles-js {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
 }
 
 .total-unit {
   display: flex;
   align-items: center;
   gap: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .total-unit-icon {
-  font-size: 30px;
-  color: #5caaff;
-  background-color: green;
-  padding: 20px;
+  font-size: 36px;
+  color: #00ffff;
+  background: rgba(0, 255, 255, 0.1);
+  padding: 25px;
   border-radius: 50%;
-  margin-left: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
 }
 
 .total-unit-info {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: -10px;
+  gap: 15px;
 }
 
 .total-unit-info span {
-  font-size: 30px;
-  color: white;
+  font-size: 48px;
+  color: #ffffff;
   font-weight: bold;
-  background-color: green;
-  padding: 10px 20px;
-  border-radius: 10px;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
+
 .total-unit-info .total-word {
-  font-size: 15px;
-  color: #fff;
-  margin-top: 30px;
+  font-size: 18px;
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff;
   white-space: nowrap;
 }
 
 .statistics {
   display: flex;
-  /* grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); */
-  justify-content: space-around;
-  margin-bottom: -2px;
+  justify-content: space-between;
 }
 
-.statistics .item {
-  min-width: 0;
+.sci-fi-card {
+  flex: 1;
+  margin: 0 10px;
+  padding: 20px -10px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 15px;
   text-align: center;
-  align-items: baseline;
-  /* background-color: #4e0404; */
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+  transition: transform 0.3s;
+}
+.sci-fi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
 }
 
-.statistics .item div:first-child {
-  font-size: 30px;
-  color: rgb(221, 11, 11);
-  margin-bottom: 5px;
+.sci-fi-card div:first-child {
+  font-size: 36px;
+  color: #00ffff;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ffff;
+  margin-bottom: 8px;
 }
 
-.statistics .item div:last-child {
-  color:rgb(67, 60, 60);
-  margin-bottom: 5px;
+.sci-fi-card div:last-child {
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 0 0 5px #00ffff;
+  margin-bottom: 10px;
 }
 </style>

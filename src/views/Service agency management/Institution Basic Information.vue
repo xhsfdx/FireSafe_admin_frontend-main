@@ -6,15 +6,15 @@
           <img :src="require('@/assets/comlogo.jpeg')" class="company-logo">
           <!-- 这里可以放置公司 Logo 或默认图标 -->
           <!-- <div class="image-placeholder"> -->
-            <!-- <i class="el-icon-picture-outline"></i> -->
-             <!-- 示例图标，根据需要替换 -->
-            <!-- <i class="el-icon-plus"></i> -->
+          <!-- <i class="el-icon-picture-outline"></i> -->
+          <!-- 示例图标，根据需要替换 -->
+          <!-- <i class="el-icon-plus"></i> -->
           <!-- </div> -->
         </div>
         <div class="company-info">
           <h2>四川不凡消防科技有限公司</h2>
           <div class="location">
-            <i class="el-icon-location"></i>
+            <i class="el-icon-location" />
             <span>四川省南充市顺庆区濛华南路二段115号法拉利广场3号楼1单元2层8号</span>
           </div>
         </div>
@@ -31,9 +31,9 @@
           <span class="value">{{ companyProfile }}</span>
         </div>
         <div class="item">
-          <span class="label"></span>
+          <span class="label" />
           <span class="value" style="margin-left: -90px;">
-            <i class="el-icon-mobile-phone"></i>
+            <i class="el-icon-mobile-phone" />
             {{ contactNumber }}
           </span>
         </div>
@@ -55,7 +55,7 @@
           <span class="label">企业法人:</span>
           <span class="value">{{ legalPerson }}</span>
         </div>
-         <div class="item">
+        <div class="item">
           <span class="label">法人电话:</span>
           <span class="value">{{ legalPersonPhone }}</span>
         </div>
@@ -66,7 +66,7 @@
           <span class="label">维保主管:</span>
           <span class="value">{{ maintenanceSupervisor }}</span>
         </div>
-         <div class="item">
+        <div class="item">
           <span class="label">主管电话:</span>
           <span class="value">{{ maintenanceSupervisorPhone }}</span>
         </div>
