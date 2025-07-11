@@ -72,29 +72,17 @@ export default {
   watch: {
     formData: {
       handler(newVal) {
-        if (newVal) {
-          // 如果是一次性合同且没有项目信息，创建一个默认项目
-          if (['施工', '评估', '检测'].includes(newVal.contractType) && (!newVal.projectList || newVal.projectList.length === 0)) {
-            this.tableData = [{
-              ownerName: newVal.entrustName || '',
-              projectName: newVal.contractName || '一次性合同项目',
+        if (newVal && newVal.projectList) {
+          if (newVal.dispatchStaffList && newVal.dispatchStaffList.length) {
+            this.tableData = JSON.parse(JSON.stringify(newVal.dispatchStaffList))
+          } else {
+            this.tableData = newVal.projectList.map(p => ({
+              ownerName: p.ownerName,
+              projectName: p.name,
               techLeader: '',
               projectLeader: '',
-              onSiteStaff: '',
-              isOneTimeContract: true
-            }]
-          } else if (newVal.projectList) {
-            if (newVal.dispatchStaffList && newVal.dispatchStaffList.length) {
-              this.tableData = JSON.parse(JSON.stringify(newVal.dispatchStaffList))
-            } else {
-              this.tableData = newVal.projectList.map(p => ({
-                ownerName: p.ownerName,
-                projectName: p.name,
-                techLeader: '',
-                projectLeader: '',
-                onSiteStaff: ''
-              }))
-            }
+              onSiteStaff: ''
+            }))
           }
         }
       },
@@ -174,4 +162,4 @@ export default {
   margin-top: 20px;
   text-align: center;
 }
-</style>
+</style> 

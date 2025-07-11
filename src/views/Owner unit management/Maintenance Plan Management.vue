@@ -1,3 +1,4 @@
+
 <template>
   <div class="plan-list-page">
     <!-- 顶部筛选栏 -->
@@ -139,13 +140,13 @@ export default {
     showPlan(row) {
       // 可传参：比如计划ID/项目名等，这里传 name
       this.$router.push({
-        name: 'PlanDetail', // 路由name要和router里配置的name一致
+        name: 'OwnerUnitPlanDetail', // 路由name要和router里配置的name一致
         query: { name: row.name }
       })
     },
     showTask(row) {
       this.$router.push({
-        name: 'TaskDetail',
+        name: 'OwnerUnitTaskDetail',
         query: { name: row.name }
       })
     },

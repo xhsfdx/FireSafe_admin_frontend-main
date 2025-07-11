@@ -1,199 +1,252 @@
 <template>
-  <div class="progress-navbar">
-    <!-- 步骤条 -->
-    <div class="steps-bar">
-      <div
-        v-for="(step, idx) in steps"
-        :key="step.name"
-        :class="['step-item', { active: idx === activeIndex }]"
-      >
-        <div :class="['step-bg', { 'highlight': idx === activeIndex }]">
-          <div class="step-icon">
-            <img :src="step.icon" alt="">
+  <div class="add-page-container">
+    <el-card class="box-card">
+      <!-- Custom Steps -->
+      <div class="custom-steps">
+        <div class="step-item" :class="{ 'active': activeStep === 0, 'completed': activeStep > 0 }">
+          <div class="icon-container">
+            <i class="el-icon-document" />
           </div>
-          <span>{{ step.label }}</span>
-          <div class="step-number" :class="{ active: idx === activeIndex }">{{ idx + 1 }}</div>
+          <span>新增合同信息</span>
+          <div class="step-number-container">
+            <div class="step-number">1</div>
+          </div>
         </div>
-        <template v-if="idx < steps.length - 1">
-          <div class="step-arrow" />
-        </template>
+        <div class="step-arrow" />
+        <div class="step-item" :class="{ 'active': activeStep === 1, 'completed': activeStep > 1 }">
+          <div class="icon-container">
+            <i class="el-icon-folder-opened" />
+          </div>
+          <span>新增项目信息</span>
+          <div class="step-number-container">
+            <div class="step-number">2</div>
+          </div>
+        </div>
+        <div class="step-arrow" />
+        <div class="step-item" :class="{ 'active': activeStep === 2 }">
+          <div class="icon-container">
+            <i class="el-icon-user" />
+          </div>
+          <span>配置维保人员</span>
+          <div class="step-number-container">
+            <div class="step-number">3</div>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- 内容区（按步切换） -->
-    <div class="step-content">
-      <component
-        :is="steps[activeIndex].component"
-        :form-data="formData"
-        @next="handleNext"
-        @prev="handlePrev"
-        @update="updateFormData"
-        @submit="handleSubmit"
-      />
-    </div>
+
+      <div class="step-content">
+        <AddNewContractInformation
+          v-show="activeStep === 0"
+          :data="formData"
+          @next="handleNext"
+          @update="updateFormData"
+        />
+        <AddNewProjectInformation
+          v-show="activeStep === 1"
+          :form-data="formData"
+          @next="handleNext"
+          @prev="handlePrev"
+          @update="updateFormData"
+        />
+        <AddNewDispatchStaff
+          v-show="activeStep === 2"
+          :form-data="formData"
+          @prev="handlePrev"
+          @submit="submitAll"
+          @update="updateFormData"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import AddNewContractInfo from './add new contract information.vue'
-import AddNewProjectInfo from './add new project information.vue'
-import DispatchStaff from './addnewdispatchStaff.vue'
-import { mapActions } from 'vuex'
+import AddNewContractInformation from './add new contract information.vue'
+import AddNewProjectInformation from './add new project information.vue'
+import AddNewDispatchStaff from './addnewdispatchStaff.vue'
 import { createContract } from '@/api/contract'
 
 export default {
-  name: 'AddContractStep',
-  components: { AddNewContractInfo, AddNewProjectInfo, DispatchStaff },
+  name: 'AddContractPage',
+  components: {
+    AddNewContractInformation,
+    AddNewProjectInformation,
+    AddNewDispatchStaff
+  },
   data() {
     return {
-      activeIndex: 0,
-      // 统一数据中心
-      formData: {},
-      steps: [
-        {
-          label: '新增合同信息',
-          name: 'contract',
-          icon: require('@/assets/contract-icon.png'),
-          component: 'AddNewContractInfo'
-        },
-        {
-          label: '新增项目信息',
-          name: 'project',
-          icon: require('@/assets/project-icon.png'),
-          component: 'AddNewProjectInfo'
-        },
-        {
-          label: '配置维保人员',
-          name: 'staff',
-          icon: require('@/assets/staff-icon.png'),
-          component: 'DispatchStaff'
-        }
-      ]
+      activeStep: 0,
+      formData: {}
     }
   },
   methods: {
-    ...mapActions('contractSubmit', ['submitContract']),
-
-    handleNext(payload) {
-      if (this.activeIndex < this.steps.length - 1) {
-        this.activeIndex++
+    handleNext() {
+      console.log('handleNext called, current activeStep:', this.activeStep)
+      if (this.activeStep < 2) {
+        this.activeStep++
+        console.log('activeStep increased to:', this.activeStep)
       }
     },
     handlePrev() {
-      if (this.activeIndex > 0) {
-        this.activeIndex--
+      if (this.activeStep > 0) {
+        this.activeStep--
       }
     },
     updateFormData(data) {
       this.formData = { ...this.formData, ...data }
     },
-    handleSubmit() {
-      // 2024-06-09 修正：合并所有子页面数据，优先使用projectForm中的projectName和ownerName，提交前校验
-      const payload = {
-        ...this.contractForm,
-        ...this.projectForm,
-        ...this.staffForm
+    async submitAll() {
+      try {
+        console.log('Final data to be submitted:', this.formData)
+
+        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType);
+        const payload = {
+          // 合同信息
+          name: this.formData.contractName,
+          code: this.formData.contractNo,
+          clientCompany: this.formData.entrustName,
+          creditCode: this.formData.creditCode,
+          payCycle: isOneTime ? undefined : this.formData.payCycle,
+          warrantyType: isOneTime ? undefined : this.formData.buildType,
+          warrantyMethod: isOneTime ? undefined : this.formData.maintType,
+          warrantyArea: this.formData.maintArea,
+          amount: this.formData.amount,
+          startDate: this.formData.dateStart,
+          endDate: this.formData.dateEnd,
+          autoNotice: this.formData.remind,
+          designOrg: this.formData.designOrg,
+          debugOrg: this.formData.debugOrg,
+          recordOrg: this.formData.recordOrg,
+          note: this.formData.remark,
+          fileUrls: [], // 假设文件上传逻辑会填充这里
+
+          // 建筑信息
+          buildings: this.formData.buildingList,
+
+          // 维保项目 (提取ID)
+          maintainItems: this.formData.checkedMaintList ? this.formData.checkedMaintList.map(item => item.id).filter(id => id) : [],
+
+          // 项目信息 (取第一个项目作为主项目)
+          projectInfo: this.formData.projectList && this.formData.projectList.length > 0
+            ? {
+                name: this.formData.projectList[0].name,
+                companyname: this.formData.projectList[0].ownerName,
+                address: this.formData.projectList[0].address,
+                district: this.formData.projectList[0].area,
+                position: '', // 根据需要填充
+                ownerCompany: this.formData.projectList[0].ownerName,
+                contactPerson: this.formData.projectList[0].linkman,
+                contactPhone: this.formData.projectList[0].phone,
+                logoUrl: '',
+                entranceReportUrl: ''
+              }
+            : (isOneTime ? {
+                name: this.formData.contractName || '一次性合同项目',
+                companyname: this.formData.entrustName,
+                address: '',
+                district: '',
+                position: '',
+                ownerCompany: this.formData.entrustName,
+                contactPerson: '',
+                contactPhone: '',
+                logoUrl: '',
+                entranceReportUrl: ''
+              } : null),
+
+          // 维保人员
+          maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p) : []
+        }
+
+        console.log('Payload sent to backend:', payload)
+        
+        const res = await createContract(payload) // 使用转换后的 payload
+        if (res.success) {
+          this.$message.success('新增合同成功！')
+          this.$router.push({ name: 'UnitProjectManagement' }) // Redirect to the list page
+        } else {
+          this.$message.error(res.message || '提交失败，请检查填写内容')
+        }
+      } catch (err) {
+        this.$message.error('请求失败，请稍后重试')
       }
-      if (!payload.projectName || !payload.ownerName) {
-        this.$message.error('请补全项目信息')
-        return
-      }
-      createContract(payload)
-        .then(() => {
-          this.$message.success('提交成功')
-          this.$router.push('/contract/list')
-        })
-        .catch(() => {
-          this.$message.error('提交失败')
-        })
     }
   }
 }
 </script>
 
 <style scoped>
-.progress-navbar {
-  background: #f8f9fb;
-  min-height: 100vh;
-  padding: 0 0 24px 0;
+.add-page-container {
+  padding: 18px;
+  background-color: #f0f2f5;
 }
-.steps-bar {
+.box-card {
+  border-radius: 10px;
+}
+.step-content {
+  margin-top: 40px;
+}
+.custom-steps {
   display: flex;
+  justify-content: space-around;
   align-items: center;
-  justify-content: center;
-  margin: 0 0 24px 0;
-  min-height: 92px;
+  margin-bottom: 20px;
 }
 .step-item {
   display: flex;
   align-items: center;
-}
-.step-bg {
-  background: #fff;
-  border-radius: 14px 14px 0 14px;
-  box-shadow: 0 4px 16px #e0ebff3b;
-  padding: 18px 54px 18px 28px;
-  min-width: 220px;
+  padding: 15px 30px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  color: #999;
   position: relative;
+  overflow: hidden;
+  flex: 1;
+  justify-content: center;
+}
+.step-item.active {
+  background-color: #eaf3ff;
+  border-color: #409eff;
+  color: #333;
+  font-weight: bold;
+}
+.step-item.completed {
+  background-color: #f0f9eb;
+  border-color: #67c23a;
+  color: #333;
+}
+.icon-container {
+  font-size: 24px;
+  margin-right: 15px;
+}
+.step-number-container {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 40px;
   display: flex;
   align-items: center;
-  transition: background 0.2s;
-}
-.step-bg.highlight {
-  background: linear-gradient(90deg, #e4f0fe 0%, #d7e8fd 100%);
-  box-shadow: 0 4px 24px #7db3f533;
-}
-.step-icon {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
-}
-.step-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.step-bg span {
-  font-size: 19px;
-  color: #222;
-  font-weight: 500;
+  justify-content: center;
 }
 .step-number {
-  position: absolute;
-  right: 12px;
-  top: 14px;
-  font-size: 24px;
-  font-weight: bold;
-  color: #2196f3;
-  opacity: 0.18;
-  z-index: 2;
+  background-color: #409eff;
+  color: white;
+  width: 30px;
+  height: 100%;
+  clip-path: polygon(25% 0%, 100% 0, 100% 100%, 25% 100%, 0% 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }
-.step-bg.highlight .step-number {
-  color: #1e72d8;
-  opacity: 1;
-  background: #1e72d8;
-  color: #fff;
-  border-radius: 7px;
-  padding: 3px 14px;
-  font-size: 20px;
-  position: absolute;
-  right: 15px;
-  top: 10px;
+.step-item.completed .step-number {
+  background-color: #67c23a;
 }
 .step-arrow {
-  width: 64px;
-  height: 6px;
-  border-bottom: 3px solid #e2eaf4;
-  margin: 0 8px;
-  border-radius: 2px;
-  background: transparent;
-  align-self: flex-end;
-}
-.step-content {
-  background: #fff;
-  margin-top: 18px;
-  border-radius: 12px;
-  min-height: 680px;
-  box-shadow: 0 4px 16px #e0ebff3b;
-  padding: 0 0 24px 0;
+  width: 20px;
+  height: 2px;
+  background-color: #ccc;
+  margin: 0 10px;
 }
 </style>

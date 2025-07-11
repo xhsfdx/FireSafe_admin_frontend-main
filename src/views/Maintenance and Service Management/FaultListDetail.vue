@@ -30,24 +30,63 @@
 </template>
 
 <script>
+import { getFaultRecords } from '@/api/faultRecord'
+
 export default {
   name: 'FaultListDetailPage',
   data() {
     return {
       // 为空数组即“暂无数据”效果
-      tableData: [
-        // {
-        //   reportTime: '2025-06-01 10:05',
-        //   system: '火灾报警系统',
-        //   project: '1号楼',
-        //   reporter: '张三'
-        // }
-      ]
+      taskId: null,
+      tableData: [],
+      loading: false,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     }
   },
+  mounted() {
+    this.taskId = this.$route.query.taskId
+    this.loadData()
+  },
   methods: {
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit,
+          taskId: this.taskId
+        }
+
+        const res = await getFaultRecords(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.tableData = []
+          this.pagination.total = 0
+          this.$message.error(res.message || '获取数据失败')
+        }
+      } catch (e) {
+        this.tableData = []
+        this.pagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
+    },
     viewDetail(row) {
-      this.$message.info('这里可跳转详情页')
+      this.$router.push({
+        name: 'FaultOrderDetail',
+        params: { id: row._id }
+      })
     },
     onSetting() {
       this.$message.info('设置')

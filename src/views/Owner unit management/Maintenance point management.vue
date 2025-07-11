@@ -40,9 +40,10 @@
       <el-table-column prop="status" label="服务状态" align="center" />
       <el-table-column prop="maintType" label="维保方式" align="center" />
       <el-table-column prop="pointCount" label="点位数量" align="center" />
-      <el-table-column label="操作" width="120" align="center">
+      <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
           <el-link type="primary" @click="viewDetail(scope.row)">详情</el-link>
+          <el-link type="primary" style="margin-left: 12px" @click="addPoint(scope.row)">添加点位</el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -51,7 +52,7 @@
       <img src="@/assets/无数据.jpg" alt="暂无">
       <div class="empty-desc">暂无数据</div>
     </div>
-    <!-- 右下角设置按钮（示意） -->
+    <!-- 右下角设置按钮 -->
     <el-button class="setting-btn" type="primary" icon="el-icon-setting" circle />
   </div>
 </template>
@@ -66,7 +67,12 @@ export default {
         entrust: '',
         status: ''
       },
-      allData: [],
+      allData: [
+        { name: '整改', entrust: 'Zhang Defen Space', status: '服务中', maintType: '点位维保', pointCount: 2 },
+        { name: '车站', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 2 },
+        { name: '大大', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 1 },
+        { name: '洗', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 2 },
+      ],
       tableData: []
     }
   },
@@ -76,7 +82,6 @@ export default {
   },
   methods: {
     onSearch() {
-      // 实际开发这里应该是接口请求
       const { name, entrust, status } = this.filters
       this.tableData = this.allData.filter(item =>
         (!name || item.name.includes(name)) &&
@@ -89,7 +94,12 @@ export default {
       this.onSearch()
     },
     viewDetail(row) {
-      this.$message.info('详情功能开发中')
+      // 你可以换成 this.$router.push(...) 跳转详情页
+      this.$message.info(`查看项目：“${row.name}”`)
+    },
+    addPoint(row) {
+      // 你可以换成 this.$router.push(...) 跳转点位添加页
+      this.$message.success(`添加点位：“${row.name}”`)
     }
   }
 }

@@ -58,6 +58,8 @@
 </template>
 
 <script>
+import MapDialog from './MapDialog.vue'
+
 export default {
   name: 'ProjectFormDialog',
   props: {
@@ -65,6 +67,7 @@ export default {
   },
   data() {
     return {
+      mapDialogVisible: false,
       form: {
         name: '',
         address: '',
@@ -174,6 +177,23 @@ export default {
 </script>
 
 <style scoped>
+.map-preview {
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  height:180px;
+  margin-bottom:12px;
+  overflow:hidden;
+}
+.map-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 14px;
+  background-color: #f5f7fa;
+}
+
 .upload-tips {
   font-size: 13px;
   color: #888;

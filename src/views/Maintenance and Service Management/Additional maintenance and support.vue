@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { getFaultRecords } from '@/api/faultRecord'
+
 export default {
   name: 'WorkReportListPage',
   data() {
@@ -62,21 +64,69 @@ export default {
         status: '',
         timeliness: ''
       },
-      tableData: [] // 没有数据时展示暂无数据
+      tableData: [],
+      loading: false,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     }
   },
+  mounted() {
+    this.loadData()
+  },
+  activated() {
+    this.loadData()
+  },
   methods: {
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        }
+        if (this.filters.projectName) params.projectName = this.filters.projectName
+        if (this.filters.owner) params.owner = this.filters.owner
+        if (this.filters.status) params.status = this.filters.status
+        if (this.filters.timeliness) params.timeliness = this.filters.timeliness
+
+        const res = await getFaultRecords(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.tableData = []
+          this.pagination.total = 0
+          this.$message.error(res.message || '获取数据失败')
+        }
+      } catch (e) {
+        this.tableData = []
+        this.pagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.loading = false
+    },
     onSearch() {
-      // 实际项目应接接口
-      this.$message.info('演示：没有数据')
-      this.tableData = []
+      this.pagination.page = 1
+      this.loadData()
     },
     onReset() {
       this.filters = { projectName: '', owner: '', status: '', timeliness: '' }
-      this.tableData = []
+      this.pagination.page = 1
+      this.loadData()
     },
     viewDetail(row) {
-      this.$message.info('详情')
+      this.$router.push({
+        name: 'FaultOrderDetail',
+        params: { id: row._id }
+      })
     },
     onSetting() {
       this.$message.info('设置')

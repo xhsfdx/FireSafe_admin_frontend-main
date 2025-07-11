@@ -1,4 +1,3 @@
-<!-- 续签项目信息 -->
 <template>
   <div class="project-info-root">
     <div class="form-card">
@@ -73,17 +72,10 @@
 import ProjectFormDialog from './ProjectFormDialog.vue'
 
 export default {
-  name: 'RenewalProjectInfo',
+  name: 'LookProjectInfoView',
   components: { ProjectFormDialog },
   props: {
-    formData: {
-      type: Object,
-      default: () => ({})
-    },
-    projectIds: {
-      type: Array,
-      default: () => []
-    }
+    formData: Object
   },
   data() {
     return {
@@ -97,26 +89,13 @@ export default {
       editingIndex: -1
     }
   },
-  created() {
-    if (this.projectIds && this.projectIds.length) {
-      this.fetchProjects(this.projectIds)
-    }
-  },
   watch: {
     formData: {
-      handler(newData) {
-        if (!newData || !Object.keys(newData).length) return;
-
-        console.log('项目信息页接收数据:', newData);
-
-        this.form.entrustName = newData.entrustName || '';
-        this.form.creditCode = newData.creditCode || '';
-
-        if (newData.projectList && newData.projectList.length > 0) {
-          this.projectList = JSON.parse(JSON.stringify(newData.projectList));
-          this.projectList.forEach((project, index) => {
-            project.index = index + 1;
-          });
+      handler(newVal) {
+        if (newVal) {
+          this.form.entrustName = newVal.entrustName || ''
+          this.form.creditCode = newVal.creditCode || ''
+          this.projectList = newVal.projectList || []
         }
       },
       immediate: true,
@@ -124,12 +103,6 @@ export default {
     }
   },
   methods: {
-    async fetchProjects(ids) {
-      // 伪代码：实际请替换为你的API调用
-      if (!this.$api || !this.$api.getProjectDetail) return;
-      const projects = await Promise.all(ids.map(id => this.$api.getProjectDetail(id)))
-      this.projectList = projects.map(res => res.data)
-    },
     addProject() {
       this.currentProject = null
       this.editingIndex = -1
@@ -146,10 +119,14 @@ export default {
       })
     },
     saveProject(project) {
+      const projectWithOwner = {
+        ...project,
+        ownerName: this.form.entrustName
+      }
       if (this.editingIndex > -1) {
-        this.$set(this.projectList, this.editingIndex, { ...project, index: this.editingIndex + 1 })
+        this.$set(this.projectList, this.editingIndex, { ...projectWithOwner, index: this.editingIndex + 1 })
       } else {
-        this.projectList.push({ ...project, index: this.projectList.length + 1 })
+        this.projectList.push({ ...projectWithOwner, index: this.projectList.length + 1 })
       }
       this.projectDialogVisible = false
     },
@@ -162,9 +139,7 @@ export default {
       this.$emit('prev')
     },
     nextStep() {
-      const updateData = { projectList: this.projectList }
-      console.log('项目信息页面 nextStep 传递数据:', updateData)
-      this.$emit('update', updateData)
+      this.$emit('update', { projectList: this.projectList })
       this.$emit('next')
     }
   }
@@ -179,4 +154,4 @@ export default {
 .empty-table { text-align:center; margin:42px 0;}
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
-</style>
+</style> 

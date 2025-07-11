@@ -11,7 +11,8 @@
           :key="index"
           :class="{ active: activeTab === item }"
           @click="activeTab = item"
-        >
+        
+      >
           {{ item }}
         </span>
       </div>

@@ -73,6 +73,61 @@
         </div>
       </div>
     </div>
+
+    <!-- <div class="data-card">
+        <div class="icon-circle">
+          <i class="el-icon-document" />
+        </div>
+        <div class="card-content">
+          <div class="card-title">例行维保
+            <div class="numbers">
+              <span class="number">{{ routineMaintenance.currentMonthCompleted }}</span>
+              <span class="label">(本月未完成)</span>
+            </div>
+            <div class="numbers">
+            <span class="number overdue">{{ routineMaintenance.lastMonthOverdue }}</span>
+            <span class="label">(上月逾期数)</span>
+          </div>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- <div class="data-card">
+         <div class="icon-circle">
+          <i class="el-icon-setting"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-title">故障工单</div>
+           <div class="numbers">
+            <span class="number">{{ faultWorkOrder.currentMonthCompleted }}</span>
+            <span class="label">(当前未完成)</span>
+          </div>
+          <div class="numbers">
+            <span class="number overdue">{{ faultWorkOrder.overdue }}</span>
+            <span class="label">(逾期未完成)</span>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- <div class="data-card">
+        <div class="icon-circle">
+          <i class="el-icon-lock"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-title">附加维保</div>
+           <div class="numbers">
+            <span class="number">{{ additionalMaintenance.currentMonthCompleted }}</span>
+            <span class="label">(当前未完成)</span>
+          </div>
+           <div class="numbers">
+            <span class="number overdue">{{ additionalMaintenance.overdue }}</span>
+            <span class="label">(逾期未完成)</span>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- 您可以根据需要添加更多数据卡片 -->
+  </div>
     <!-- 您可以根据需要添加更多数据卡片 -->
   </div>
 </template>

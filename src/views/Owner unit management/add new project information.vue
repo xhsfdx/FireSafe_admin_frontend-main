@@ -4,6 +4,9 @@
       <div class="section-title">合同关联项目信息</div>
       <div class="tips">
         <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
+        <div v-if="isOneTimeContract" style="color: #409EFF; margin-top: 8px;">
+          <i class="el-icon-info"></i> 一次性合同可以跳过项目信息，直接进入下一步
+        </div>
       </div>
       <!-- 基本信息只读 -->
       <el-form ref="form" :model="form" label-width="130px" class="single-form-row">
@@ -89,11 +92,22 @@ export default {
       editingIndex: -1
     }
   },
-  mounted() {
-    if (this.formData) {
-      this.form.entrustName = this.formData.entrustName || ''
-      this.form.creditCode = this.formData.creditCode || ''
-      this.projectList = this.formData.projectList || []
+  computed: {
+    isOneTimeContract() {
+      return this.formData && ['施工', '评估', '检测'].includes(this.formData.contractType)
+    }
+  },
+  watch: {
+    formData: {
+      handler(newVal) {
+        if (newVal) {
+          this.form.entrustName = newVal.entrustName || ''
+          this.form.creditCode = newVal.creditCode || ''
+          this.projectList = newVal.projectList || []
+        }
+      },
+      immediate: true,
+      deep: true
     }
   },
   methods: {
@@ -113,16 +127,14 @@ export default {
       })
     },
     saveProject(project) {
-      // 2024-06-09 修正：强制补充name和ownerName字段，防止后端校验失败
-      const safeProject = {
+      const projectWithOwner = {
         ...project,
-        name: project.name || '',
-        ownerName: project.ownerName || ''
+        ownerName: this.form.entrustName
       }
       if (this.editingIndex > -1) {
-        this.$set(this.projectList, this.editingIndex, { ...safeProject, index: this.editingIndex + 1 })
+        this.$set(this.projectList, this.editingIndex, { ...projectWithOwner, index: this.editingIndex + 1 })
       } else {
-        this.projectList.push({ ...safeProject, index: this.projectList.length + 1 })
+        this.projectList.push({ ...projectWithOwner, index: this.projectList.length + 1 })
       }
       this.projectDialogVisible = false
     },
@@ -131,16 +143,24 @@ export default {
       this.editingIndex = -1
     },
     prevStep() {
+      this.$emit('update', { projectList: this.projectList })
       this.$emit('prev')
     },
     nextStep() {
-      // 2024-06-09 emit时带上projectName和ownerName字段，保证父页面能直接获取
-      const first = this.projectList[0] || {}
-      this.$emit('update', {
-        projectList: this.projectList,
-        projectName: first.name || '',
-        ownerName: first.ownerName || ''
-      })
+      // 如果是一次性合同且没有项目信息，创建一个默认项目
+      let projectList = this.projectList
+      if (this.isOneTimeContract && this.projectList.length === 0) {
+        projectList = [{
+          ownerName: this.form.entrustName,
+          name: this.formData.contractName || '一次性合同项目',
+          address: '',
+          area: '',
+          linkman: '',
+          phone: '',
+          index: 1
+        }]
+      }
+      this.$emit('update', { projectList: projectList })
       this.$emit('next')
     }
   }
@@ -156,3 +176,5 @@ export default {
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
 </style>
+
+
