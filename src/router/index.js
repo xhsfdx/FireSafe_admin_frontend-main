@@ -116,6 +116,71 @@ export const constantRoutes = [
         meta: { title: 'Profile', icon: 'user', noCache: true }
       }
     ]
+  },
+  {
+    path: '/test-dispatch-staff',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/test-dispatch-staff'),
+        name: 'TestDispatchStaff',
+        meta: { title: '测试维保人员配置', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/test-contract-flow',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/test-contract-flow'),
+        name: 'TestContractFlow',
+        meta: { title: '测试合同创建流程', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/test-maintenance-staff',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/test-maintenance-staff'),
+        name: 'TestMaintenanceStaff',
+        meta: { title: '维保人员配置测试', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/test-maintenance-flow',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/test-maintenance-flow'),
+        name: 'TestMaintenanceFlow',
+        meta: { title: '维保人员数据流测试', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/test-dispatch-staff',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/test-dispatch-staff'),
+        name: 'TestDispatchStaff',
+        meta: { title: 'DispatchStaff组件测试', noCache: true }
+      }
+    ]
   }
 ]
 

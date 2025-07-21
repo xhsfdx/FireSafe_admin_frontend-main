@@ -91,54 +91,96 @@ export default {
         this.$router.back()
         return
       }
+      console.log('开始加载合同详情，ID:', id)
       this.loading = true
       try {
         const res = await fetchProjectDetail(id)
+        console.log('API返回的原始数据:', res)
+        
         if (res.success && res.data) {
           const item = res.data
-          // 适配合同信息
+          console.log('后端返回的合同数据:', item)
+          
+          // 适配合同信息 - 传递完整的后端数据
           const formData = {
+            // 传递完整的后端数据
+            ...item,
             // 合同基本信息
-            clientCompany: item.clientCompany || '',
-            name: item.name || '',
-            code: item.code || '',
-            payCycle: item.payCycle || '',
-            warrantyType: item.warrantyType || '',
-            warrantyMethod: item.warrantyMethod || '',
-            warrantyArea: item.warrantyArea || '',
-            amount: item.amount || '',
-            startDate: item.startDate || '',
-            endDate: item.endDate || '',
-            autoNotice: item.autoNotice || false,
-            designCompany: item.designCompany || '',
-            debugCompany: item.debugCompany || '',
-            checkCompany: item.checkCompany || '',
-            note: item.note || '',
+            contractName: item.name || '',
+            contractNo: item.code || '',
+            entrustName: item.clientCompany || '',
             creditCode: item.creditCode || '',
-            // 建筑信息
+            contractType: item.contractType || '',
+            payCycle: item.payCycle || '',
+            buildType: item.warrantyType || '',
+            maintType: item.warrantyMethod || '',
+            maintArea: item.warrantyArea || '',
+            amount: item.amount || '',
+            dateStart: item.startDate || '',
+            dateEnd: item.endDate || '',
+            remind: item.autoNotice || false,
+            designOrg: item.designCompany || '',
+            debugOrg: item.debugCompany || '',
+            recordOrg: item.checkCompany || '',
+            remark: item.note || '',
+            // 建筑信息 - 从populate的buildings中提取数据
             buildingList: (item.buildings || []).map(b => ({
-              name: b.name,
-              area: b.area,
-              floor: b.floors || b.floor,
-              height: b.height,
+              name: b.name || '',
+              area: b.area || 0,
+              floor: b.floors || 0,
+              height: b.height || 0,
               remark: b.remark || ''
             })),
             // 维保内容
             checkedMaintList: item.maintainItems || [],
-            // 项目信息
+            // 项目信息 - 从populate的project中提取数据
             projectList: item.project ? [{
-              ownerName: item.project.ownerCompany || '',
+              ownerName: item.project.ownerCompany || item.project.companyname || '',
               name: item.project.name || '',
               address: item.project.address || '',
               area: item.project.district || '',
               linkman: item.project.contactPerson || '',
               phone: item.project.contactPhone || ''
             }] : [],
-            // 维保人员
-            dispatchStaffList: item.maintainPersons || []
+            // 维保人员 - 处理populate的数据
+            dispatchStaffList: [{
+              projectName: item.project?.name || item.name || '',
+              ownerName: item.project?.ownerCompany || item.project?.companyname || item.clientCompany || '',
+              maintainPersons: item.maintainPersons ? {
+                technical: item.maintainPersons.technical || null,
+                leader: item.maintainPersons.leader || null,
+                maintainers: Array.isArray(item.maintainPersons.maintainers) ? item.maintainPersons.maintainers : []
+              } : {
+                technical: null,
+                leader: null,
+                maintainers: []
+              }
+            }]
+          }
+          
+          console.log('处理后的formData:', formData)
+          console.log('维保人员数据:', formData.dispatchStaffList)
+          console.log('项目信息:', formData.projectList)
+          console.log('原始项目数据:', item.project)
+          console.log('原始合同数据:', item)
+          console.log('项目名称:', item.project?.name)
+          console.log('项目ID:', item.project?._id)
+          console.log('业主单位:', item.project?.ownerCompany)
+          console.log('委托单位:', item.clientCompany)
+          console.log('=== 维保人员数据详细分析 ===')
+          console.log('item.maintainPersons:', item.maintainPersons)
+          if (item.maintainPersons) {
+            console.log('technical:', item.maintainPersons.technical)
+            console.log('leader:', item.maintainPersons.leader)
+            console.log('maintainers:', item.maintainPersons.maintainers)
+            console.log('technical类型:', typeof item.maintainPersons.technical)
+            console.log('leader类型:', typeof item.maintainPersons.leader)
+            console.log('maintainers类型:', typeof item.maintainPersons.maintainers)
+            console.log('maintainers是否为数组:', Array.isArray(item.maintainPersons.maintainers))
           }
           this.formData = formData
         } else {
+          console.error('API返回失败:', res)
           this.$message.error(res.message || '获取合同详情失败')
         }
       } catch (err) {

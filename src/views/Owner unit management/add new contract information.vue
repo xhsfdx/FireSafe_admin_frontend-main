@@ -378,7 +378,7 @@ export default {
 
     handleContractTypeChange(value) {
       if (['施工', '评估', '检测'].includes(value)) {
-        // 一次性合同时，其他字段默认无
+        // 一次性合同时，清空维保相关字段
         this.form.payCycle = ''
         this.form.buildType = ''
         this.form.maintType = ''
@@ -426,20 +426,24 @@ export default {
         contractType: this.form.contractType,
         entrustName: this.form.entrustName,
         creditCode: this.form.creditCode,
-        payCycle: this.form.payCycle,
-        buildType: this.form.buildType,
-        maintType: this.form.maintType,
-        maintArea: this.form.maintArea,
-        amount: this.form.amount,
         dateStart: this.form.dateStart,
         dateEnd: this.form.dateEnd,
-        remind: this.form.remind,
+        amount: this.form.amount,
         designOrg: this.form.designOrg,
         debugOrg: this.form.debugOrg,
         recordOrg: this.form.recordOrg,
         remark: this.form.remark,
         buildingList: this.buildingList,
         checkedMaintList: this.checkedMaintList
+      }
+
+      // 只有项目维保合同才添加维保相关字段
+      if (!['施工', '评估', '检测'].includes(this.form.contractType)) {
+        data.payCycle = this.form.payCycle
+        data.buildType = this.form.buildType
+        data.maintType = this.form.maintType
+        data.maintArea = this.form.maintArea
+        data.remind = this.form.remind
       }
       console.log('合同信息页面准备发送数据:', data)
       this.$emit('update', data)

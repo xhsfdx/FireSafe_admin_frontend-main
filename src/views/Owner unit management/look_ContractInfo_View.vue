@@ -6,18 +6,18 @@
         <el-row :gutter="48">
           <el-col :span="12">
             <el-form-item label="委托单位名称">
-              <el-input :value="formData.clientCompany" disabled />
+              <el-input :value="formData.clientCompany || formData.entrustName" disabled />
             </el-form-item>
             <el-form-item label="合同时间">
-              <el-date-picker :value="formData.startDate" type="date" style="width: 140px" disabled />
+              <el-date-picker :value="formData.startDate || formData.dateStart" type="date" style="width: 140px" disabled />
               <span class="date-sep">-</span>
-              <el-date-picker :value="formData.endDate" type="date" style="width: 140px" disabled />
+              <el-date-picker :value="formData.endDate || formData.dateEnd" type="date" style="width: 140px" disabled />
             </el-form-item>
             <el-form-item label="合同名称">
-              <el-input :value="formData.name" disabled />
+              <el-input :value="formData.name || formData.contractName" disabled />
             </el-form-item>
             <el-form-item label="合同编号">
-              <el-input :value="formData.code" disabled />
+              <el-input :value="formData.code || formData.contractNo" disabled />
             </el-form-item>
             <el-form-item label="付款周期">
               <el-select :value="formData.payCycle" style="width: 100%" disabled>
@@ -28,7 +28,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="维保建筑类型">
-              <el-select :value="formData.warrantyType" style="width: 100%" disabled>
+              <el-select :value="formData.warrantyType || formData.buildType" style="width: 100%" disabled>
                 <el-option label="高层" value="高层" />
                 <el-option label="地下" value="地下" />
                 <el-option label="人员密集场所" value="人员密集场所" />
@@ -47,10 +47,10 @@
               </el-select>
             </el-form-item>
             <el-form-item label="设计单位">
-              <el-input :value="formData.designCompany" disabled />
+              <el-input :value="formData.designCompany || formData.designOrg" disabled />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input :value="formData.note" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" disabled />
+              <el-input :value="formData.note || formData.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -58,13 +58,13 @@
               <el-input :value="formData.creditCode" disabled />
             </el-form-item>
             <el-form-item label="维保方式">
-              <el-select :value="formData.warrantyMethod" style="width: 100%" disabled>
+              <el-select :value="formData.warrantyMethod || formData.maintType" style="width: 100%" disabled>
                 <el-option label="系统维保" value="系统维保" />
                 <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
-              <el-input-number :value="formData.warrantyArea" style="width: 130px" disabled />
+              <el-input-number :value="formData.warrantyArea || formData.maintArea" style="width: 130px" disabled />
               <span class="unit-text">㎡</span>
             </el-form-item>
             <el-form-item label="合同金额">
@@ -72,16 +72,16 @@
               <span class="unit-text">元</span>
             </el-form-item>
             <el-form-item label="收款提醒">
-              <el-radio-group :value="formData.autoNotice ? 1 : 0" disabled>
+              <el-radio-group :value="formData.autoNotice || formData.remind ? 1 : 0" disabled>
                 <el-radio :label="1">开通</el-radio>
                 <el-radio :label="0">关闭</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="调试单位">
-              <el-input :value="formData.debugCompany" disabled />
+              <el-input :value="formData.debugCompany || formData.debugOrg" disabled />
             </el-form-item>
             <el-form-item label="验收备案">
-              <el-input :value="formData.checkCompany" disabled />
+              <el-input :value="formData.checkCompany || formData.recordOrg" disabled />
             </el-form-item>
             <el-form-item label="合同文件">
               <el-button size="mini" disabled>查看合同文件</el-button>
@@ -126,6 +126,9 @@ export default {
       type: Object,
       default: () => ({})
     }
+  },
+  mounted() {
+    console.log('look_ContractInfo_View - 接收到的formData:', this.formData)
   },
   methods: {
     formatDate(date) {

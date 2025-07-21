@@ -3,7 +3,7 @@ import request from '@/utils/request'
 
 export function createContract(data) {
   return request({
-    url: '/contracts/', // 就是你提到的这一行，写在这里
+    url: '/contracts/', // 移除/api前缀
     method: 'post',
     data
   })
@@ -11,7 +11,7 @@ export function createContract(data) {
 // 查询合同列表
 export function fetchContracts(params) {
   return request({
-    url: '/contracts',
+    url: '/contracts', // 移除/api前缀
     method: 'get',
     params
   })
@@ -20,14 +20,14 @@ export function fetchContracts(params) {
 // 删除合同
 export function deleteContract(id) {
   return request({
-    url: `/contracts/${id}`,
+    url: `/contracts/${id}`, // 移除/api前缀
     method: 'delete'
   })
 }
 
 export function fetchProjectDetail(id) {
   return request({
-    url: `/contracts/${id}`, // 路径请根据实际后端接口调整
+    url: `/contracts/${id}`, // 移除/api前缀
     method: 'get'
   })
 }
@@ -35,7 +35,7 @@ export function fetchProjectDetail(id) {
 // 获取合同详情（用于续签）
 export function getContractDetail(id) {
   return request({
-    url: `/contracts/${id}/for-renewal`,
+    url: `/contracts/${id}/for-renewal`, // 移除/api前缀
     method: 'get'
   }).then(response => {
     // 确保返回正确的数据格式
@@ -50,7 +50,7 @@ export function getContractDetail(id) {
 // 续签合同
 export function renewalContract(data) {
   return request({
-    url: '/contracts/renewal',
+    url: '/contracts/renewal', // 移除/api前缀
     method: 'post',
     data
   })
@@ -59,7 +59,7 @@ export function renewalContract(data) {
 // 审核合同 - 通过
 export function approveContract(id, data) {
   return request({
-    url: `/contracts/${id}/approve`,
+    url: `/contracts/${id}/approve`, // 移除/api前缀
     method: 'put',
     data
   })
@@ -68,9 +68,8 @@ export function approveContract(id, data) {
 // 审核合同 - 不通过
 export function rejectContract(id, data) {
   return request({
-    url: `/contracts/${id}/reject`,
-    method: 'put',
-    data
+    url: `/contracts/${id}/reject`, // 移除/api前缀
+    method: 'put'
   })
 }
 

@@ -93,9 +93,11 @@ export default {
     formData: {
       handler(newVal) {
         if (newVal) {
-          this.form.entrustName = newVal.entrustName || ''
+          console.log('look_ProjectInfo_View - 接收到的formData:', newVal)
+          this.form.entrustName = newVal.clientCompany || newVal.entrustName || ''
           this.form.creditCode = newVal.creditCode || ''
           this.projectList = newVal.projectList || []
+          console.log('look_ProjectInfo_View - 处理后的项目列表:', this.projectList)
         }
       },
       immediate: true,

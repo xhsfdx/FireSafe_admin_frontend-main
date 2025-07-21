@@ -169,15 +169,26 @@ export default {
 
           this.tableData = list.map(item => {
             const days = item.endDate ? this.getRemainDays(item.endDate) : ''
-            return {
+            const mappedItem = {
               id: item._id,
-              ownerName: item.project?.ownerCompany || '',
+              ownerName: item.project?.ownerCompany || item.project?.companyname || '',
               entrustName: item.clientCompany || '',
               contractType: item.contractType || '长期性合同',
               status: item.status || '',
               contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '',
-              days: days
+              days: days,
+              // 保存完整的原始数据，用于传递给详情页面
+              originalData: item
             }
+            console.log('Unit Project Management - 映射后的数据项:', mappedItem)
+            console.log('Unit Project Management - 原始数据项:', item)
+            console.log('Unit Project Management - 合同ID:', item._id)
+            console.log('Unit Project Management - 项目信息:', item.project)
+            console.log('Unit Project Management - 合同名称:', item.name)
+            console.log('Unit Project Management - 合同编号:', item.code)
+            console.log('Unit Project Management - 业主单位:', item.project?.ownerCompany)
+            console.log('Unit Project Management - 委托单位:', item.clientCompany)
+            return mappedItem
           })
           // 分页信息
           if (res.pagination) {
@@ -251,9 +262,31 @@ export default {
     },
     // 查看详情
     viewDetail(row) {
+      console.log('Unit Project Management - viewDetail 被调用，传递的row:', row)
+      console.log('Unit Project Management - 传递的ID:', row.id)
+      
+      // 传递更多数据到详情页面，包括原始数据
+      const queryParams = {
+        id: row.id,
+        projectName: row.ownerName, // 项目名称（业主单位名称）
+        entrustName: row.entrustName, // 委托单位
+        contractType: row.contractType, // 合同类型
+        status: row.status, // 当前状态
+        contractAmount: row.contractAmount, // 合同金额
+        remainingDays: row.days // 剩余天数
+      }
+      
+      // 如果有原始数据，也传递一些关键信息
+      if (row.originalData) {
+        queryParams.startDate = row.originalData.startDate
+        queryParams.endDate = row.originalData.endDate
+        queryParams.ownerCompany = row.originalData.project?.ownerCompany
+        queryParams.clientCompany = row.originalData.clientCompany
+      }
+      
       this.$router.push({
         name: 'UnitDetail',
-        query: { id: row.id }
+        query: queryParams
       })
     },
     // 续签
