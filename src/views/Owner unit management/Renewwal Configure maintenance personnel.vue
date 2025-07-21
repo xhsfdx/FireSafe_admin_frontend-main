@@ -49,8 +49,8 @@
       title="配置维保人员"
       :visible.sync="showDialog"
       width="700px"
-      @close="showDialog = false"
       destroy-on-close
+      @close="showDialog = false"
     >
       <DispatchStaff
         :data="currentRow"

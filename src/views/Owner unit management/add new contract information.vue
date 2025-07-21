@@ -19,7 +19,7 @@
                 <el-option label="项目维保" value="项目维保" />
               </el-select>
               <div v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
-                <i class="el-icon-info"></i> 一次性合同仅需填写基本信息，维保相关内容将自动清空
+                <i class="el-icon-info" /> 一次性合同仅需填写基本信息，维保相关内容将自动清空
               </div>
             </el-form-item>
             <el-form-item label="合同时间" required>
@@ -82,8 +82,12 @@
               <el-input v-model="form.designOrg" placeholder="请输入设计单位" />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }"
-                placeholder="请输入备注说明" />
+              <el-input
+                v-model="form.remark"
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 3 }"
+                placeholder="请输入备注说明"
+              />
             </el-form-item>
           </el-col>
           <!-- 右栏 -->
@@ -162,8 +166,12 @@
         </el-table-column>
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
-            <el-button v-if="buildingList.length > 1" type="text" style="color:#f56c6c"
-              @click="removeRow(scope.$index)">删除</el-button>
+            <el-button
+              v-if="buildingList.length > 1"
+              type="text"
+              style="color:#f56c6c"
+              @click="removeRow(scope.$index)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -178,16 +186,23 @@
         合同维保内容
         <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-              <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
+      <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
         <!-- 左侧树形列表 + 全选 -->
         <el-col :span="6">
           <div style="margin-bottom:12px;">
-            <el-checkbox v-model="treeCheckAll" @change="handleCheckAll" style="margin-left:2px;">一键全选</el-checkbox>
+            <el-checkbox v-model="treeCheckAll" style="margin-left:2px;" @change="handleCheckAll">一键全选</el-checkbox>
           </div>
           <el-tabs v-model="activeTab" class="tab-tree">
             <el-tab-pane label="平台标准系统" name="standard">
-              <el-tree ref="maintTree" :data="maintTree" show-checkbox node-key="id" :default-checked-keys="checkedKeys"
-                :expand-on-click-node="false" @check="handleTreeCheck" />
+              <el-tree
+                ref="maintTree"
+                :data="maintTree"
+                show-checkbox
+                node-key="id"
+                :default-checked-keys="checkedKeys"
+                :expand-on-click-node="false"
+                @check="handleTreeCheck"
+              />
             </el-tab-pane>
             <el-tab-pane label="自建标准系统" name="custom">
               <div class="tab-empty">暂无内容</div>
@@ -211,7 +226,6 @@
         </el-col>
       </el-row>
 
-
       <!-- 下一步 -->
       <div style="text-align: center; margin: 38px 0 12px 0;">
         <el-button type="primary" size="large" style="width: 160px;font-size:18px;" @click="nextStep">下一步</el-button>
@@ -221,11 +235,15 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import { createContract } from '@/api/contract'
 
 export default {
   name: 'AddNewContractInfo',
-  props: ['data'],
+  props: {
+    data: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
       form: {
@@ -269,12 +287,12 @@ export default {
       }
       return attachParent(rawData)
     },
-    transformToTree(data) {
+    transformToTreeWithPeriod(data) {
       // period: 1 => '月检'
       const getPeriodLabel = (p) => {
         if (!p) return ''
-        if (p == 1) return '月检'
-        if (p == 12) return '年检'
+        if (p === 1) return '月检'
+        if (p === 12) return '年检'
         return `每${p}月`
       }
       return data.map(system => ({
@@ -291,7 +309,7 @@ export default {
               item: project.projectName,
               content: item.content,
               period: getPeriodLabel(item.period),
-              standard: item.attention || '',
+              standard: item.attention || ''
             }
           }))
         }))
@@ -301,7 +319,7 @@ export default {
       try {
         const res = await fetch('/maintainTree.json')
         const rawData = await res.json()
-        this.maintTree = this.transformToTree(rawData)
+        this.maintTree = this.transformToTreeWithPeriod(rawData)
       } catch (err) {
         this.$message.error('加载维保项目失败')
       }
@@ -336,7 +354,7 @@ export default {
       this.updateCheckedMaintList()
     },
 
-     // 提取所有叶子节点id
+    // 提取所有叶子节点id
     getAllLeafIds(nodes, arr = []) {
       nodes.forEach(n => {
         if (n.children && n.children.length) {
@@ -348,7 +366,7 @@ export default {
       return arr
     },
     // 生成右侧表格完整内容
-     updateCheckedMaintList() {
+    updateCheckedMaintList() {
       const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
       this.checkedMaintList = checkedNodes
         .filter(n => !n.children)
@@ -383,25 +401,24 @@ export default {
     },
     nextStep() {
       console.log('nextStep 被调用')
-      
+
       // 如果是一次性合同，临时移除维保方式的验证规则
-      const originalRules = { ...this.rules }
       if (['施工', '评估', '检测'].includes(this.form.contractType)) {
         this.rules.maintType = []
         this.form.maintType = '' // 确保维保方式为空
       }
-      
+
       // 检查必填字段
       const requiredFields = ['entrustName', 'contractName', 'contractType', 'dateStart', 'dateEnd', 'creditCode']
       const missingFields = requiredFields.filter(field => !this.form[field])
-      
+
       if (missingFields.length > 0) {
         this.$message.error(`请填写必填字段: ${missingFields.join(', ')}`)
         return
       }
-      
+
       console.log('必填字段检查通过，准备验证表单')
-      
+
       // 简化验证逻辑，直接提交
       const data = {
         contractName: this.form.contractName,
@@ -544,5 +561,4 @@ export default {
   margin-top: 38px;
 }
 </style>
-
 

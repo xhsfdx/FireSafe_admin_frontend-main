@@ -31,9 +31,15 @@
       共查询到{{ pagination.total }}条
     </div>
     <!-- 表格 -->
-    <el-table :data="tableData" border style="width: 100%; margin-top: 16px"
-      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }" :empty-text="' '"
-      @selection-change="handleSelectionChange" ref="unitTable">
+    <el-table
+      ref="unitTable"
+      :data="tableData"
+      border
+      style="width: 100%; margin-top: 16px"
+      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
+      :empty-text="' '"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column type="index" label="序号" width="60" align="center" />
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
@@ -73,21 +79,26 @@
     </el-table>
     <!-- 分页控件 -->
     <div style="text-align:right;margin-top:8px;">
-      <el-pagination background layout="prev, pager, next" :page-size="pagination.limit" :total="pagination.total"
-        :current-page="pagination.page" @current-change="handlePageChange" />
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size="pagination.limit"
+        :total="pagination.total"
+        :current-page="pagination.page"
+        @current-change="handlePageChange"
+      />
     </div>
     <!-- 无数据时自定义内容 -->
     <div v-if="tableData.length === 0" class="table-empty">
       <img :src="require('@/assets/无数据.jpg')" alt="无数据" class="empty-img">
       <div class="empty-text">暂无数据</div>
     </div>
-    
+
     <!-- 审核对话框 -->
     <el-dialog :title="auditDialogTitle" :visible.sync="auditDialogVisible" width="500px">
-      <el-form :model="auditForm" :rules="auditRules" ref="auditForm" label-width="100px">
+      <el-form ref="auditForm" :model="auditForm" :rules="auditRules" label-width="100px">
         <el-form-item label="审核意见" prop="auditNote">
-          <el-input v-model="auditForm.auditNote" type="textarea" placeholder="请输入审核意见" :rows="4">
-          </el-input>
+          <el-input v-model="auditForm.auditNote" type="textarea" placeholder="请输入审核意见" :rows="4" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -193,7 +204,7 @@ export default {
       const diff = Math.ceil((end - now) / (1000 * 3600 * 24))
       return diff > 0 ? diff : 0
     },
-    
+
     // 获取状态标签类型
     getStatusTagType(status) {
       const statusMap = {
@@ -205,7 +216,7 @@ export default {
       }
       return statusMap[status] || 'info'
     },
-    
+
     // 获取状态显示文本
     getStatusDisplayText(status) {
       const statusMap = {
@@ -270,71 +281,70 @@ export default {
       }
     },
     handleSelectionChange(val) {
-      this.selectedRows = val;
+      this.selectedRows = val
     },
     handleSumAmount() {
-      let rows = this.selectedRows.length > 0 ? this.selectedRows : this.tableData;
-      let sum = rows.reduce((acc, cur) => {
+      const rows = this.selectedRows.length > 0 ? this.selectedRows : this.tableData
+      const sum = rows.reduce((acc, cur) => {
         // 兼容金额格式
-        let amount = cur.amount || cur.contractAmount || 0;
+        let amount = cur.amount || cur.contractAmount || 0
         if (typeof amount === 'string') {
-          amount = Number(amount.replace(/[￥,]/g, '')) || 0;
+          amount = Number(amount.replace(/[￥,]/g, '')) || 0
         }
-        return acc + amount;
-      }, 0);
-      this.$message.info(`合同金额合计：￥${sum.toLocaleString()}`);
+        return acc + amount
+      }, 0)
+      this.$message.info(`合同金额合计：￥${sum.toLocaleString()}`)
     },
-    
+
     // 审核通过
     onApprove(row) {
-      this.currentContract = row;
-      this.auditType = 'approve';
-      this.auditDialogTitle = '审核通过';
-      this.auditForm.auditNote = '';
-      this.auditDialogVisible = true;
+      this.currentContract = row
+      this.auditType = 'approve'
+      this.auditDialogTitle = '审核通过'
+      this.auditForm.auditNote = ''
+      this.auditDialogVisible = true
     },
-    
+
     // 审核不通过
     onReject(row) {
-      this.currentContract = row;
-      this.auditType = 'reject';
-      this.auditDialogTitle = '审核不通过';
-      this.auditForm.auditNote = '';
-      this.auditDialogVisible = true;
+      this.currentContract = row
+      this.auditType = 'reject'
+      this.auditDialogTitle = '审核不通过'
+      this.auditForm.auditNote = ''
+      this.auditDialogVisible = true
     },
-    
+
     // 提交审核
     async submitAudit() {
       try {
-        await this.$refs.auditForm.validate();
-        
-        let res;
+        await this.$refs.auditForm.validate()
+
+        let res
         if (this.auditType === 'approve') {
           res = await approveContract(this.currentContract.id, {
             auditNote: this.auditForm.auditNote
-          });
+          })
         } else {
           res = await rejectContract(this.currentContract.id, {
             auditNote: this.auditForm.auditNote
-          });
+          })
         }
-        
+
         if (res.success) {
-          this.$message.success(res.message || '审核成功');
-          this.auditDialogVisible = false;
-          this.loadData(); // 刷新数据
+          this.$message.success(res.message || '审核成功')
+          this.auditDialogVisible = false
+          this.loadData() // 刷新数据
         } else {
-          this.$message.error(res.message || '审核失败');
+          this.$message.error(res.message || '审核失败')
         }
       } catch (error) {
-        console.error('审核失败:', error);
-        this.$message.error('审核失败');
+        console.error('审核失败:', error)
+        this.$message.error('审核失败')
       }
     }
   }
 }
 </script>
-
 
 <style scoped>
 .unit-manage-page {

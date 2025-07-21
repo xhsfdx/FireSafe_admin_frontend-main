@@ -189,7 +189,7 @@ export default {
       this.updatePagedData()
     },
     viewDetail(row) {
-      this.$router.push({ 
+      this.$router.push({
         name: 'TaskDetail',
         params: { id: row._id }
       })

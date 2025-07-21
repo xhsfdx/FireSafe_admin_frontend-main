@@ -91,6 +91,7 @@
     </div>
 
     <div class="footer">
+      <el-button @click="$emit('cancel')">取消</el-button>
       <el-button type="primary" @click="submit">保存</el-button>
     </div>
   </div>
@@ -99,10 +100,15 @@
 <script>
 import avatar1 from '@/assets/avatar-1.jpg'
 import { getStaffList } from '@/api/staff'
-import { getMaintainTask, assignMaintainers } from '@/api/maintainTask'
 
 export default {
   name: 'DispatchStaff',
+  props: {
+    data: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
       activeTab: 'technical',
@@ -113,8 +119,6 @@ export default {
         leader: null,
         maintainer: [] // ✅ 一定要这样
       },
-      taskId: null,
-      taskData: null,
       loading: false,
 
       roleMap: {
@@ -130,7 +134,6 @@ export default {
     }
   },
   mounted() {
-    this.taskId = this.$route.params.id
     this.loadData()
   },
   methods: {
@@ -150,29 +153,21 @@ export default {
           }))
         }
 
-        // 加载任务数据
-        if (this.taskId) {
-          const taskRes = await getMaintainTask(this.taskId)
-          if (taskRes.success) {
-            this.taskData = taskRes.data
-            // 设置已选择的人员
-            if (taskRes.data.maintainPersons) {
-              const persons = taskRes.data.maintainPersons
-              if (persons.technical) {
-                this.selected.technical = this.staffList.find(s => s.id === persons.technical)
-              }
-              if (persons.leader) {
-                this.selected.leader = this.staffList.find(s => s.id === persons.leader)
-              }
-              if (persons.maintainers && persons.maintainers.length > 0) {
-                this.selected.maintainer = persons.maintainers.map(id => 
-                  this.staffList.find(s => s.id === id)
-                ).filter(Boolean)
-              }
-            }
+        // 如果有传入的数据，设置已选择的人员
+        if (this.data && this.data.maintainPersons) {
+          const persons = this.data.maintainPersons
+          if (persons.technical) {
+            this.selected.technical = this.staffList.find(s => s.id === persons.technical)
+          }
+          if (persons.leader) {
+            this.selected.leader = this.staffList.find(s => s.id === persons.leader)
+          }
+          if (persons.maintainers && persons.maintainers.length > 0) {
+            this.selected.maintainer = persons.maintainers.map(id => this.staffList.find(s => s.id === id)).filter(Boolean)
           }
         }
       } catch (e) {
+        console.error('加载数据失败:', e)
         this.$message.error('加载数据失败')
       }
       this.loading = false
@@ -201,29 +196,19 @@ export default {
         this.selected[role] = null
       }
     },
-    async submit() {
+    submit() {
       if (!this.selected.technical || !this.selected.leader || this.selected.maintainer.length === 0) {
         this.$message.error('请选择技术负责人、项目负责人和至少一名现场维保人员')
         return
       }
 
-      try {
-        const maintainPersons = {
-          technical: this.selected.technical.id,
-          leader: this.selected.leader.id,
-          maintainers: this.selected.maintainer.map(p => p.id)
-        }
-
-        const res = await assignMaintainers(this.taskId, { maintainPersons })
-        if (res.success) {
-          this.$message.success('人员分配成功')
-          this.$router.go(-1)
-        } else {
-          this.$message.error(res.message || '分配失败')
-        }
-      } catch (e) {
-        this.$message.error('网络异常或接口出错')
+      const maintainPersons = {
+        technical: this.selected.technical.id,
+        leader: this.selected.leader.id,
+        maintainers: this.selected.maintainer.map(p => p.id)
       }
+
+      this.$emit('submit', { maintainPersons })
     }
   }
 }
@@ -446,15 +431,5 @@ export default {
   top: 12px;
   color: #f56c6c;
   cursor: pointer;
-}
-
-.empty-card {
-  padding: 24px;
-  background: #f0f6fd;
-  border: 1px dashed #bbb;
-  border-radius: 8px;
-  color: #409EFF;
-  text-align: left;
-  font-size: 14px;
 }
 </style>

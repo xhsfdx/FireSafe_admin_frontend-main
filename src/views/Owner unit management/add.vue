@@ -99,7 +99,7 @@ export default {
       try {
         console.log('Final data to be submitted:', this.formData)
 
-        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType);
+        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType)
         const payload = {
           // 合同信息
           name: this.formData.contractName,
@@ -129,36 +129,38 @@ export default {
           // 项目信息 (取第一个项目作为主项目)
           projectInfo: this.formData.projectList && this.formData.projectList.length > 0
             ? {
-                name: this.formData.projectList[0].name,
-                companyname: this.formData.projectList[0].ownerName,
-                address: this.formData.projectList[0].address,
-                district: this.formData.projectList[0].area,
-                position: '', // 根据需要填充
-                ownerCompany: this.formData.projectList[0].ownerName,
-                contactPerson: this.formData.projectList[0].linkman,
-                contactPhone: this.formData.projectList[0].phone,
-                logoUrl: '',
-                entranceReportUrl: ''
-              }
+              name: this.formData.projectList[0].name,
+              companyname: this.formData.projectList[0].ownerName,
+              address: this.formData.projectList[0].address,
+              district: this.formData.projectList[0].area,
+              position: '', // 根据需要填充
+              ownerCompany: this.formData.projectList[0].ownerName,
+              contactPerson: this.formData.projectList[0].linkman,
+              contactPhone: this.formData.projectList[0].phone,
+              logoUrl: '',
+              entranceReportUrl: ''
+            }
             : (isOneTime ? {
-                name: this.formData.contractName || '一次性合同项目',
-                companyname: this.formData.entrustName,
-                address: '',
-                district: '',
-                position: '',
-                ownerCompany: this.formData.entrustName,
-                contactPerson: '',
-                contactPhone: '',
-                logoUrl: '',
-                entranceReportUrl: ''
-              } : null),
+              name: this.formData.contractName || '一次性合同项目',
+              companyname: this.formData.entrustName,
+              address: '',
+              district: '',
+              position: '',
+              ownerCompany: this.formData.entrustName,
+              contactPerson: '',
+              contactPhone: '',
+              logoUrl: '',
+              entranceReportUrl: ''
+            } : null),
 
           // 维保人员
-          maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p) : []
+          maintainPersons: this.formData.dispatchStaffList && this.formData.dispatchStaffList.length > 0
+            ? this.formData.dispatchStaffList[0].maintainPersons || null
+            : null
         }
 
         console.log('Payload sent to backend:', payload)
-        
+
         const res = await createContract(payload) // 使用转换后的 payload
         if (res.success) {
           this.$message.success('新增合同成功！')

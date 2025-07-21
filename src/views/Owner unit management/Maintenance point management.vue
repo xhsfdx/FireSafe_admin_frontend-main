@@ -71,7 +71,7 @@ export default {
         { name: '整改', entrust: 'Zhang Defen Space', status: '服务中', maintType: '点位维保', pointCount: 2 },
         { name: '车站', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 2 },
         { name: '大大', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 1 },
-        { name: '洗', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 2 },
+        { name: '洗', entrust: '西华师范大学', status: '服务中', maintType: '点位维保', pointCount: 2 }
       ],
       tableData: []
     }

@@ -24,16 +24,22 @@
         <el-button type="success" icon="el-icon-edit" @click="handleBatchUpdate">批量更新</el-button>
       </div>
     </div>
-    
+
     <!-- 统计信息 -->
     <div style="text-align:right; margin-bottom:6px;">
       共查询到{{ pagination.total }}条
     </div>
-    
+
     <!-- 表格 -->
-    <el-table :data="tableData" border style="width: 100%; margin-top: 16px"
-      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }" :empty-text="' '"
-      @selection-change="handleSelectionChange" ref="paymentTable">
+    <el-table
+      ref="paymentTable"
+      :data="tableData"
+      border
+      style="width: 100%; margin-top: 16px"
+      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
+      :empty-text="' '"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column type="index" label="序号" width="60" align="center" />
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
@@ -83,22 +89,28 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <!-- 分页控件 -->
     <div style="text-align:right;margin-top:8px;">
-      <el-pagination background layout="prev, pager, next" :page-size="pagination.limit" :total="pagination.total"
-        :current-page="pagination.page" @current-change="handlePageChange" />
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size="pagination.limit"
+        :total="pagination.total"
+        :current-page="pagination.page"
+        @current-change="handlePageChange"
+      />
     </div>
-    
+
     <!-- 无数据时自定义内容 -->
     <div v-if="tableData.length === 0" class="table-empty">
       <img :src="require('@/assets/无数据.jpg')" alt="无数据" class="empty-img">
       <div class="empty-text">暂无数据</div>
     </div>
-    
+
     <!-- 更新结款对话框 -->
     <el-dialog title="更新结款状态" :visible.sync="paymentDialogVisible" width="500px">
-      <el-form :model="paymentForm" :rules="paymentRules" ref="paymentForm" label-width="100px">
+      <el-form ref="paymentForm" :model="paymentForm" :rules="paymentRules" label-width="100px">
         <el-form-item label="结款状态" prop="paymentStatus">
           <el-select v-model="paymentForm.paymentStatus" placeholder="选择结款状态" style="width:100%">
             <el-option label="未结款" value="未结款" />
@@ -112,8 +124,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="结款日期" prop="paymentDate">
-          <el-date-picker v-model="paymentForm.paymentDate" type="date" placeholder="选择结款日期" style="width:100%">
-          </el-date-picker>
+          <el-date-picker v-model="paymentForm.paymentDate" type="date" placeholder="选择结款日期" style="width:100%" />
         </el-form-item>
         <el-form-item label="结款方式" prop="paymentMethod">
           <el-select v-model="paymentForm.paymentMethod" placeholder="选择结款方式" style="width:100%">
@@ -124,8 +135,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="paymentNote">
-          <el-input v-model="paymentForm.paymentNote" type="textarea" placeholder="请输入备注信息" :rows="3">
-          </el-input>
+          <el-input v-model="paymentForm.paymentNote" type="textarea" placeholder="请输入备注信息" :rows="3" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -202,7 +212,7 @@ export default {
         if (this.filters.entrustName) params.entrustName = this.filters.entrustName
         if (this.filters.ownerName) params.ownerName = this.filters.ownerName
         if (this.filters.contractType) params.contractType = this.filters.contractType
-        
+
         const res = await getPaymentList(params)
         if (res.success) {
           const list = res.data || []
@@ -224,7 +234,7 @@ export default {
               amount: item.amount || 0
             }
           })
-          
+
           // 分页信息
           if (res.pagination) {
             this.pagination.total = res.pagination.total
@@ -243,7 +253,7 @@ export default {
       }
       this.loading = false
     },
-    
+
     // 获取合同类型标签样式
     getContractTypeTagType(type) {
       const typeMap = {
@@ -254,7 +264,7 @@ export default {
       }
       return typeMap[type] || 'info'
     },
-    
+
     // 获取结款状态标签样式
     getPaymentStatusTagType(status) {
       const statusMap = {
@@ -264,33 +274,33 @@ export default {
       }
       return statusMap[status] || 'info'
     },
-    
+
     // 格式化日期
     formatDate(date) {
       if (!date) return ''
       const d = new Date(date)
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     },
-    
+
     // 翻页事件
     handlePageChange(page) {
       this.pagination.page = page
       this.loadData()
     },
-    
+
     // 查询
     onSearch() {
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     // 重置
     onReset() {
       this.filters = { ownerName: '', entrustName: '', paymentStatus: '', contractType: '' }
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     // 查看详情
     viewDetail(row) {
       this.$router.push({
@@ -298,7 +308,7 @@ export default {
         query: { id: row.id }
       })
     },
-    
+
     // 更新结款
     updatePayment(row) {
       this.currentContract = row
@@ -311,12 +321,12 @@ export default {
       }
       this.paymentDialogVisible = true
     },
-    
+
     // 提交结款更新
     async submitPaymentUpdate() {
       try {
         await this.$refs.paymentForm.validate()
-        
+
         const res = await updatePaymentStatus(this.currentContract.id, this.paymentForm)
         if (res.success) {
           this.$message.success('结款状态更新成功')
@@ -330,12 +340,12 @@ export default {
         this.$message.error('更新失败')
       }
     },
-    
+
     // 查看结款记录
     viewPaymentHistory(row) {
       this.$message.info('结款记录功能开发中...')
     },
-    
+
     // 批量更新
     handleBatchUpdate() {
       if (this.selectedRows.length === 0) {
@@ -344,23 +354,23 @@ export default {
       }
       this.$message.info('批量更新功能开发中...')
     },
-    
+
     handleSelectionChange(val) {
       this.selectedRows = val
     },
-    
+
     handleSumAmount() {
-      let rows = this.selectedRows.length > 0 ? this.selectedRows : this.tableData
+      const rows = this.selectedRows.length > 0 ? this.selectedRows : this.tableData
       let totalAmount = 0
       let totalPaidAmount = 0
       let totalUnpaidAmount = 0
-      
+
       rows.forEach(row => {
         totalAmount += row.amount || 0
         totalPaidAmount += row.paidAmount || 0
         totalUnpaidAmount += row.unpaidAmount || 0
       })
-      
+
       this.$message.info(`合同金额合计：￥${totalAmount.toLocaleString()}\n已结金额：￥${totalPaidAmount.toLocaleString()}\n未结金额：￥${totalUnpaidAmount.toLocaleString()}`)
     }
   }
@@ -432,4 +442,4 @@ export default {
 .dialog-footer {
   text-align: right;
 }
-</style> 
+</style>

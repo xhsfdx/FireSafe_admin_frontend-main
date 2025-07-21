@@ -157,17 +157,17 @@ export default {
         }, 1000)
         return
       }
-      
+
       this.contractId = id
       this.loading = true
       try {
         const res = await fetchProjectDetail(id)
         if (res.success && res.data) {
           const item = res.data
-          
+
           // 计算剩余天数
           const remainingDays = this.getRemainingDays(item.endDate)
-          
+
           this.projectDetail = {
             projectName: item.project?.name || item.name || '未知项目',
             projectId: item.project?._id || item._id || '',

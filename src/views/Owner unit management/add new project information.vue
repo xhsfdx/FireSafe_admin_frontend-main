@@ -5,7 +5,7 @@
       <div class="tips">
         <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
         <div v-if="isOneTimeContract" style="color: #409EFF; margin-top: 8px;">
-          <i class="el-icon-info"></i> 一次性合同可以跳过项目信息，直接进入下一步
+          <i class="el-icon-info" /> 一次性合同可以跳过项目信息，直接进入下一步
         </div>
       </div>
       <!-- 基本信息只读 -->
@@ -78,7 +78,10 @@ export default {
   name: 'AddNewProjectInfo',
   components: { ProjectFormDialog },
   props: {
-    formData: Object
+    formData: {
+      type: Object,
+      default: () => ({})
+    }
   },
   data() {
     return {
@@ -176,5 +179,4 @@ export default {
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
 </style>
-
 

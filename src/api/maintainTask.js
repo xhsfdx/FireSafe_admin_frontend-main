@@ -59,4 +59,4 @@ export function assignMaintainers(id, data) {
     method: 'put',
     data
   })
-} 
+}

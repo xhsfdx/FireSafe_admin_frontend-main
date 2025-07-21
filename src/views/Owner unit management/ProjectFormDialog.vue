@@ -130,10 +130,10 @@ export default {
   },
   methods: {
     handleMapConfirm(location) {
-      this.form.address = location.address;
-      this.form.longitude = location.longitude;
-      this.form.latitude = location.latitude;
-      this.mapDialogVisible = false;
+      this.form.address = location.address
+      this.form.longitude = location.longitude
+      this.form.latitude = location.latitude
+      this.mapDialogVisible = false
     },
     onSave() {
       this.$refs.projectForm.validate(valid => {

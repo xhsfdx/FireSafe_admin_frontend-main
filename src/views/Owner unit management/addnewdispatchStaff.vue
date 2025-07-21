@@ -41,6 +41,7 @@
 
 <script>
 import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import { getStaffList } from '@/api/staff'
 
 export default {
   name: 'AddNewDispatchStaff',
@@ -56,7 +57,8 @@ export default {
       search: '',
       showDialog: false,
       currentRow: {},
-      tableData: []
+      tableData: [],
+      staffList: [] // 添加员工列表
     }
   },
   computed: {
@@ -102,7 +104,20 @@ export default {
       deep: true
     }
   },
+  mounted() {
+    this.loadStaffList()
+  },
   methods: {
+    async loadStaffList() {
+      try {
+        const staffRes = await getStaffList()
+        if (staffRes.success) {
+          this.staffList = staffRes.data
+        }
+      } catch (e) {
+        console.error('加载员工列表失败:', e)
+      }
+    },
     query() {
       // The computed property 'filteredTableData' handles the search
     },
@@ -120,22 +135,29 @@ export default {
       }
       const index = this.tableData.findIndex(item => item.projectName === this.currentRow.projectName)
       if (index !== -1) {
-        const maintainPersons = {
-          technical: newData.maintainPersons.technical || '',
-          leader: newData.maintainPersons.leader || '',
-          maintainer: Array.isArray(newData.maintainPersons.maintainer) ? newData.maintainPersons.maintainer.filter(Boolean) : []
-        }
+        const maintainPersons = newData.maintainPersons
+
+        // 获取人员姓名用于显示
+        const techLeader = this.getStaffNameById(maintainPersons.technical)
+        const projectLeader = this.getStaffNameById(maintainPersons.leader)
+        const onSiteStaff = maintainPersons.maintainers.map(id => this.getStaffNameById(id)).filter(Boolean).join('、')
+
         const updatedRow = {
           ...this.tableData[index],
-          techLeader: maintainPersons.technical,
-          projectLeader: maintainPersons.leader,
-          onSiteStaff: (maintainPersons.maintainer || []).join('、'),
+          techLeader,
+          projectLeader,
+          onSiteStaff,
           maintainPersons
         }
         this.$set(this.tableData, index, updatedRow)
         this.emitUpdate()
       }
       this.showDialog = false
+    },
+    getStaffNameById(id) {
+      // 从员工列表中查找姓名
+      const staff = this.staffList.find(s => s._id === id)
+      return staff ? staff.name : id
     },
     prevStep() {
       this.emitUpdate()

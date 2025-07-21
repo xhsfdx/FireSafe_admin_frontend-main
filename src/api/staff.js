@@ -14,6 +14,14 @@ export function getAllStaff() {
   })
 }
 
+// 添加getStaffList函数，用于DispatchStaff组件
+export function getStaffList() {
+  return request({
+    url: '/api/staff/all',
+    method: 'get'
+  })
+}
+
 export function addStaff(data) {
   return request({
     url: '/vue-element-admin/staff',

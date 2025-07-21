@@ -97,36 +97,36 @@ export default {
       editingIndex: -1
     }
   },
-  created() {
-    if (this.projectIds && this.projectIds.length) {
-      this.fetchProjects(this.projectIds)
-    }
-  },
   watch: {
     formData: {
       handler(newData) {
-        if (!newData || !Object.keys(newData).length) return;
+        if (!newData || !Object.keys(newData).length) return
 
-        console.log('项目信息页接收数据:', newData);
+        console.log('项目信息页接收数据:', newData)
 
-        this.form.entrustName = newData.entrustName || '';
-        this.form.creditCode = newData.creditCode || '';
+        this.form.entrustName = newData.entrustName || ''
+        this.form.creditCode = newData.creditCode || ''
 
         if (newData.projectList && newData.projectList.length > 0) {
-          this.projectList = JSON.parse(JSON.stringify(newData.projectList));
+          this.projectList = JSON.parse(JSON.stringify(newData.projectList))
           this.projectList.forEach((project, index) => {
-            project.index = index + 1;
-          });
+            project.index = index + 1
+          })
         }
       },
       immediate: true,
       deep: true
     }
   },
+  created() {
+    if (this.projectIds && this.projectIds.length) {
+      this.fetchProjects(this.projectIds)
+    }
+  },
   methods: {
     async fetchProjects(ids) {
       // 伪代码：实际请替换为你的API调用
-      if (!this.$api || !this.$api.getProjectDetail) return;
+      if (!this.$api || !this.$api.getProjectDetail) return
       const projects = await Promise.all(ids.map(id => this.$api.getProjectDetail(id)))
       this.projectList = projects.map(res => res.data)
     },

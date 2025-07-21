@@ -154,4 +154,4 @@ export default {
 .empty-table { text-align:center; margin:42px 0;}
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
-</style> 
+</style>
