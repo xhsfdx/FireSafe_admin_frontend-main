@@ -17,6 +17,22 @@ export function fetchContracts(params) {
   })
 }
 
+// 获取maintainstandarditems数据
+export function getMaintainStandardItems() {
+  return request({
+    url: '/contracts/maintainstandarditems',
+    method: 'get'
+  })
+}
+
+// 合同详情
+export function getContractById(id) {
+  return request({
+    url: `/contracts/${id}`,
+    method: 'get'
+  })
+}
+
 // 删除合同
 export function deleteContract(id) {
   return request({

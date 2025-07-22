@@ -100,7 +100,7 @@
       </el-table>
 
       <div class="section-title" style="margin-top:28px;">合同维保内容</div>
-      <el-table :data="formData.checkedMaintList" border style="width:100%;">
+      <el-table :data="checkedMaintList" border style="width:100%;">
         <el-table-column type="index" label="序号" width="55" align="center" />
         <el-table-column prop="system" label="消防系统/设施" align="center" />
         <el-table-column prop="item" label="维保项目" align="center" />
@@ -108,7 +108,7 @@
         <el-table-column prop="period" label="维保周期" align="center" />
         <el-table-column prop="standard" label="规范" align="center" />
       </el-table>
-      <div v-if="!formData.checkedMaintList || formData.checkedMaintList.length === 0" class="empty-box">
+      <div v-if="!checkedMaintList || checkedMaintList.length === 0" class="empty-box">
         暂无维保内容
       </div>
 
@@ -119,6 +119,7 @@
   </div>
 </template>
 <script>
+import axios from 'axios'
 export default {
   name: 'ContractInfoView',
   props: {
@@ -127,12 +128,59 @@ export default {
       default: () => ({})
     }
   },
+  data() {
+    return {
+      checkedMaintList: []
+    }
+  },
+  watch: {
+    'formData.maintainItems': {
+      immediate: true,
+      handler(ids) {
+        if (ids && ids.length > 0) {
+          this.fetchMaintDetail(ids)
+        } else {
+          this.checkedMaintList = []
+        }
+      }
+    }
+  },
   methods: {
     formatDate(date) {
       return date ? date.substring(0, 10) : 'N/A'
     },
     nextStep() {
       this.$emit('next')
+    },
+    async fetchMaintDetail(ids) {
+      try {
+        const res = await axios.post('/api/contracts/getdetailmaintainitems', {
+          ids
+        })
+        if (res.data.success) {
+          this.checkedMaintList = res.data.data.flatMap(item => {
+            const system = item.systemType || '——'
+            const standard = item.standard || '——'
+
+            return (item.devices || []).flatMap(device => {
+              const deviceName = device.device || '——'
+
+              return (device.items || []).map(checkItem => ({
+                system, // 消防系统/设施
+                item: deviceName, // 维保项目（设备）
+                content: checkItem.maintainContent || '——', // 检测内容
+                period: checkItem.frequency || '——', // 维保周期
+                standard // 规范
+              }))
+            })
+          })
+        } else {
+          this.checkedMaintList = []
+        }
+      } catch (err) {
+        console.error('获取维保项失败:', err)
+        this.checkedMaintList = []
+      }
     }
   }
 }
@@ -189,4 +237,4 @@ export default {
     color: #606266 !important;
     background-color: #F5F7FA !important;
 }
-</style> 
+</style>

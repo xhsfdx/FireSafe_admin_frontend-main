@@ -24,8 +24,8 @@
           <el-col :span="12">
             <el-form-item label="* 性别" prop="gender">
               <el-select v-model="formData.gender" placeholder="请选择性别">
-                <el-option label="男" value="男"></el-option>
-                <el-option label="女" value="女"></el-option>
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -62,7 +62,7 @@
                 <el-option label="建(构)筑物消防员四级" value="建(构)筑物消防员四级" />
                 <el-option label="消防设施操作员" value="消防设施操作员" />
                 <el-option label="其他" value="其他" />
-                <!-- 添加更多资质级别选项 -->
+                <!-- 添加更多资质级别选项 <img v-if="certificateImageUrl" :src="certificateImageUrl" class="avatar"> -->
               </el-select>
             </el-form-item>
           </el-col>
@@ -71,33 +71,41 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="资质证书">
-              <el-upload class="avatar-uploader" action="handleCertificateUploadSuccess" :show-file-list="false"
-                :on-success="handleCertificateUploadSuccess" :before-upload="beforeCertificateUpload"> <!-- 上传前钩子 -->
-                <img v-if="certificateImageUrl" :src="certificateImageUrl" class="avatar"> <!-- 预览图片 -->
-                <div v-else class="uploader-icon-text">
-                  <i class="el-icon-camera"></i>
+              <el-upload
+                class="avatar-uploader"
+                :http-request="handleCertificateUploadSuccess"
+                :on-remove="handleRemovePhotos"
+                :file-list="fileListcertificate"
+                list-type="picture-card"
+              >
+                <div class="uploader-icon-text">
+                  <i class="el-icon-camera" />
                   <span>上传图片</span>
                 </div>
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12"></el-col>
+          <el-col :span="12" />
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="* 人员照片">
-              <el-upload class="avatar-uploader" action="hand" :show-file-list="false"
-                :on-success="handlePersonPhotoUploadSuccess" :before-upload="beforePersonPhotoUpload"> <!-- 上传前钩子 -->
-                <img v-if="personPhotoUrl" :src="personPhotoUrl" class="avatar"> <!-- 预览图片 -->
-                <div v-else class="uploader-icon-text">
-                  <i class="el-icon-camera"></i>
+              <el-upload
+                class="avatar-uploader"
+                :http-request="handlePersonPhotoUploadSuccess"
+                :on-remove="handleRemovePhotos"
+                :file-list="personPhotoList"
+                list-type="picture-card"
+              > <!-- 上传前钩子 -->
+                <div class="uploader-icon-text">
+                  <i class="el-icon-camera" />
                   <span>上传图片</span>
                 </div>
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12"></el-col>
+          <el-col :span="12" />
         </el-row>
 
       </el-form>
@@ -107,17 +115,12 @@
 
 <script>
 import axios from 'axios'
-import { addStaff } from '@/api/staff'
+import { createStaff } from '@/api/staff'
 import { uploadImage } from '@/api/upload'
 export default {
   data() {
     return {
       person: {},
-      created() {
-        const id = this.$route.params.id
-        const people = JSON.parse(localStorage.getItem('people')) || []
-        this.person = people.find(p => p.id === id) || {}
-      },
       formData: {
         name: '', // 绑定姓名数据
         gender: '', // 绑定性别数据
@@ -151,7 +154,10 @@ export default {
         // 可以添加更多字段的验证规则
       },
       certificateImageUrl: '', // 资质证书图片预览 URL
-      personPhotoUrl: '' // 人员照片图片预览 URL
+      personPhotoUrl: '', // 人员照片图片预览 URL
+      fileListcertificate: [],
+      personPhotoList: []
+
     }
   },
   watch: {
@@ -162,93 +168,65 @@ export default {
       }
     }
   },
+  created() {
+    const id = this.$route.params.id
+    const people = JSON.parse(localStorage.getItem('people')) || []
+    this.person = people.find(p => p.id === id) || {}
+    this.formData = { ...this.person }
+  },
   mounted() {
     // 组件挂载后获取初始数据
     this.fetchPersonInfo()
   },
   methods: {
     save() {
-      const formData = {
-        name: this.formData.name,
-        gender: this.formData.gender,
-        phone: this.formData.phone,
-        idCard: this.formData.idCard,
-        residentialAddress: this.formData.residentialAddress,
-        age: this.formData.age,
-        employmentDate: this.formData.employmentDate,
-        qualificationLevel: this.formData.qualificationLevel,
-        certificateImageUrl: this.formData.certificateImageUrl,
-        personPhotoUrl: this.formData.personPhotoUrl
-      };
+      this.$refs.personForm.validate(valid => {
+        if (!valid) {
+          this.$message.warning('请填写完整信息')
+          return
+        }
+        // const formData = {
+        //   name: this.formData.name,
+        //   gender: this.formData.gender,
+        //   phone: this.formData.phone,
+        //   idCard: this.formData.idCard,
+        //   residentialAddress: this.formData.residentialAddress,
+        //   age: this.formData.age,
+        //   employmentDate: this.formData.employmentDate,
+        //   qualificationLevel: this.formData.qualificationLevel,
+        //   certificateImageUrl: this.formData.certificateImageUrl,
+        //   personPhotoUrl: this.formData.personPhotoUrl
+        // };
 
-      // Call addStaff to send the form data to the backend
-      addStaff(formData)
-        .then(response => {
-          // Handle successful response (e.g., navigate to the staff list)
-          this.$router.push({ name: 'personList' });
-          this.$message.success('Staff saved successfully!');
-        })
-        .catch(error => {
-          // Handle error
-          this.$message.error('Error saving staff: ' + error.message);
-        });
+        // Call addStaff to send the form data to the backend
+        createStaff(this.formData)
+          .then(response => {
+            // Handle successful response (e.g., navigate to the staff list)
+            this.$router.push({ name: 'personList' })
+            this.$message.success('Staff saved successfully!')
+          })
+          .catch(error => {
+            // Handle error
+            this.$message.error('Error saving staff: ' + error.message)
+          })
+      })
     },
-    // 保存按钮点击事件
-    // savePerson() {
-    //   this.$refs.personForm.validate((valid) => {
-    //     if (valid) {
-    //       // 表单验证通过，可以提交数据到后端
-    //       console.log('表单数据:', this.formData)
-    //       // 触发保存数据的后端请求
-    //       axios.post('/api/savePersonInfo', this.formData)
-    //         .then(response => {
-    //           if (response.data.code === 200) {
-    //             this.$message.success('保存成功')
-    //             // 保存成功后跳转到 personList 页面
-    //             this.$router.push({ name: 'personList' }) // 使用路由名称跳转
-    //           } else {
-    //             this.$message.error('保存失败: ' + response.data.message)
-    //           }
-    //         })
-    //         .catch(error => {
-    //           this.$message.error('保存失败')
-    //           console.error('保存错误:', error)
-    //         })
-
-    //       // 这里只是模拟保存成功并跳转
-    //       this.$message.success('保存成功 (模拟)')
-    //       // 模拟成功后跳转
-    //       this.$router.push({ name: 'personList' }) // 请确保你的路由配置中有一个名为 'personList' 的路由
-    //     } else {
-    //       console.log('表单验证失败')
-    //       this.$message.warning('请检查填写信息') // 提示用户检查信息
-    //       return false
-    //     }
-    //   })
-    // },
-
     // 资质证书上传成功处理
-    handleCertificateUploadSuccess(file) {
-      // Assuming file contains the selected file for upload
-      // Call uploadImage to handle the file upload
-      uploadImage(file)
+    handleCertificateUploadSuccess(option) {
+      uploadImage(option.file)
         .then(response => {
-          console.log('资质证书上传成功:', response);
-
-          // Handle the response (assuming structure: { code: 200, message: '上传成功', data: { url: '图片访问地址', fileId: '文件ID' } })
+          // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.certificateImageUrl = response.data.url; // Set preview image URL
-            // Also update the formData with the URL
-            this.formData.certificateImageUrl = response.data.url;
-            this.$message.success('资质证书上传成功');
+            this.certificateImageUrl = response.filePath // Set preview image URL
+            this.formData.certificateImageUrl = response.filePath
+            this.$message.success('资质证书上传成功')
           } else {
-            this.$message.error('资质证书上传失败: ' + response.message);
+            this.$message.error('资质证书上传失败: ' + response.message)
           }
         })
         .catch(error => {
-          // Handle upload error
-          this.$message.error('资质证书上传失败: ' + error.message);
-        });
+          this.$message.error('资质证书上传失败: ' + error.message)
+        })
     },
 
     // 资质证书上传前处理
@@ -269,20 +247,21 @@ export default {
     },
 
     // 人员照片上传成功处理
-    handlePersonPhotoUploadSuccess(response, file, fileList) {
-      console.log('人员照片上传成功:', response)
-      if (response.code === 200) {
-        this.personPhotoUrl = response.data.url// 设置预览图片URL
-        // 可能需要同时更新 formData 中的照片URL
-        this.formData.personPhotoUrl = response.data.url
-
-        // 手动触发人员照片的表单验证更新 (解决必填项在上传后仍然提示的问题)
-        this.$refs.personForm.validateField('personPhoto')
-
-        this.$message.success('人员照片上传成功')
-      } else {
-        this.$message.error('人员照片上传失败: ' + response.message)
-      }
+    handlePersonPhotoUploadSuccess(option) {
+      uploadImage(option.file)
+        .then(response => {
+          console.log('人员照片上传成功:', response)
+          if (response.code === 200) {
+            this.personPhotoUrl = response.filePath // Set preview image URL
+            this.formData.personPhotoUrl = response.filePath
+            this.$message.success('人员照片上传成功')
+          } else {
+            this.$message.error('人员照片上传失败: ' + response.message)
+          }
+        })
+        .catch(error => {
+          this.$message.error('人员照片上传失败: ' + error.message)
+        })
     },
 
     // 人员照片上传前处理

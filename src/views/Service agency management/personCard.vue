@@ -5,7 +5,7 @@
       <div class="text-info">
         <div class="name">{{ person.name }}</div>
         <div class="phone">{{ person.phone }}</div>
-        <div class="title">{{ person.title }}</div>
+        <div class="qualificationLevel">{{ person.qualificationLevel }}</div>
       </div>
     </div>
     <div class="divider" />
@@ -17,39 +17,29 @@
       <span class="delete" @click="deletePerson">删除</span>
     </div>
   </div>
-  </div>
   <!-- 在父组件的模板中 -->
 
 </template>
 
 <script>
-import CreateAccount from './CreateAccount.vue'
-
-// import { ref } from 'vue'
-// import CreateAccount from '@/views/Service agency management/CreateAccount.vue'
-// const isCreateAccountDialogVisible = ref(false)
-// const showCreateAccountDialog = () => {
-//   isCreateAccountDialogVisible.value = true
-// };
-// const handleAccountCreated = (accountData) => {
-//   console.log('新创建的账号数据:', accountData)
-//   // TODO: 在父组件中刷新用户列表或其他相关操作
-// };
+// import { title } from '@/settings'
+// import axios from 'axios'
 
 export default {
   // components: {
   //   CreateAccount,
   // },
   name: 'PersonCard',
+  props: {
+    person: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       isCreateAccountDialogVisible: false, // 控制模态框的显示
-      prefilledPhone: '', // 用于存储预填的手机号
-      person: {
-        name: '林根',
-        phone: '13508270870',
-        title: '消防设施操作员'
-      }
+      prefilledPhone: '' // 用于存储预填的手机号
     }
   },
   methods: {
@@ -124,7 +114,7 @@ export default {
   margin-bottom: 5px;
 }
 
-.text-info .title {
+.text-info .qualificationLevel {
   font-size: 14px;
   color: #666;
 }
