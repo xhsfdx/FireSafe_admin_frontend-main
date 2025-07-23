@@ -179,6 +179,7 @@
 
 <script>
 import axios from 'axios'
+import { uploadImage } from '@/api/upload'
 export default {
   data() {
     return {
@@ -230,7 +231,9 @@ export default {
       fileListPhotos: [], // 企业照片文件列表
       fileListLogo: [], // 企业LOGO文件列表
       fileListLicense: [], // 营业执照文件列表
-      licenseImageUrl: ''// 营业执照图片预览 URL
+      licenseImageUrl: '', // 营业执照图片预览 URL
+      PhotoImageUrl: '', // 企业照片预览 URL
+      LogoImageUrl: '' // 企业logo图片预览 URL
     }
   },
   // created() {
@@ -268,21 +271,19 @@ export default {
     },
     // 上传企业照片
     customUploadPhotos(option) {
-      const formData = new FormData()
-      formData.append('file', option.file)
-      axios.post('/api/uploadImage', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      }).then(res => {
-        if (res.data.code === 200) {
-          const url = res.data.data.url
-          this.fileListPhotos.push({ name: option.file.name, url })
-          if (!this.formData.enterprisePhotos) this.formData.enterprisePhotos = []
-          this.formData.enterprisePhotos.push(url)
-          option.onSuccess(res.data)
-        } else {
-          option.onError(new Error(res.data.message))
-        }
-      }).catch(err => option.onError(err))
+      uploadImage(option.file)
+        .then(response => {
+          if (response.code === 200) {
+            this.PhotoImageUrl = response.filePath // Set preview image URL
+            this.formData.PhotoImageUrl = response.filePath
+            this.$message.success('企业照片上传成功')
+          } else {
+            this.$message.error('企业照片上传失败: ' + response.message)
+          }
+        })
+        .catch(error => {
+          this.$message.error('企业照片上传失败: ' + error.message)
+        })
     },
     handleRemovePhotos(file) {
       this.fileListPhotos = this.fileListPhotos.filter(f => f.url !== file.url)
@@ -291,22 +292,20 @@ export default {
 
     // 上传企业LOGO
     customUploadLogo(option) {
-      const formData = new FormData()
-      formData.append('file', option.file)
-      axios.post('/api/uploadImage', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      }).then(res => {
-        console.log('上传响应:', res.data)
-        if (res.data.code === 200) {
-          const url = res.data.data.url
-          this.fileListLogo = [{ name: option.file.name, url }]
-          this.formData.enterpriseLogo = url
-          this.$message.success('上传成功')
-          option.onSuccess(res.data)
-        } else {
-          option.onError(new Error(res.data.message))
-        }
-      }).catch(err => option.onError(err))
+      uploadImage(option.file)
+        .then(response => {
+          // console.log('资质证书上传成功:', response);
+          if (response.code === 200) {
+            this.LogoImageUrl = response.filePath // Set preview image URL
+            this.formData.LogoImageUrl = response.filePath
+            this.$message.success('企业LOGO上传成功')
+          } else {
+            this.$message.error('企业LOGO上传失败: ' + response.message)
+          }
+        })
+        .catch(error => {
+          this.$message.error('企业LOGO上传失败: ' + error.message)
+        })
     },
     handleRemoveLogo() {
       this.fileListLogo = []
@@ -315,21 +314,20 @@ export default {
 
     // 上传营业执照
     customUploadLicense(option) {
-      const formData = new FormData()
-      formData.append('file', option.file)
-      axios.post('/api/uploadImage', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      }).then(res => {
-        if (res.data.code === 200) {
-          const url = res.data.data.url
-          this.licenseImageUrl = url
-          this.fileListLicense = [{ name: option.file.name, url }]
-          this.formData.businessLicense = url
-          option.onSuccess(res.data)
-        } else {
-          option.onError(new Error(res.data.message))
-        }
-      }).catch(err => option.onError(err))
+      uploadImage(option.file)
+        .then(response => {
+          // console.log('资质证书上传成功:', response);
+          if (response.code === 200) {
+            this.licenseImageUrl = response.filePath // Set preview image URL
+            this.formData.licenseImageUrl = response.filePath
+            this.$message.success('营业执照上传成功')
+          } else {
+            this.$message.error('营业执照上传失败: ' + response.message)
+          }
+        })
+        .catch(error => {
+          this.$message.error('营业执照上传失败: ' + error.message)
+        })
     },
     handleRemoveLicense() {
       this.fileListLicense = []

@@ -3,7 +3,7 @@
     <!-- 筛选栏 -->
     <el-form :inline="true" :model="queryForm" class="filter-form">
       <el-form-item>
-        <el-select v-model="queryForm.level" placeholder="请选择资质级别" clearable>
+        <el-select v-model="queryForm.qualificationLevel" placeholder="请选择资质级别" clearable>
           <el-option label="一级注册消防工程师" value="1" />
           <el-option label="消防设施操作员" value="2" />
           <el-option label="建筑物资质四级" value="3" />
@@ -25,9 +25,9 @@
 
     <!-- 卡片列表 -->
     <div class="card-list">
-      <person-card
-        v-for="item in filteredList"
-        :key="item.id"
+      <PersonCard
+        v-for="item in staffList"
+        :key="item._id"
         :person="item"
         @delete="handleDelete"
         @edit="goEdit"
@@ -35,75 +35,106 @@
     </div>
 
     <!-- 分页 -->
-    <div class="pagination">
+    <!-- <div class="pagination">
       共查询到{{ total }}条
       <el-pagination
         layout="prev, pager, next"
         :total="total"
         :page-size="5"
         :current-page.sync="page"
-      />
-    </div>
+      /> -->
+  <!-- </div> -->
   </div>
 </template>
 
 <script>
 import PersonCard from './personCard.vue'
+import axios from 'axios'
+import { getAllStaff } from '@/api/staff'
 
 export default {
-  components: { PersonCard },
+  components: {
+    PersonCard
+  },
   data() {
     return {
-      people: [],
       queryForm: {
-        level: '',
+        qualificationLevel: '',
         name: '',
         phone: ''
       },
-      personList: [
-        { id: 1, name: '林根', phone: '13508270870', title: '消防设施操作员' },
-        { id: 2, name: '王蕾', phone: '17760052365', title: '一级注册消防工程师' },
-        { id: 3, name: '何珍', phone: '13350252055', title: '一级注册消防工程师' },
-        { id: 4, name: '黎建军', phone: '15378390343', title: '消防设施操作员' },
-        { id: 5, name: '邱峥峰', phone: '15228141726', title: '一级注册消防工程师' }
-      ],
-      page: 1
+      staffList: [],
+      total: 0,
+      page: 1,
+      pageSize: 5
     }
   },
-  computed: {
-    total() {
-      return this.filteredList.length
-    },
-    filteredList() {
-      let result = this.personList
-      const { level, name, phone } = this.queryForm
-      if (level) result = result.filter(p => p.title.includes(level === '1' ? '一级' : '设施'))
-      if (name) result = result.filter(p => p.name.includes(name))
-      if (phone) result = result.filter(p => p.phone.includes(phone))
-      return result
-    }
-  },
+  // watch: {
+  //   page() {
+  //     this.fetchStaff()
+  //   }
+  // },
+  // mounted() {
+  //   this.fetchStaff()
+  // },
   created() {
-    this.loadData()
+    this.fetchStaff()
   },
   methods: {
-    loadData() {
-      const localData = JSON.parse(localStorage.getItem('people')) || []
-      this.people = localData
+    async fetchStaff() {
+      try {
+        const res = await getAllStaff()
+        if (res.success) {
+          this.staffList = res.data
+          this.total = res.data.length
+          console.log('接口返回内容:', res)
+        } else {
+          this.$message.error('获取人员列表失败')
+        }
+      } catch (err) {
+        console.error(err)
+        this.$message.error('网络错误')
+      }
     },
-    goEdit(person) {
-      this.$router.push({ name: 'PersonInfo', params: { id: person.id }})
+
+    handleQuery() {
+      this.page = 1
+      this.fetchStaff()
     },
-    handleQuery() {},
+
     resetForm() {
-      this.queryForm = { level: '', name: '', phone: '' }
+      this.queryForm = {
+        level: '',
+        name: '',
+        phone: ''
+      }
+      this.page = 1
+      this.fetchStaff()
     },
+
     handleAdd() {
-      this.$message.info('点击新增')
+      // 跳转或打开新增弹窗等
       this.$router.push({ name: 'PersonInfo' })
     },
-    handleDelete(person) {
-      this.personList = this.personList.filter(p => p.id !== person.id)
+
+    handleDelete(id) {
+      this.$confirm('确认删除该人员信息吗？', '提示', {
+        type: 'warning'
+      }).then(async() => {
+        const res = await axios.delete(`/api/staff/${id}`)
+        if (res.data.success) {
+          this.$message.success('删除成功')
+          this.fetchStaff()
+        } else {
+          this.$message.error('删除失败')
+        }
+      }).catch(() => {
+        this.$message.info('取消删除')
+      })
+    },
+
+    goEdit(person) {
+      this.$router.push({ name: 'EditPerson', params: { id: person._id }})
     }
   }
 }

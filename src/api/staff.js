@@ -9,12 +9,18 @@ export function getRoutes() {
 
 export function getAllStaff() {
   return request({
-    url: '/vue-element-admin/staff/list',
+    url: '/staff/all',
     method: 'get'
   })
 }
 
-export function addStaff(data) {
+export function getStaffById() {
+  return request({
+    url: '/staff/:id',
+    method: 'get'
+  })
+}
+export function createStaff(data) {
   return request({
     url: '/staff/create',
     method: 'post',
