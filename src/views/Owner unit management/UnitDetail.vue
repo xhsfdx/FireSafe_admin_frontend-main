@@ -169,9 +169,9 @@ export default {
           const remainingDays = this.getRemainingDays(item.endDate)
           
           this.projectDetail = {
-            projectName: item.project?.name || item.name || '未知项目',
-            projectId: item.project?._id || item._id || '',
-            ownerName: item.project?.ownerCompany || item.ownerName || '',
+            projectName: item.projectName || '未知项目',
+            projectId: item.projectId || '',
+            ownerName: item.ownerCompany || '',
             entrustName: item.clientCompany || '',
             status: item.status || '未知状态',
             serviceDate: item.startDate && item.endDate

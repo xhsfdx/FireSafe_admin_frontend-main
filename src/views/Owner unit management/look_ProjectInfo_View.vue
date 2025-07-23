@@ -10,7 +10,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="委托单位名称">
-              <el-input v-model="form.entrustName" disabled />
+              <el-input v-model="form.clientCompany" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -80,7 +80,7 @@ export default {
   data() {
     return {
       form: {
-        entrustName: '',
+        clientCompany: '',
         creditCode: ''
       },
       projectList: [],
@@ -93,7 +93,7 @@ export default {
     formData: {
       handler(newVal) {
         if (newVal) {
-          this.form.entrustName = newVal.entrustName || ''
+          this.form.clientCompany = newVal.clientCompany || ''
           this.form.creditCode = newVal.creditCode || ''
           this.projectList = newVal.projectList || []
         }

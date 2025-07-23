@@ -100,8 +100,8 @@ export default {
           const formData = {
             // 合同基本信息
             clientCompany: item.clientCompany || '',
-            name: item.name || '',
-            code: item.code || '',
+            name: item.contractName || '',
+            code: item.contractCode || '',
             payCycle: item.payCycle || '',
             warrantyType: item.warrantyType || '',
             warrantyMethod: item.warrantyMethod || '',
@@ -126,14 +126,17 @@ export default {
             // 维保内容
             checkedMaintList: item.maintainItems || [],
             // 项目信息
-            projectList: item.project ? [{
-              ownerName: item.project.ownerCompany || '',
-              name: item.project.name || '',
-              address: item.project.address || '',
-              area: item.project.district || '',
-              linkman: item.project.contactPerson || '',
-              phone: item.project.contactPhone || ''
-            }] : [],
+            projectList: [{
+              ownerName: item.ownerCompany || '',
+              name: item.projectName || '',
+              address: item.projectAddress || '',
+              area: item.projectDistrict || '',
+              linkman: item.contactPerson || '',
+              phone: item.contactPhone || '',
+              leader: item.leader.name || '',
+              technical: item.technical.name || '',
+              maintainers: item.maintainers || ''
+            }],
             // 维保人员
             dispatchStaffList: item.maintainPersons || []
           }

@@ -150,7 +150,7 @@ export default {
         }
         if (this.filters.status) params.status = this.filters.status
         if (this.filters.entrustName) params.clientCompany = this.filters.entrustName
-        if (this.filters.ownerName) params.ownerName = this.filters.ownerName // 如果后端有这个字段
+        if (this.filters.ownerName) params.ownerName = this.filters.ownerName// 如果后端有这个字段
         if (this.filters.contractType) params.contractType = this.filters.contractType
         const res = await fetchContracts(params)
         if (res.success) {
@@ -159,8 +159,9 @@ export default {
           this.tableData = list.map(item => {
             const days = item.endDate ? this.getRemainDays(item.endDate) : ''
             return {
-              id: item._id,
-              ownerName: item.project?.ownerCompany || '',
+              id: item.contractId,
+              projectid: item.project_id,
+              ownerName: item.ownerCompany || '',
               entrustName: item.clientCompany || '',
               contractType: item.contractType || '长期性合同',
               status: item.status || '',
@@ -242,7 +243,7 @@ export default {
     viewDetail(row) {
       this.$router.push({
         name: 'UnitDetail',
-        query: { id: row.id }
+        query: { id: row.projectid }
       })
     },
     // 续签
