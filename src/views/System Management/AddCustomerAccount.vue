@@ -12,7 +12,8 @@
           <!-- 业主单位 -->
           <el-form-item label="业主单位" prop="company">
             <el-select v-model="form.company" placeholder="请选择业主单位" filterable :loading="loadingCompanies">
-              <el-option v-for="item in companyOptions" :key="item.name" :label="item.name" :value="item.name"></el-option>
+              <el-option v-for="item in companyOptions" :key="item.value" :label="item.lable"
+                :value="item.value"></el-option>
             </el-select>
           </el-form-item>
 
@@ -37,8 +38,8 @@
           <!-- 用户角色 -->
           <el-form-item label="用户角色" prop="role">
             <el-select v-model="form.role" placeholder="请选择用户角色">
-              <el-option label="社会单位管理员" value="admin"></el-option>
-              <el-option label="社会单位人员" value="user"></el-option>
+              <el-option label="社会单位管理员" value="社会单位管理员"></el-option>
+              <el-option label="社会单位人员" value="社会单位人员"></el-option>
             </el-select>
           </el-form-item>
 
@@ -58,8 +59,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-
+import { getcustomers, Createcustomer } from '@/api/customer'
 export default {
   name: 'AddCustomerForm',
   data() {
@@ -104,51 +104,52 @@ export default {
       }
     }
   },
-  mounted() {
-    this.loadingCompanies = true
-    axios
-      .get('/customer/company-names')
-      .then((res) => {
-        this.companyOptions = res.data
-      })
-      .catch(() => {
-        this.$message.error('获取业主单位失败')
-      })
-      .finally(() => {
-        this.loadingCompanies = false
-      })
+  created() {
+    this.loadData()
   },
   methods: {
-    // 加载业主单位
-    // fetchCompanies() {
-    //   this.loadingCompanies = true
-    //   axios
-    //     .get('/api/customer/company-names')
-    //     .then((res) => {
-    //       // 假设接口返回 { data: [{id: '1', name: '单位1'}, ...] }
-    //       this.companyOptions = res.data
-    //     })
-    //     .catch(() => {
-    //       this.$message.error('获取业主单位失败')
-    //     })
-    //     .finally(() => {
-    //       this.loadingCompanies = false
-    //     })
-    // },
+    async loadData() {
+      try {
+        const res = await getcustomers()
+        const rawData = res.data || []
+
+        console.log(rawData)
+        // 动态生成 orgList
+        const orgs = [...new Set(rawData.map(item => item.organization))]
+
+        this.companyOptions = orgs.map(item => ({
+          label: item,
+          value: item
+        }))
+
+        this.company = orgs[0] || ''
+
+        console.log(this.companyOptions)
+        this.$message.success('数据加载成功')
+      } catch (err) {
+        console.error(err)
+        this.$message.error('加载数据失败')
+      }
+    },
     onSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           // 提交数据
-          axios
-            .post('/api/customer/create', this.form)
-            .then((response) => {
-              this.$message.success('保存成功！')
-              console.log('提交数据成功', response.data)
-            })
-            .catch((error) => {
-              this.$message.success('保存成功！')
-              console.log('提交数据成功', error)
-            })
+          const data = {
+            organization: this.form.company,
+            mobile: this.form.phone,
+            name: this.form.name,
+            username: this.form.username,
+            password: this.form.password,
+            role: this.form.role
+          }
+          const res = Createcustomer(data)
+          if (res.code === 200) {
+            this.$message.success(res.msg)
+          }
+          else {
+            this.$message.error("创建用户失败")
+          }
         } else {
           console.log('表单验证失败')
           return false

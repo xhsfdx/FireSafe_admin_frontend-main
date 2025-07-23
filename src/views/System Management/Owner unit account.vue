@@ -4,12 +4,8 @@
     <div class="left-bar">
       <el-input v-model="orgFilter" placeholder="请输入单位名称" size="small" class="org-search" clearable />
       <div class="org-list">
-        <div
-          v-for="item in filteredOrgs"
-          :key="item"
-          :class="['org-item', { active: activeOrg === item }]"
-          @click="activeOrg = item"
-        >{{ item }}</div>
+        <div v-for="item in filteredOrgs" :key="item" :class="['org-item', { active: activeOrg === item }]"
+          @click="activeOrg = item">{{ item }}</div>
       </div>
     </div>
 
@@ -17,27 +13,12 @@
     <div class="main-panel">
       <!-- 顶部搜索操作栏 -->
       <div class="toolbar">
-        <el-input
-          v-model="filters.name"
-          placeholder="姓名"
-          size="small"
-          style="width:150px; margin-right:10px"
-          clearable
-        />
-        <el-input
-          v-model="filters.phone"
-          placeholder="电话"
-          size="small"
-          style="width:150px; margin-right:10px"
-          clearable
-        />
-        <el-select
-          v-model="filters.status"
-          placeholder="账号状态"
-          size="small"
-          style="width:150px; margin-right:10px"
-          clearable
-        >
+        <el-input v-model="filters.name" placeholder="姓名" size="small" style="width:150px; margin-right:10px"
+          clearable />
+        <el-input v-model="filters.phone" placeholder="电话" size="small" style="width:150px; margin-right:10px"
+          clearable />
+        <el-select v-model="filters.status" placeholder="账号状态" size="small" style="width:150px; margin-right:10px"
+          clearable>
           <el-option label="全部" value="" />
           <el-option label="正常" value="1" />
           <el-option label="禁用" value="0" />
@@ -45,22 +26,17 @@
         <el-button type="primary" icon="el-icon-search" style="margin-right:6px" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" style="margin-right:6px" @click="onReset">重置</el-button>
         <el-button type="primary" icon="el-icon-plus" style="margin-right:6px" @click="onAdd">新增</el-button>
-        <el-button
+        <!-- <el-button
           type="primary"
           style="background: #885cf7; border-color: #885cf7; margin-right: 0;"
           icon="el-icon-link"
           @click="jumpSystem"
-        >跳转到社会单位系统</el-button>
+        >跳转到社会单位系统</el-button> -->
       </div>
 
       <!-- 用户表格 -->
-      <el-table
-        :data="filteredData"
-        border
-        style="width: 100%;"
-        :empty-text="' '"
-        header-cell-class-name="table-header"
-      >
+      <el-table :data="filteredData" border style="width: 100%;" :empty-text="' '"
+        header-cell-class-name="table-header">
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="username" label="用户名" align="center" />
         <el-table-column prop="name" label="姓名" align="center" />
@@ -87,6 +63,7 @@
 </template>
 
 <script>
+import { getcustomers, Deletecustomer } from '@/api/customer'
 export default {
   name: 'UserManagePage',
   data() {
@@ -101,16 +78,6 @@ export default {
       },
       // 加上 org 字段
       tableData: [
-        {
-          org: '高坪汽车站',
-          username: 'wangpan',
-          name: '王攀',
-          createTime: '2025-04-22 01:24:08',
-          role: '社会单位管理员',
-          mobile: '17683231030',
-          status: 1,
-          statusText: '正常'
-        }
         // 你可以加更多数据，也可以给 org: '小学' 的条目
       ]
     }
@@ -129,9 +96,53 @@ export default {
       return list
     }
   },
+  created() {
+    this.loadData()
+  },
   methods: {
-    onSearch() {
-      this.$message.success('点击了查询')
+
+    async loadData() {
+      try {
+        const res = await getcustomers()
+        const rawData = res.data || []
+
+        this.tableData = rawData.map(item => {
+          return {
+            id: item._id,
+            org: item.organization,
+            username: item.username,
+            name: item.name,
+            createTime: this.formatTime(item.createTime),
+            role: item.role,
+            mobile: item.mobile,
+            status: item.user.active ? 1 : 0,
+            statusText: item.user.active ? '正常' : '禁用'
+          }
+        })
+
+        // 动态生成 orgList
+        const orgs = [...new Set(this.tableData.map(item => item.org))]
+        this.orgList = orgs
+        this.activeOrg = orgs[0] || ''
+
+        this.$message.success('数据加载成功')
+      } catch (err) {
+        console.error(err)
+        this.$message.error('加载数据失败')
+      }
+    },
+    formatTime(timeStr) {
+      const d = new Date(timeStr)
+      const Y = d.getFullYear()
+      const M = (d.getMonth() + 1).toString().padStart(2, '0')
+      const D = d.getDate().toString().padStart(2, '0')
+      const h = d.getHours().toString().padStart(2, '0')
+      const m = d.getMinutes().toString().padStart(2, '0')
+      const s = d.getSeconds().toString().padStart(2, '0')
+      return `${Y}-${M}-${D} ${h}:${m}:${s}`
+    },
+    async onSearch() {
+      this.loadData();
     },
     onReset() {
       this.filters = { name: '', phone: '', status: '' }
@@ -147,11 +158,18 @@ export default {
       // 假设用 username 作为唯一标识，推荐实际用 id
       this.$router.push({
         path: '/system/edit-customer-account',
-        query: { username: row.username }
+        query: { id: row.id }
       })
     },
-    deleteRow(row) {
-      this.$message.error('点击了删除')
+    async deleteRow(row) {
+      const res = await Deletecustomer(row.id)
+      if (res.code === 200 ){
+        this.$message.error('删除了一条')
+        this.loadData();
+      }
+      else {
+        this.$message.error('删除错误')
+      }
     },
     onSetting() {
       this.$message.info('设置按钮')
