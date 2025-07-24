@@ -287,7 +287,7 @@ export default {
         console.log('maintainItems 数据:', maintainItems)
         await renewalContract(payload)
         this.$message.success('续签提交成功')
-        this.$router.push({ name: 'UnitProjectManagement' })
+        this.$router.push({ name: 'UnitProject' })
       } catch (e) {
         console.error('续签提交失败:', e)
         this.$message.error('续签提交失败')

@@ -289,7 +289,7 @@ export default {
         if (!p) return ''
         if (p === 1) return '月检'
         if (p === 12) return '年检'
-        return `每${p}月`
+        return `${p}`
       }
 
       return data.map(system => ({
@@ -302,6 +302,7 @@ export default {
             id: item._id,
             label: item.maintainSlim,
             data: {
+              id: item._id,
               system: system.category,
               item: device.device,
               content: item.maintainContent,
@@ -372,6 +373,8 @@ export default {
           system: n.label,
           item: '', content: '', period: '', standard: ''
         })
+
+      console.log(this.checkedMaintList)
     },
 
     handleContractTypeChange(value) {

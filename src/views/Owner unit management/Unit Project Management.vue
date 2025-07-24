@@ -101,7 +101,7 @@
 import { fetchContracts, deleteContract, approveContract, rejectContract } from '@/api/contract'
 
 export default {
-  name: 'UnitProjectManagement',
+  name: 'UnitProject',
   data() {
     return {
       filters: {

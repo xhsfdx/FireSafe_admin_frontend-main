@@ -7,24 +7,27 @@
       <template>
         <div class="step-bar-perfect">
           <div v-for="(step, i) in steps" :key="i" class="step-item-perfect">
-            <div class="step-time-perfect">{{ step.time }}</div>
+            <!-- 时间戳 -->
+            <div class="step-time-perfect">{{ step.timestamp }}</div>
+
             <div class="step-center-block">
-              <!-- 圆圈+勾 -->
-              <div class="circle-outer" :class="{ active: i <= activeStep }">
-                <div class="circle-inner" :class="{ active: i <= activeStep }">
-                  <i v-if="i <= activeStep" class="el-icon-check" />
+              <!-- 圆圈 + 勾 -->
+              <div class="circle-outer" :class="{ active: step.status === 'done' }">
+                <div class="circle-inner" :class="{ active: step.status === 'done' }">
+                  <i v-if="step.status === 'done'" class="el-icon-check" />
                 </div>
               </div>
+
               <!-- 横线 -->
-              <div
-                v-if="i < steps.length - 1"
-                class="step-line-perfect"
-                :class="{ active: i < activeStep }"
-              />
+              <div v-if="i < steps.length - 1" class="step-line-perfect"
+                :class="{ active: steps[i].status === 'done' }" />
             </div>
-            <div class="step-label-perfect">{{ step.label }}</div>
+
+            <!-- 标签 -->
+            <div class="step-label-perfect">{{ step.name }}</div>
           </div>
         </div>
+
       </template>
 
       <!-- 任务基础信息 -->
@@ -35,7 +38,7 @@
             <div class="row-txt"><span class="label">项目名称：</span>{{ task.projectName }}</div>
             <div class="row-txt">
               <span class="label">任务状态：</span>
-              <span :class="task.taskStatus === '已完成' ? 'stat-finish' : 'stat-process'">{{ task.taskStatus }}</span>
+              <span :class="task.status === '已完成' ? 'stat-finish' : 'stat-process'">{{ task.status }}</span>
             </div>
             <div class="row-txt">
               <span class="label">服务评分：</span>
@@ -44,56 +47,65 @@
             <div class="row-txt"><span class="label">维护保养情况：</span>{{ task.maintDesc }}</div>
           </el-col>
           <el-col :span="6">
-            <div class="row-txt"><span class="label">计划类型：</span><span class="stat-plan">{{ task.planType }}</span></div>
-            <div class="row-txt"><span class="label">现场维保人员：</span>{{ task.worker }}</div>
+            <div class="row-txt"><span class="label">计划类型：</span><span class="stat-plan">{{ task.planType }}</span>
+            </div>
+            <div class="row-txt"><span class="label">现场维保人员：</span>{{ task.maintainPersons.maintainers[0].name }}</div>
             <div class="row-txt"><span class="label">评价描述：</span>{{ task.comment }}</div>
           </el-col>
           <el-col :span="6">
-            <div class="row-txt"><span class="label">任务名称：</span>{{ task.taskName }}</div>
-            <div class="row-txt"><span class="label">项目负责人：</span>{{ task.manager }}</div>
+            <div class="row-txt"><span class="label">任务名称：</span>{{ task.taskMonth }}</div>
+            <div class="row-txt"><span class="label">项目负责人：</span>{{ task.maintainPersons.technical.name }}</div>
             <div class="row-txt">
               <span class="label">故障列表：</span>
-              <el-link type="primary" style="padding: 0 4px;" @click="showFaultList">详情<i class="el-icon-arrow-right" /></el-link>
+              <el-link type="primary" style="padding: 0 4px;" @click="showFaultList">详情<i
+                  class="el-icon-arrow-right" /></el-link>
             </div>
           </el-col>
           <el-col :span="6">
-            <div class="row-txt"><span class="label">业主单位名称：</span>{{ task.owner }}</div>
-            <div class="row-txt"><span class="label">维保方式：</span><span class="stat-maint">{{ task.maintType }}</span></div>
+            <div class="row-txt"><span class="label">业主单位名称：</span>{{ task.ownerName }}</div>
+            <div class="row-txt"><span class="label">维保方式：</span><span class="stat-maint">{{
+              task.contract.warrantyMethod
+                }}</span></div>
           </el-col>
         </el-row>
         <el-row class="stat-bar" :gutter="24">
           <el-col :span="4">
             <div class="stat-item">
-              <img src="https://img.shields.io/badge/检测总数-1bace0?style=for-the-badge&logo=datadog&logoColor=white" style="height:48px;">
-              <div class="stat-num">{{ stat.total }}</div>
+              <img src="https://img.shields.io/badge/检测总数-1bace0?style=for-the-badge&logo=datadog&logoColor=white"
+                style="height:48px;">
+              <div class="stat-num">{{ task.totalCheckCount }}</div>
               <div class="stat-label">检测总数</div>
             </div>
           </el-col>
           <el-col :span="4">
             <div class="stat-item">
-              <img src="https://img.shields.io/badge/未检数-8d9aac?style=for-the-badge&logo=search&logoColor=white" style="height:48px;">
-              <div class="stat-num">{{ stat.notChecked }}</div>
+              <img src="https://img.shields.io/badge/未检数-8d9aac?style=for-the-badge&logo=search&logoColor=white"
+                style="height:48px;">
+              <div class="stat-num">{{ task.totalCheckCount - task.passedCount }}</div>
               <div class="stat-label">未检数</div>
             </div>
           </el-col>
           <el-col :span="4">
             <div class="stat-item">
-              <img src="https://img.shields.io/badge/已检数-1cb659?style=for-the-badge&logo=vercel&logoColor=white" style="height:48px;">
-              <div class="stat-num">{{ stat.checked }}</div>
+              <img src="https://img.shields.io/badge/已检数-1cb659?style=for-the-badge&logo=vercel&logoColor=white"
+                style="height:48px;">
+              <div class="stat-num">{{ task.passedCount }}</div>
               <div class="stat-label">已检数</div>
             </div>
           </el-col>
           <el-col :span="4">
             <div class="stat-item">
-              <img src="https://img.shields.io/badge/故障记录-fa7952?style=for-the-badge&logo=wrench&logoColor=white" style="height:48px;">
-              <div class="stat-num">{{ stat.fault }}</div>
+              <img src="https://img.shields.io/badge/故障记录-fa7952?style=for-the-badge&logo=wrench&logoColor=white"
+                style="height:48px;">
+              <div class="stat-num">{{ task.abnormalCount	}}</div>
               <div class="stat-label">故障记录</div>
             </div>
           </el-col>
           <el-col :span="4">
             <div class="stat-item">
-              <img src="https://img.shields.io/badge/更换设备-845ce3?style=for-the-badge&logo=handshake&logoColor=white" style="height:48px;">
-              <div class="stat-num">{{ stat.replace }}</div>
+              <img src="https://img.shields.io/badge/更换设备-845ce3?style=for-the-badge&logo=handshake&logoColor=white"
+                style="height:48px;">
+              <div class="stat-num">{{ task.replacedCount }}</div>
               <div class="stat-label">更换设备</div>
             </div>
           </el-col>
@@ -106,7 +118,7 @@
       <div class="section-title">检测详情</div>
       <el-row :gutter="0">
         <!-- 左侧树 -->
-        <el-col :span="6">
+        <!-- <el-col :span="6">
           <el-tree
             :data="treeData"
             node-key="id"
@@ -117,11 +129,12 @@
             class="check-tree"
             @current-change="handleTreeChange"
           />
-        </el-col>
+        </el-col> -->
         <!-- 右侧表格 -->
-        <el-col :span="18">
+        <el-col :span="24">
           <el-table :data="tableData" border>
-            <el-table-column prop="content" label="检测内容" min-width="340" />
+            <el-table-column prop="device" label="检测项" min-width="340" />
+            <el-table-column prop="maintainContent" label="检测内容" min-width="340" />
             <el-table-column prop="result" label="检测结果" min-width="110">
               <template slot-scope="{ row }">
                 <span v-if="row.result === '异常'" class="result-warn">{{ row.result }}</span>
@@ -136,6 +149,7 @@
 </template>
 
 <script>
+import { getMaintainTask } from '@/api/maintainTask'
 export default {
   name: 'MpmTDDetail',
   data() {
@@ -149,7 +163,7 @@ export default {
         { label: '完成维保', time: '2025-04-22 01:30:58' },
         { label: '已评价', time: '' }
       ],
-      activeStep: 4, // 当前进度
+      activeStep: 2, // 当前进度
       // 基本信息
       task: {
         projectName: '高坪汽车站消防维保服务',
@@ -194,7 +208,22 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.onLoad()
+  },
   methods: {
+    async onLoad() {
+      const id = this.$route.query.id
+      try {
+        const res = await getMaintainTask(id);
+        console.log(res)
+        this.task = res.data;
+        this.tableData = res.data.details;
+        this.steps = res.data.progress;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
+    },
     renderTreeNode(h, { node, data }) {
       return (
         <span>
@@ -237,6 +266,7 @@ export default {
   background: #f8fbfd;
   min-height: 100vh;
 }
+
 .task-steps-section {
   background: #fff;
   border-radius: 14px;
@@ -244,6 +274,7 @@ export default {
   padding: 16px 24px 26px 24px;
   box-shadow: 0 4px 12px #e7f4ff18;
 }
+
 .step-bar-custom {
   display: flex;
   align-items: flex-start;
@@ -253,6 +284,7 @@ export default {
   padding-left: 8px;
   min-width: 1200px;
 }
+
 .step-item-custom {
   display: flex;
   flex-direction: column;
@@ -267,6 +299,7 @@ export default {
   position: relative;
   margin-bottom: 7px;
 }
+
 .circle-inner {
   width: 90px;
   height: 90px;
@@ -281,14 +314,17 @@ export default {
   background: #edf4fa;
   transition: 0.3s;
 }
+
 .circle-wrap.active .circle-inner {
   background: #2cb4fa;
   border-color: #2cb4fa;
 }
+
 .circle-wrap:not(.active) .circle-inner {
   background: #edf4fa;
   border-color: #eaf1f7;
 }
+
 .circle-inner i {
   font-size: 42px;
   font-weight: bold;
@@ -303,9 +339,11 @@ export default {
   margin-right: -2px;
   transition: 0.3s;
 }
+
 .step-line-custom.active {
   background: #cce9fa;
 }
+
 .step-label-custom {
   font-size: 25px;
   color: #222;
@@ -315,6 +353,7 @@ export default {
   letter-spacing: 1px;
   min-height: 34px;
 }
+
 .step-time-custom {
   font-size: 17px;
   color: #8a8a8a;
@@ -324,10 +363,23 @@ export default {
 }
 
 @media (max-width: 1300px) {
-  .step-bar-custom { min-width: 900px;}
-  .circle-inner { width: 60px; height: 60px; font-size: 30px;}
-  .step-label-custom { font-size: 16px;}
-  .step-time-custom { font-size: 13px;}
+  .step-bar-custom {
+    min-width: 900px;
+  }
+
+  .circle-inner {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+
+  .step-label-custom {
+    font-size: 16px;
+  }
+
+  .step-time-custom {
+    font-size: 13px;
+  }
 }
 
 .task-base-info {
@@ -336,6 +388,7 @@ export default {
   border-radius: 8px;
   padding: 18px 22px 2px 22px;
 }
+
 .section-title {
   font-size: 20px;
   font-weight: bold;
@@ -343,43 +396,66 @@ export default {
   color: #113;
   letter-spacing: 1px;
 }
+
 .row-txt {
   font-size: 15px;
   margin-bottom: 5px;
   color: #222;
 }
+
 .label {
   color: #888;
   min-width: 88px;
   display: inline-block;
 }
-.stat-finish { color: #1db217; font-weight: 600; }
-.stat-process { color: #1976d2; font-weight: 600; }
-.stat-plan { color: #18bb4a; font-weight: 600;}
-.stat-maint { color: #741cd4; font-weight: 600;}
+
+.stat-finish {
+  color: #1db217;
+  font-weight: 600;
+}
+
+.stat-process {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.stat-plan {
+  color: #18bb4a;
+  font-weight: 600;
+}
+
+.stat-maint {
+  color: #741cd4;
+  font-weight: 600;
+}
+
 .stat-bar {
   margin: 14px 0 0 0;
   border-top: 1.5px solid #e6eaf0;
   padding-top: 18px;
 }
+
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0;
 }
+
 .stat-num {
   font-size: 29px;
   font-weight: bold;
   margin: 2px 0 2px 0;
   color: #393;
 }
+
 .stat-label {
   font-size: 14px;
   color: #757b8a;
   margin-top: 2px;
   font-weight: 500;
 }
+
 .check-detail-section {
   background: #fff;
   border-radius: 14px;
@@ -387,14 +463,24 @@ export default {
   margin-top: 12px;
   box-shadow: 0 4px 12px #e7f4ff18;
 }
+
 .check-tree {
   background: #f4f7fb;
   padding: 6px 6px 8px 6px;
   border-radius: 10px;
   min-height: 420px;
 }
-.result-warn { color: #fe571e; font-weight: 600;}
-.result-ok { color: #1888fe; font-weight: 600;}
+
+.result-warn {
+  color: #fe571e;
+  font-weight: 600;
+}
+
+.result-ok {
+  color: #1888fe;
+  font-weight: 600;
+}
+
 /* 表格微调 */
 ::v-deep .el-table thead th {
   background: #f6fafd;
@@ -402,9 +488,12 @@ export default {
   color: #223;
   font-weight: bold;
 }
-::v-deep .el-table td, ::v-deep .el-table th {
+
+::v-deep .el-table td,
+::v-deep .el-table th {
   padding: 14px 0 !important;
 }
+
 .step-bar-perfect {
   display: flex;
   justify-content: space-between;
@@ -457,6 +546,7 @@ export default {
   z-index: 2;
   transition: 0.2s;
 }
+
 .circle-outer.active {
   background: #eaf4fe;
   box-shadow: 0 0 0 12px #eaf4fe;
@@ -474,9 +564,11 @@ export default {
   color: #fff;
   transition: background 0.2s;
 }
+
 .circle-inner.active {
   background: #169fff;
 }
+
 .circle-inner i {
   font-size: 34px;
   color: #fff;
@@ -499,6 +591,7 @@ export default {
   border-radius: 4px;
   transition: background 0.2s;
 }
+
 .step-line-perfect.active {
   background: #c1e1fd;
 }

@@ -31,21 +31,22 @@
     >
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column prop="name" label="项目名称" align="center" />
-      <el-table-column prop="owner" label="业主单位名称" align="center" />
+      <!-- <el-table-column v-show="false" prop="_id" label="项目ID" align="center"  /> -->
+      <el-table-column prop="projectName" label="项目名称" align="center" />
+      <el-table-column prop="ownerName" label="业主单位名称" align="center" />
       <el-table-column prop="planType" label="计划类型" align="center">
         <template slot-scope="{ row }">
           <span style="color: #16c336;">{{ row.planType }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="maintType" label="维保方式" align="center">
+      <el-table-column prop="maintenanceMethod" label="维保方式" align="center">
         <template slot-scope="{ row }">
-          <span style="color: #7814ea;">{{ row.maintType }}</span>
+          <span style="color: #7814ea;">{{ row.maintenanceMethod }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="makingStatus" label="制定情况" align="center">
+      <el-table-column prop="planDefinedStatus" label="制定情况" align="center">
         <template slot-scope="{ row }">
-          <span style="color: #1bb214;">{{ row.makingStatus }}</span>
+          <span style="color: #1bb214;">{{ row.planDefinedStatus }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="planStatus" label="计划状态" align="center">
@@ -84,6 +85,7 @@
 </template>
 
 <script>
+import { getMaintainPlans } from '@/api/maintainPlan'
 export default {
   name: 'PlanListPage',
   data() {
@@ -94,30 +96,13 @@ export default {
         planType: '',
         planStatus: ''
       },
-      allData: [
-        {
-          name: 'ue',
-          owner: '小学',
-          planType: '月',
-          maintType: '系统维保',
-          makingStatus: '已制定',
-          planStatus: '进行中'
-        },
-        {
-          name: '高坪汽车站消防维保…',
-          owner: '高坪汽车站',
-          planType: '月',
-          maintType: '系统维保',
-          makingStatus: '已制定',
-          planStatus: '进行中'
-        }
-      ],
+      allData: [],
       tableData: [],
       multipleSelection: []
     }
   },
   mounted() {
-    this.onSearch()
+    this.onLoad()
   },
   methods: {
     onSearch() {
@@ -130,6 +115,15 @@ export default {
         (!planStatus || item.planStatus === planStatus)
       )
     },
+    async onLoad() {
+      try {
+        const res = await getMaintainPlans();
+        console.log(res)
+        this.tableData = res.data;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
+    },
     onReset() {
       this.filters = { name: '', makingStatus: '', planType: '', planStatus: '' }
       this.onSearch()
@@ -140,14 +134,14 @@ export default {
     showPlan(row) {
       // 可传参：比如计划ID/项目名等，这里传 name
       this.$router.push({
-        name: 'OwnerUnitPlanDetail', // 路由name要和router里配置的name一致
-        query: { name: row.name }
+        name: 'PlanDetail', // 路由name要和router里配置的name一致
+        query: { id: row._id }
       })
     },
     showTask(row) {
       this.$router.push({
-        name: 'OwnerUnitTaskDetail',
-        query: { name: row.name }
+        name: 'TaskDetail',
+        query: { id: row.projectId }
       })
     },
     delRow(row) {

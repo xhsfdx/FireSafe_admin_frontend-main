@@ -1,7 +1,7 @@
 <template>
   <div class="person-card">
     <div class="top-section">
-      <img class="avatar" :src="require('@/assets/person.png')" alt="头像">
+      <img class="avatar" :src="person.avatar" alt="头像">
       <div class="text-info">
         <div class="name">{{ person.name }}</div>
         <div class="phone">{{ person.phone }}</div>

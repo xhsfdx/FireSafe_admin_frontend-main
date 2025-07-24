@@ -15,7 +15,7 @@
           <h2>四川不凡消防科技有限公司</h2>
           <div class="location">
             <i class="el-icon-location" />
-            <span>四川省南充市顺庆区濛华南路二段115号法拉利广场3号楼1单元2层8号</span>
+            <span>{{ organization.organizationAddress	}}</span>
           </div>
         </div>
       </div>
@@ -28,13 +28,13 @@
       <div class="section">
         <div class="item">
           <span class="label">企业简介:</span>
-          <span class="value">{{ companyProfile }}</span>
+          <span class="value">{{ organization.organizationIntroduction }}</span>
         </div>
         <div class="item">
           <span class="label" />
           <span class="value" style="margin-left: -90px;">
             <i class="el-icon-mobile-phone" />
-            {{ contactNumber }}
+            {{ organization.organizationPhone }}
           </span>
         </div>
       </div>
@@ -42,43 +42,43 @@
       <div class="section">
         <div class="item">
           <span class="label" style="width: auto; margin-left: -10px;">统一社会信用代码:</span>
-          <span class="value">{{ socialCreditCode }}</span>
+          <span class="value">{{ organization.unifiedSocialCreditCode }}</span>
         </div>
         <div class="item">
           <span class="label">企业邮箱:</span>
-          <span class="value">{{ enterpriseEmail }}</span>
+          <span class="value">{{ organization.email }}</span>
         </div>
       </div>
 
       <div class="section">
         <div class="item">
           <span class="label">企业法人:</span>
-          <span class="value">{{ legalPerson }}</span>
+          <span class="value">{{ organization.legalPerson }}</span>
         </div>
         <div class="item">
           <span class="label">法人电话:</span>
-          <span class="value">{{ legalPersonPhone }}</span>
+          <span class="value">{{ organization.legalPersonPhone }}</span>
         </div>
       </div>
 
       <div class="section">
         <div class="item">
           <span class="label">维保主管:</span>
-          <span class="value">{{ maintenanceSupervisor }}</span>
+          <span class="value">{{ organization.maintenanceSupervisor }}</span>
         </div>
         <div class="item">
           <span class="label">主管电话:</span>
-          <span class="value">{{ maintenanceSupervisorPhone }}</span>
+          <span class="value">{{ organization.supervisorPhone }}</span>
         </div>
       </div>
       <div class="section">
         <div class="item">
           <span class="label">企业照片:</span>
-          <span class="value">{{ enterprisePhotos }}</span>
+          <span class="value">{{ organization.organizationPhoto }}</span>
         </div>
         <div class="item">
           <span class="label">营业执照:</span>
-          <span class="value">{{ businessLicense }}</span>
+          <span class="value">{{ organization.businessLicense }}</span>
         </div>
       </div>
     </div>
@@ -86,9 +86,11 @@
 </template>
 
 <script>
+import { getOrganization } from '@/api/organization';
 export default {
   data() {
     return {
+      organization: {
       companyProfile: '无', // 绑定企业简介数据
       contactNumber: '13438783735', // 绑定联系电话数据
       socialCreditCode: '91511302MA7FXFWY6L', // 绑定统一社会信用代码数据
@@ -99,9 +101,23 @@ export default {
       maintenanceSupervisorPhone: '无', // 绑定主管电话数据
       enterprisePhotos: '无', // 绑定企业照片数据
       businessLicense: '无' // 绑定营业执照数据
+      }
+      
     }
   },
+  mounted() {
+    this.onLoad()
+  },
   methods: {
+    async onLoad() {
+      try {
+        const res = await getOrganization();
+        console.log(res)
+        this.organization = res.data;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
+    },
     goToEditPage(id) {
       // 实现页面跳转逻辑
       // 使用 Vue Router 进行导航

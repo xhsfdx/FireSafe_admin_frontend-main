@@ -35,26 +35,12 @@
       </div>
 
       <div class="step-content">
-        <AddNewContractInformation
-          v-show="activeStep === 0"
-          :data="formData"
-          @next="handleNext"
-          @update="updateFormData"
-        />
-        <AddNewProjectInformation
-          v-show="activeStep === 1"
-          :form-data="formData"
-          @next="handleNext"
-          @prev="handlePrev"
-          @update="updateFormData"
-        />
-        <AddNewDispatchStaff
-          v-show="activeStep === 2"
-          :form-data="formData"
-          @prev="handlePrev"
-          @submit="submitAll"
-          @update="updateFormData"
-        />
+        <AddNewContractInformation v-show="activeStep === 0" :data="formData" @next="handleNext"
+          @update="updateFormData" />
+        <AddNewProjectInformation v-show="activeStep === 1" :form-data="formData" @next="handleNext" @prev="handlePrev"
+          @update="updateFormData" />
+        <AddNewDispatchStaff v-show="activeStep === 2" :form-data="formData" @prev="handlePrev" @submit="submitAll"
+          @update="updateFormData" />
       </div>
     </el-card>
   </div>
@@ -125,50 +111,47 @@ export default {
 
           // 维保项目 (提取ID)
           maintainItems: this.formData.checkedMaintList ? this.formData.checkedMaintList.map(item => item.id).filter(id => id) : [],
-
+          maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p)[0] : [],
           // 项目信息 (取第一个项目作为主项目)
-          projectInfo: this.formData.projectList && this.formData.projectList.length > 0
-            ? {
-                name: this.formData.projectList[0].name,
-                companyname: this.formData.projectList[0].ownerName,
-                address: this.formData.projectList[0].address,
-                district: this.formData.projectList[0].area,
-                position: '', // 根据需要填充
-                ownerCompany: this.formData.projectList[0].ownerName,
-                contactPerson: this.formData.projectList[0].linkman,
-                contactPhone: this.formData.projectList[0].phone,
-                logoUrl: '',
-                entranceReportUrl: ''
-              }
-            : (isOneTime ? {
-                name: this.formData.contractName || '一次性合同项目',
-                companyname: this.formData.entrustName,
-                address: '',
-                district: '',
-                position: '',
-                ownerCompany: this.formData.entrustName,
-                contactPerson: '',
-                contactPhone: '',
-                logoUrl: '',
-                entranceReportUrl: ''
-              } : null),
-
-          // 维保人员
-          maintainPersons: this.formData.dispatchStaffList ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p) : []
-        }
+          projects: this.formData.projectList && this.formData.projectList.length > 0
+            ? this.formData.projectList.map(item => ({
+              name: item.name,
+              companyname: item.ownerName,
+              address: item.address,
+              district: item.area,
+              position: '', // 可根据需要设置
+              ownerCompany: item.ownerName,
+              contactPerson: item.linkman,
+              contactPhone: item.phone,
+              logoUrl: '',
+              entranceReportUrl: ''
+            }))
+            : (isOneTime ? [{
+              name: this.formData.contractName || '一次性合同项目',
+              companyname: this.formData.entrustName,
+              address: '',
+              district: '',
+              position: '',
+              ownerCompany: this.formData.entrustName,
+              contactPerson: '',
+              contactPhone: '',
+              logoUrl: '',
+              entranceReportUrl: ''
+            }] : [])
+          }
 
         console.log('Payload sent to backend:', payload)
         
         const res = await createContract(payload) // 使用转换后的 payload
-        if (res.success) {
-          this.$message.success('新增合同成功！')
-          this.$router.push({ name: 'UnitProjectManagement' }) // Redirect to the list page
-        } else {
-          this.$message.error(res.message || '提交失败，请检查填写内容')
-        }
-      } catch (err) {
-        this.$message.error('请求失败，请稍后重试')
-      }
+        if(res.success) {
+            this.$message.success('新增合同成功！')
+          this.$router.push({ name: 'UnitProject' }) // Redirect to the list page
+  } else {
+    this.$message.error(res.message || '提交失败，请检查填写内容')
+  }
+} catch (err) {
+  this.$message.error('请求失败，请稍后重试')
+}
     }
   }
 }
@@ -179,18 +162,22 @@ export default {
   padding: 18px;
   background-color: #f0f2f5;
 }
+
 .box-card {
   border-radius: 10px;
 }
+
 .step-content {
   margin-top: 40px;
 }
+
 .custom-steps {
   display: flex;
   justify-content: space-around;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .step-item {
   display: flex;
   align-items: center;
@@ -204,21 +191,25 @@ export default {
   flex: 1;
   justify-content: center;
 }
+
 .step-item.active {
   background-color: #eaf3ff;
   border-color: #409eff;
   color: #333;
   font-weight: bold;
 }
+
 .step-item.completed {
   background-color: #f0f9eb;
   border-color: #67c23a;
   color: #333;
 }
+
 .icon-container {
   font-size: 24px;
   margin-right: 15px;
 }
+
 .step-number-container {
   position: absolute;
   right: -1px;
@@ -229,6 +220,7 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
 .step-number {
   background-color: #409eff;
   color: white;
@@ -240,9 +232,11 @@ export default {
   justify-content: center;
   font-size: 16px;
 }
+
 .step-item.completed .step-number {
   background-color: #67c23a;
 }
+
 .step-arrow {
   width: 20px;
   height: 2px;

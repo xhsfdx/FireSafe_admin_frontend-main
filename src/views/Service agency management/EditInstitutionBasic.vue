@@ -9,21 +9,21 @@
       <el-form ref="enterpriseForm" :model="formData" :rules="rules" label-width="150px">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="* 企业名称" prop="enterpriseName">
-              <el-input v-model="formData.enterpriseName" placeholder="请输入企业名称" />
+            <el-form-item label="* 企业名称" prop="organizationName">
+              <el-input v-model="formData.organizationName" placeholder="请输入企业名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="企业邮箱" prop="enterpriseEmail">
-              <el-input v-model="formData.enterpriseEmail" placeholder="请输入企业邮箱" />
+            <el-form-item label="企业邮箱" prop="email">
+              <el-input v-model="formData.email" placeholder="请输入企业邮箱" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="* 统一社会信用代码" prop="socialCreditCode">
-              <el-input v-model="formData.socialCreditCode" placeholder="请输入统一社会信用代码" disabled />
+            <el-form-item label="* 统一社会信用代码" prop="unifiedSocialCreditCode">
+              <el-input v-model="formData.unifiedSocialCreditCode" placeholder="请输入统一社会信用代码" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -35,8 +35,8 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="* 企业地址" prop="enterpriseAddress">
-              <el-input v-model="formData.enterpriseAddress" placeholder="请输入企业地址" />
+            <el-form-item label="* 企业地址" prop="organizationAddress">
+              <el-input v-model="formData.organizationAddress" placeholder="请输入企业地址" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -48,8 +48,8 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="企业电话" prop="enterprisePhone">
-              <el-input v-model="formData.enterprisePhone" placeholder="请输入企业电话" />
+            <el-form-item label="企业电话" prop="organizationPhone">
+              <el-input v-model="formData.organizationPhone" placeholder="请输入企业电话" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -61,22 +61,22 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="企业网址" prop="enterpriseWebsite">
-              <el-input v-model="formData.enterpriseWebsite" placeholder="请输入企业网址" />
+            <el-form-item label="企业网址" prop="organizationWebsite">
+              <el-input v-model="formData.organizationWebsite" placeholder="请输入企业网址" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="主管电话" prop="maintenanceSupervisorPhone">
-              <el-input v-model="formData.maintenanceSupervisorPhone" placeholder="请输入主管电话" />
+            <el-form-item label="主管电话" prop="supervisorPhone">
+              <el-input v-model="formData.supervisorPhone" placeholder="请输入主管电话" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="企业简介" prop="companyProfile">
+            <el-form-item label="企业简介" prop="organizationIntroduction">
               <el-input
-                v-model="formData.companyProfile"
+                v-model="formData.organizationIntroduction"
                 type="textarea"
                 placeholder="请输入企业简介"
                 :rows="4"
@@ -93,8 +93,8 @@
         <el-row :gutter="20">
           <el-col :span="12" />
           <el-col :span="12">
-            <el-form-item label="服务区域" prop="serviceArea">
-              <el-select v-model="formData.serviceArea" placeholder="请选择服务区域">
+            <el-form-item label="服务区域" prop="serviceRegion">
+              <el-select v-model="formData.serviceRegion" placeholder="请选择服务区域">
                 <el-option label="南充市" value="南充市" />
                 <el-option label="成都市" value="成都市" />
                 <!-- 添加更多服务区域选项 -->
@@ -117,7 +117,7 @@
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <!-- <el-col :span="12">
             <el-form-item label="是否有四川省网账号" prop="hasSichuanNetAccount">
               <div style="display: flex; align-items: center;" />
               <el-radio-group v-model="formData.hasSichuanNetAccount">
@@ -125,7 +125,7 @@
                 <el-radio :label="false">否</el-radio>
               </el-radio-group>
             </el-form-item>
-          </el-col>
+          </el-col> -->
         </el-row>
 
         <el-row :gutter="20">
@@ -142,7 +142,7 @@
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <!-- <el-col :span="12">
             <el-form-item label="* 业务类型" prop="businessType">
               <el-select v-model="formData.businessType" placeholder="请选择业务类型">
                 <el-option label="消防设施检测" value="消防设施检测" />
@@ -150,7 +150,7 @@
                 <el-option label="消防安全评估" value="消防安全评估" />
               </el-select>
             </el-form-item>
-          </el-col>
+          </el-col> -->
         </el-row>
 
         <el-row :gutter="20">
@@ -180,28 +180,29 @@
 <script>
 import axios from 'axios'
 import { uploadImage } from '@/api/upload'
+import { getOrganization } from '@/api/organization';
 export default {
   data() {
     return {
       // ImageUrl: 'http://localhost:9527/#/agency/basic/edit',
       formData: {
-        enterpriseName: '四川不凡消防科技有限公司', // 绑定企业名称数据
-        enterpriseEmail: '', // 绑定企业邮箱数据
-        socialCreditCode: '91511302MA7FXFWY6L', // 绑定统一社会信用代码数据
+        organizationName: '四川不凡消防科技有限公司', // 绑定企业名称数据
+        email: '', // 绑定企业邮箱数据
+        unifiedSocialCreditCode: '91511302MA7FXFWY6L', // 绑定统一社会信用代码数据
         legalPerson: '', // 绑定企业法人数据
-        enterpriseAddress: '四川省南充市顺庆区濛华南路二段115号法拉利', // 绑定企业地址数据
+        organizationAddress: '四川省南充市顺庆区濛华南路二段115号法拉利', // 绑定企业地址数据
         legalPersonPhone: '', // 绑定法人电话数据
-        enterprisePhone: '13438783735', // 绑定企业电话数据
+        organizationPhone: '13438783735', // 绑定企业电话数据
         maintenanceSupervisor: '', // 绑定维保主管数据
-        enterpriseWebsite: '', // 绑定企业网址数据
-        maintenanceSupervisorPhone: '', // 绑定主管电话数据
-        companyProfile: '', // 绑定企业简介数据
+        organizationWebsite: '', // 绑定企业网址数据
+        supervisorPhone: '', // 绑定主管电话数据
+        organizationIntroduction: '', // 绑定企业简介数据
         systemTitle: '四川不凡消防科技有限公司', // 绑定系统标题数据
-        serviceArea: '南充市', // 绑定服务区域数据
+        serviceRegion: '南充市', // 绑定服务区域数据
         hasSichuanNetAccount: false, // 绑定是否有四川省网平台账号数据
-        businessType: [], // 绑定业务类型数据
+        businessTypes: [], // 绑定业务类型数据
         enterprisePhotos: [], // 企业照片数组
-        enterpriseLogo: '', // 企业logo 单张
+        organizationPhoto: '', // 企业logo 单张
         businessLicense: '' // 营业执照 单张
       },
       // 表单验证规则
@@ -239,8 +240,20 @@ export default {
   // created() {
   //   this.fetchEnterpriseInfo(this.$route.params.id)
   // },
+  mounted() {
+    this.onLoad()
+  },
   methods: {
     // 保存按钮点击事件
+    async onLoad() {
+      try {
+        const res = await getOrganization();
+        console.log(res)
+        this.formData = res.data;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
+    },
     saveInfo() {
       this.$refs.enterpriseForm.validate((valid) => {
         if (valid) {

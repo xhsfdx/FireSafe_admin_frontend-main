@@ -133,9 +133,9 @@ export default {
               area: item.projectDistrict || '',
               linkman: item.contactPerson || '',
               phone: item.contactPhone || '',
-              leader: item.leader.name || '',
-              technical: item.technical.name || '',
-              maintainers: item.maintainers || ''
+              leader: item?.leader.name || '',
+              technical: item?.technical.name || '',
+              maintainers: item?.maintainers || ''
             }],
             // 维保人员
             dispatchStaffList: item.maintainPersons || []

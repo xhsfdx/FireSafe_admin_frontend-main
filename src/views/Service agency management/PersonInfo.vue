@@ -130,8 +130,8 @@ export default {
         age: 0, // 绑定年龄数据
         employmentDate: null, // 绑定从业日期数据
         qualificationLevel: '', // 绑定资质级别数据
-        certificateImageUrl: '', // 绑定资质证书图片URL
-        personPhotoUrl: '' // 绑定人员照片图片URL
+        qualificationCertificate: '', // 绑定资质证书图片URL
+        avatar: '' // 绑定人员照片图片URL
       },
       // 表单验证规则
       rules: {
@@ -153,8 +153,8 @@ export default {
         ]
         // 可以添加更多字段的验证规则
       },
-      certificateImageUrl: '', // 资质证书图片预览 URL
-      personPhotoUrl: '', // 人员照片图片预览 URL
+      qualificationCertificate: '', // 资质证书图片预览 URL
+      avatar: '', // 人员照片图片预览 URL
       fileListcertificate: [],
       personPhotoList: []
 
@@ -217,8 +217,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.certificateImageUrl = response.filePath // Set preview image URL
-            this.formData.certificateImageUrl = response.filePath
+            this.qualificationCertificate = response.filePath // Set preview image URL
+            this.formData.qualificationCertificate = response.filePath
             this.$message.success('资质证书上传成功')
           } else {
             this.$message.error('资质证书上传失败: ' + response.message)
@@ -252,8 +252,8 @@ export default {
         .then(response => {
           console.log('人员照片上传成功:', response)
           if (response.code === 200) {
-            this.personPhotoUrl = response.filePath // Set preview image URL
-            this.formData.personPhotoUrl = response.filePath
+            this.avatar = response.filePath // Set preview image URL
+            this.formData.avatar = response.filePath
             this.$message.success('人员照片上传成功')
           } else {
             this.$message.error('人员照片上传失败: ' + response.message)

@@ -30,11 +30,11 @@
       <el-table-column prop="index" label="序号" width="60" align="center" />
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="planType" label="计划类型" align="center" />
-      <el-table-column prop="taskName" label="任务名称" align="center" />
-      <el-table-column prop="manager" label="项目负责人" align="center" />
-      <el-table-column prop="worker" label="现场维保人员" align="center" />
-      <el-table-column prop="taskStatus" label="任务状态" align="center" />
-      <el-table-column prop="taskTime" label="任务时效" align="center" />
+      <el-table-column prop="taskMonth" label="任务名称" align="center" />
+      <el-table-column prop="maintainPersons.technical.name" label="项目负责人" align="center" />
+      <el-table-column prop="maintainPersons.maintainers[0].name" label="现场维保人员" align="center" />
+      <el-table-column prop="status" label="任务状态" align="center" />
+      <el-table-column prop="isOverdue" label="任务时效" align="center" />
       <el-table-column label="操作" width="180" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="goDetail(row)">详情</el-link>
@@ -52,23 +52,32 @@
   </div>
 </template>
 <script>
+import { getMaintainbyProject } from '@/api/maintainTask'
 export default {
   name: 'TaskDetail',
   data() {
     return {
       filter: { time: '', status: '' },
-      tableData: [
-        { index: 1, projectName: '小学', planType: '月', taskName: '2025年6月任务', manager: '王蕾', worker: '黎建军', taskStatus: '处理中', taskTime: '正常' },
-        { index: 2, projectName: '小学', planType: '月', taskName: '2025年6月任务', manager: '王蕾', worker: '黎建军', taskStatus: '待审批', taskTime: '正常' },
-        { index: 3, projectName: '小学', planType: '月', taskName: '2025年6月任务', manager: '王蕾', worker: '黎建军', taskStatus: '待审批', taskTime: '正常' },
-        { index: 4, projectName: '小学', planType: '月', taskName: '2025年5月任务', manager: '王蕾', worker: '黎建军', taskStatus: '待处理', taskTime: '已逾期' },
-        { index: 5, projectName: '小学', planType: '月', taskName: '2025年4月任务', manager: '王蕾', worker: '黎建军', taskStatus: '待审批', taskTime: '已逾期' }
-      ]
+      tableData: []
     }
+  },
+  mounted() {
+    this.onLoad()
   },
   methods: {
     onSearch() {
       // 实际项目可根据 filter 搜索
+    },
+    async onLoad() {
+      const id = this.$route.query.id
+      try {
+        const res = await getMaintainbyProject(id);
+        console.log(res)
+        this.tableData = res.data;
+        this.maintItems = res.data.maintenanceItems;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
     },
     onReset() {
       this.filter = { time: '', status: '' }
@@ -85,7 +94,7 @@ export default {
     goDetail(row) {
       this.$router.push({
         name: 'MpmTDDetail', // 你的mpmTD-detail路由name
-        query: { taskName: row.taskName }
+        query: { id: row._id }
       })
     }
   }

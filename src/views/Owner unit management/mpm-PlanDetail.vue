@@ -9,18 +9,18 @@
         <el-col :span="6"><div><span>项目名称：</span>{{ plan.projectName }}</div></el-col>
         <el-col :span="6"><div><span>业主单位名称：</span>{{ plan.ownerName }}</div></el-col>
         <el-col :span="6"><div><span>计划类型：</span><span class="plan-type">{{ plan.planType }}</span></div></el-col>
-        <el-col :span="6"><div><span>计划状态：</span><span class="plan-status">{{ plan.status }}</span></div></el-col>
+        <el-col :span="6"><div><span>计划状态：</span><span class="plan-status">{{ plan.planDefinedStatus }}</span></div></el-col>
       </el-row>
       <el-row :gutter="30" class="plan-info-row">
-        <el-col :span="6"><div><span>项目负责人：</span>{{ plan.manager }}</div></el-col>
-        <el-col :span="6"><div><span>现场维保人员：</span>{{ plan.worker }}</div></el-col>
+        <el-col :span="6"><div><span>项目负责人：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
+        <el-col :span="6"><div><span>现场维保人员：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
       </el-row>
     </div>
     <!-- 维保内容 -->
     <div class="section-title">维保内容</div>
     <div class="content-area">
       <el-row>
-        <el-col :span="6">
+        <!-- <el-col :span="6">
           <el-tabs v-model="activeTab">
             <el-tab-pane label="平台标准系统" name="platform">
               <el-tree
@@ -33,14 +33,14 @@
             </el-tab-pane>
             <el-tab-pane label="自建标准系统" name="custom" />
           </el-tabs>
-        </el-col>
+        </el-col> -->
         <el-col :span="18">
           <el-table :data="maintItems" style="width:100%;" border>
             <el-table-column prop="index" label="序号" width="60" />
-            <el-table-column prop="system" label="消防系统/设施" />
-            <el-table-column prop="item" label="维保项目" />
-            <el-table-column prop="test" label="检测内容" />
-            <el-table-column prop="period" label="维保周期" />
+            <el-table-column prop="systemCategory" label="消防系统/设施" />
+            <el-table-column prop="maintainSlim" label="维保项目" />
+            <el-table-column prop="maintainContent" label="检测内容" />
+            <el-table-column prop="frequency" label="维保周期" />
           </el-table>
         </el-col>
       </el-row>
@@ -48,6 +48,7 @@
   </div>
 </template>
 <script>
+import { getMaintainbyId } from '@/api/maintainPlan'
 export default {
   name: 'PlanDetail',
   data() {
@@ -64,20 +65,36 @@ export default {
       },
       activeTab: 'platform',
       // 示例数据
-      systemTree: [
-        {
-          id: 1, label: '消防供配电设施', children: [
-            { id: 11, label: '消防电源监控', children: [] }
-          ]
-        },
-        { id: 2, label: '火灾自动报警系统', children: [] }
-      ],
+      // systemTree: [
+      //   {
+      //     id: 1, label: '消防供配电设施', children: [
+      //       { id: 11, label: '消防电源监控', children: [] }
+      //     ]
+      //   },
+      //   { id: 2, label: '火灾自动报警系统', children: [] }
+      // ],
       maintItems: [
         { index: 1, system: '消防供配电设施', item: '消防配电柜', test: '消防电源', period: '月检' },
         { index: 2, system: '消防供配电设施', item: '消防配电柜', test: '消防设备', period: '月检' },
         { index: 3, system: '消防供配电设施', item: '消防配电柜', test: '试验主...', period: '月检' },
         { index: 4, system: '消防供配电设施', item: '自备发电机组', test: '发电机...', period: '月检' }
       ]
+    }
+  },
+  mounted() {
+    this.onLoad()
+  },
+  methods: {
+    async onLoad() {
+      const id = this.$route.query.id
+      try {
+        const res = await getMaintainbyId(id);
+        console.log(res)
+        this.plan = res.data;
+        this.maintItems = res.data.maintenanceItems;
+      } catch (error) {
+        this.$message.error(`出现错误${error.msg}`)
+      }
     }
   }
 }
