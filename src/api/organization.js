@@ -8,3 +8,11 @@ export function getOrganization() {
     method: 'get',
   })
 }
+
+export function updateOrganization(data) {
+  return request({
+    url: '/organization/update',
+    method: 'put',
+    data
+  })
+}

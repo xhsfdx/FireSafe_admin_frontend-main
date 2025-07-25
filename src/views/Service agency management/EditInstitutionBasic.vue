@@ -180,7 +180,7 @@
 <script>
 import axios from 'axios'
 import { uploadImage } from '@/api/upload'
-import { getOrganization } from '@/api/organization';
+import { getOrganization, updateOrganization } from '@/api/organization';
 export default {
   data() {
     return {
@@ -255,25 +255,14 @@ export default {
       }
     },
     saveInfo() {
-      this.$refs.enterpriseForm.validate((valid) => {
+      this.$refs.enterpriseForm.validate( async (valid) => {
         if (valid) {
           // 表单验证通过，可以提交数据到后端
           console.log('表单数据:', this.formData)
           // 触发保存数据的后端请求
-          axios.post('/api/saveEnterpriseInfo', this.formData)
-            .then(response => {
-              if (response.data.code === 200) {
-                this.$message.success('保存成功')
-                // ✅ 携带 ID 跳转回基础信息页
-                this.$router.push({ name: 'AgencyBasicInfo', query: { id: this.formData.id }})
-              } else {
-                this.$message.error('保存失败: ' + response.data.message)
-              }
-            })
-            .catch(error => {
-              this.$message.error('请求出错: ' + error.message)
-            })
-
+          
+          const res = await updateOrganization(this.formData);
+          console.log(res.data)
           // 这里只是模拟保存成功
           this.$message.success('保存成功')
         } else {
