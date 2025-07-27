@@ -6,25 +6,42 @@
 
 <script>
 import echarts from 'echarts'
-
+import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   name: 'BusinessTrend',
   data() {
     return {
       myChart: null,
-      baseData: [0, 3, 1, 0, 4, 4, 5],
+      labels: [],
+      baseData: [],
       pulseState: true,
       timer: null
     }
   },
-  mounted() {
-    this.initChart()
-    this.startPulseAnimation()
+  async mounted() {
+    await this.fetchTrendData()
+    this.$nextTick(() => {
+      this.initChart()
+      this.startPulseAnimation()
+    })
   },
   beforeDestroy() {
     if (this.timer) clearInterval(this.timer)
+    if (this.myChart) this.myChart.dispose()
   },
   methods: {
+    async fetchTrendData() {
+      try {
+        const res = await getDigitalScreenData()
+        if (res) {
+          const trend = res.data.contractMonthlyCounts
+          this.labels = trend.map(i => i.yearMonth)
+          this.baseData = trend.map(i => i.count)
+        }
+      } catch (err) {
+        console.error('获取趋势数据失败', err)
+      }
+    },
     initChart() {
       const chartDom = this.$refs.chart
       this.myChart = echarts.init(chartDom)
@@ -39,22 +56,25 @@ export default {
         xAxis: {
           name: '月',
           type: 'category',
-          data: ['0', '1', '2', '3', '4', '5', '6'],
+          data: this.labels,
           boundaryGap: false,
-          axisLine: { lineStyle: { color: '#00ffff', width: 2 } },
+          axisLine: { lineStyle: { color: '#00ffff', width: 2 }},
           axisLabel: { color: '#00ffff', fontFamily: 'Orbitron' },
           splitLine: { show: false }
         },
         yAxis: {
           name: '个数',
           type: 'value',
-          axisLine: { lineStyle: { color: '#00ffff', width: 2 } },
+          min: 0,
+          max: 20,
+          interval: 5,
+          axisLine: { lineStyle: { color: '#00ffff', width: 2 }},
           axisLabel: { color: '#00ffff', fontFamily: 'Orbitron' },
-          splitLine: { lineStyle: { color: 'rgba(0,255,255,0.1)' } }
+          splitLine: { lineStyle: { color: 'rgba(0,255,255,0.1)' }}
         },
         series: [
           {
-            name: '数据量',
+            name: '合同签订数',
             type: 'line',
             smooth: true,
             symbol: 'circle',

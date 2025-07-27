@@ -11,8 +11,7 @@
           :key="index"
           :class="{ active: activeTab === item }"
           @click="activeTab = item"
-        
-      >
+        >
           {{ item }}
         </span>
       </div>
@@ -32,8 +31,9 @@
 </template>
 
 <script>
-// import { random } from 'core-js/core/number'
+import { getDigitalScreenData } from '@/api/digitalScreen'
 import echarts from 'echarts'
+// import { fetchData } from 'public/build/pdf.mjs'
 // 如果用npm安装particles.js，需引入
 
 export default {
@@ -43,18 +43,8 @@ export default {
       activeTab: '例行维护',
       tabs: ['例行维护', '故障工单'],
       tabStatuses: {
-        '例行维护': [
-          { name: '待处理', color: '#ff794b', value: 3 },
-          { name: '处理中', color: '#ffcc5b', value: 0 },
-          { name: '待审批', color: '#47c9ff', value: 0 },
-          { name: '已完成', color: '#39f5ff', value: 2 }
-        ],
-        '故障工单': [
-          { name: '待处理', color: '#ff794b', value: 5 },
-          { name: '处理中', color: '#ffcc5b', value: 2 },
-          // { name: '待审批', color: '#47c9ff', value: 1 },
-          { name: '已完成', color: '#39f5ff', value: 10 }
-        ]
+        '例行维护': [],
+        '故障工单': []
       },
       chart: null
     }
@@ -66,9 +56,32 @@ export default {
   },
   mounted() {
     this.initChart()
+    this.fetchData()
     // this.initParticles()
   },
   methods: {
+    async fetchData() {
+      try {
+        const res = await getDigitalScreenData()
+        if (res) {
+          const d = res.data
+          this.tabStatuses['例行维护'] = [
+            { name: '待处理', color: '#ff794b', value: d.maintainPendingCount },
+            { name: '处理中', color: '#ffcc5b', value: d.maintainProcessingCount },
+            { name: '待审批', color: '#47c9ff', value: d.maintainWaitingApprovalCount },
+            { name: '已完成', color: '#39f5ff', value: d.maintainFinishedCount }
+          ]
+          this.tabStatuses['故障工单'] = [
+            { name: '待处理', color: '#ff794b', value: d.faultPendingCount },
+            { name: '处理中', color: '#ffcc5b', value: d.faultProcessingCount },
+            { name: '已完成', color: '#39f5ff', value: d.faultFinishedCount }
+          ]
+          this.updateChart()
+        }
+      } catch (e) {
+        console.error('获取大屏数据失败', e)
+      }
+    },
     initChart() {
       this.chart = echarts.init(this.$refs.echarts)
       this.updateChart()
@@ -78,10 +91,10 @@ export default {
       this.chart.setOption(this.getOption(), true)
     },
     getOption() {
-      const data = this.tabStatuses[this.activeTab];
-      const finished = data.find(item => item.name === '已完成')?.value || 0;
-      const total = data.reduce((sum, item) => sum + item.value, 0);
-      const percent = total > 0 ? Math.round((finished / total) * 100) : 0;
+      const data = this.tabStatuses[this.activeTab]
+      const finished = data.find(item => item.name === '已完成')?.value || 0
+      const total = data.reduce((sum, item) => sum + item.value, 0)
+      const percent = total > 0 ? Math.round((finished / total) * 100) : 0
       return {
         series: [
           {
@@ -200,6 +213,7 @@ export default {
 
   }
 }
+
 </script>
 
 <style scoped>

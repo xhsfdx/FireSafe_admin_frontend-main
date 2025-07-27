@@ -1,7 +1,7 @@
 <template>
   <div class="top10-container">
     <!-- Canvas 星空背景 -->
-    <canvas ref="starCanvas" class="star-canvas"></canvas>
+    <canvas ref="starCanvas" class="star-canvas" />
     <!-- 排行表 -->
     <div class="top10-table">
       <div class="header">
@@ -25,41 +25,39 @@
 </template>
 
 <script>
+import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   name: 'ComprehensiveRanking',
   data() {
     return {
-      list: [
-        { name: '盛长枫', completed: 0, area: 0, score: 57 },
-        { name: '张晓意', completed: 2, area: 50500, score: 53 },
-        { name: '盛长柏', completed: 0, area: 0, score: 28 }
-      ],
+      list: [],
       stars: []
-    };
+    }
   },
   mounted() {
-    this.initCanvas();
-    window.addEventListener('resize', this.resizeCanvas);
+    this.initCanvas()
+    window.addEventListener('resize', this.resizeCanvas)
+    this.fetchTop5Maintainers()
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.resizeCanvas);
-    cancelAnimationFrame(this.animationId);
+    window.removeEventListener('resize', this.resizeCanvas)
+    cancelAnimationFrame(this.animationId)
   },
   methods: {
     initCanvas() {
-      const canvas = this.$refs.starCanvas;
-      const ctx = canvas.getContext('2d');
+      const canvas = this.$refs.starCanvas
+      const ctx = canvas.getContext('2d')
 
       const resize = () => {
-        canvas.width = this.$el.clientWidth;
-        canvas.height = this.$el.clientHeight;
-      };
-      resize();
-      this.resizeCanvas = resize;
+        canvas.width = this.$el.clientWidth
+        canvas.height = this.$el.clientHeight
+      }
+      resize()
+      this.resizeCanvas = resize
 
       // 创建星星
-      const starCount = 80;
-      this.stars = [];
+      const starCount = 80
+      this.stars = []
       for (let i = 0; i < starCount; i++) {
         this.stars.push({
           x: Math.random() * canvas.width,
@@ -69,44 +67,59 @@ export default {
           dy: (Math.random() - 0.5) * 0.2,
           opacity: Math.random(),
           dOpacity: (Math.random() - 0.5) * 0.02
-        });
+        })
       }
 
       const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let star of this.stars) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        for (const star of this.stars) {
           // 移动
-          star.x += star.dx;
-          star.y += star.dy;
-          if (star.x < 0) star.x = canvas.width;
-          if (star.x > canvas.width) star.x = 0;
-          if (star.y < 0) star.y = canvas.height;
-          if (star.y > canvas.height) star.y = 0;
+          star.x += star.dx
+          star.y += star.dy
+          if (star.x < 0) star.x = canvas.width
+          if (star.x > canvas.width) star.x = 0
+          if (star.y < 0) star.y = canvas.height
+          if (star.y > canvas.height) star.y = 0
 
           // 闪烁
-          star.opacity += star.dOpacity;
+          star.opacity += star.dOpacity
           if (star.opacity <= 0) {
-            star.opacity = 0;
-            star.dOpacity = -star.dOpacity;
+            star.opacity = 0
+            star.dOpacity = -star.dOpacity
           }
           if (star.opacity >= 1) {
-            star.opacity = 1;
-            star.dOpacity = -star.dOpacity;
+            star.opacity = 1
+            star.dOpacity = -star.dOpacity
           }
 
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${star.opacity})`;
-          ctx.fill();
+          ctx.beginPath()
+          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(255,255,255,${star.opacity})`
+          ctx.fill()
         }
 
-        this.animationId = requestAnimationFrame(animate);
-      };
+        this.animationId = requestAnimationFrame(animate)
+      }
 
-      animate();
+      animate()
+    },
+    async fetchTop5Maintainers() {
+      try {
+        const res = await getDigitalScreenData()
+        if (res?.data?.maintainerStats) {
+          this.list = res.data.maintainerStats.map(item => ({
+            name: item.staffName,
+            completed: item.taskCount,
+            area: item.totalArea,
+            score: item.totalScore
+          }))
+        }
+      } catch (err) {
+        console.error('获取Top维保人员数据失败：', err)
+      }
     }
   }
-};
+}
 </script>
 
 <style scoped>

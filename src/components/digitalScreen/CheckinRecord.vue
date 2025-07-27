@@ -25,16 +25,36 @@
 </template>
 
 <script>
+import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   name: 'CheckinRecord',
   data() {
     return {
-      list: [
-        { id: 1, name: '任慧媛', project: '项目有限责任公司', time: '16:12:43' },
-        { id: 2, name: '张晓蕾', project: '项目有限责任公司', time: '14:39:56' },
-        { id: 3, name: '张三', project: '项目有限责任公司', time: '19:12:43' },
-        { id: 4, name: '李四', project: '项目有限责任公司', time: '21:39:56' }
-      ]
+      list: []
+    }
+  },
+  mounted() {
+    this.fetchCheckins()
+  },
+  methods: {
+    async fetchCheckins() {
+      try {
+        const res = await getDigitalScreenData()
+        if (res) {
+          this.list = res.data.maintainerCheckins.map((item, index) => ({
+            id: index + 1,
+            name: item.staffName || '未知人员',
+            project: item.projectName || '未知项目',
+            time: this.formatTime(item.checkinTime)
+          }))
+        }
+      } catch (e) {
+        console.error('打卡记录获取失败', e)
+      }
+    },
+    formatTime(dateStr) {
+      const d = new Date(dateStr)
+      return d.toTimeString().substring(0, 8) // 只取 HH:MM:SS
     }
   }
 }

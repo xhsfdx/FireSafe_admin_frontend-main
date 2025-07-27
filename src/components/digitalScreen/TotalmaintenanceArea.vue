@@ -11,17 +11,33 @@
 </template>
 
 <script>
+import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   name: 'TotalmaintenceArea',
   data() {
     return {
-      total: 102500 // 你的总数可以从API中获取
+      total: 0 // 你的总数可以从API中获取
     }
   },
   computed: {
     paddedDigits() {
       // 一共有9位数，若不够则用0填充
       return this.total.toString().padStart(9, '0').split('')
+    }
+  },
+  mounted() {
+    this.fetchTotalArea()
+  },
+  methods: {
+    async fetchTotalArea() {
+      try {
+        const res = await getDigitalScreenData()
+        if (res) {
+          this.total = Math.round(res.data.warrantyAreaTotal || 0)
+        }
+      } catch (err) {
+        console.error('获取维保面积失败', err)
+      }
     }
   }
 }
