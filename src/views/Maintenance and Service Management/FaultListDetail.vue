@@ -19,7 +19,7 @@
       <el-table-column prop="reportTime" label="上报时间" align="center" />
       <el-table-column prop="system" label="消防系统/设施" align="center" />
       <el-table-column prop="project" label="项目" align="center" />
-      <el-table-column prop="reporter" label="上报人员" align="center" />
+      <el-table-column prop="reporter.name" label="上报人员" align="center" />
       <el-table-column label="操作" align="center" width="120">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">详情</el-link>

@@ -2,7 +2,7 @@
   <div class="order-detail-page">
     <!-- 1. 顶部进度条 -->
     <el-steps :active="4" align-center>
-      <el-step v-for="(item, idx) in steps" :key="idx" :title="item.title" :description="item.time + '<br/>' + item.person" />
+      <el-step v-for="(item, idx) in steps" :key="idx" :title="item.title" :description="item.time + item.person" />
     </el-steps>
 
     <!-- 2. 故障工单详情 -->
@@ -16,7 +16,7 @@
       <el-row>
         <el-col :span="8">工单来源：{{ order.source }}</el-col>
         <el-col :span="8">预计完成时间：{{ order.finishTime }}</el-col>
-        <el-col :span="8">上报人员：{{ order.reportPerson }}</el-col>
+        <el-col :span="8">上报人员：{{ order.reportPerson.name }}</el-col>
       </el-row>
       <el-row>
         <el-col :span="8">工单状态：<span style="color:#39c271;">{{ order.status }}</span></el-col>
@@ -55,8 +55,12 @@
       <div class="section-title">故障处置信息</div>
       <el-row>
         <el-col :span="8">处理时间：{{ handle.time }}</el-col>
-        <el-col :span="8">处理人员：{{ handle.person }}</el-col>
-        <el-col :span="8">处理照片：{{ handle.photo || '暂无' }}</el-col>
+        <el-col :span="8">处理人员：{{ handle.person.name }}</el-col>
+        <el-col :span="8">处理照片：
+          <span v-for="(img, idx) in handle.photo" :key="idx" style="margin-right: 8px;">
+            <el-image :src="img" :preview-src-list="handle.photo" style="width: 50px; height: 50px; border-radius: 4px;" />
+          </span>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">逾期时间：{{ handle.overtime }}</el-col>
@@ -162,7 +166,7 @@ export default {
         finishTime: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '',
         reportPerson: data.reporter || '',
         status: data.resolved ? '已完成' : '未完成',
-        unitName: data.task?.project?.ownerCompany || '',
+        unitName: data.ownerCompany || '',
         method: '系统维保',
         taskName: data.task?.taskMonth ? `${data.task.taskMonth}任务` : '',
         rating: 0,
@@ -175,17 +179,17 @@ export default {
         project: data.taskItem?.device || '',
         desc: data.description || '',
         testContent: data.taskItem?.maintainContent || '',
-        photos: []
+        photos: data.problemphotoUrls
       }
 
       // 格式化处理信息
       this.handle = {
         time: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '',
         person: data.resolvedBy || '',
-        photo: '暂无',
+        photo: data.solutionphotoUrls,
         overtime: this.calculateOvertime(data.createdAt, data.resolvedAt),
         desc: data.resolution || '',
-        remark: ''
+        remark: data.remarks
       }
 
       // 构建步骤信息
@@ -205,10 +209,10 @@ export default {
     // 构建步骤信息
     buildSteps(data) {
       const steps = [
-        { title: '已派发', time: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '', person: data.reporter || '' },
+        { title: '已派发', time: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '', person: data.reporter.name || '' },
         { title: '已接单', time: '', person: '' },
         { title: '已到达', time: '', person: '' },
-        { title: '完成', time: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '', person: data.resolvedBy || '' },
+        { title: '完成', time: data.resolvedAt ? new Date(data.resolvedAt).toLocaleString('zh-CN') : '', person: data.resolvedBy.name || '' },
         { title: '已评价', time: '', person: '' }
       ]
       this.steps = steps

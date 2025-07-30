@@ -2,12 +2,8 @@
   <div class="work-order-page">
     <!-- 查询栏 -->
     <div class="search-bar">
-      <el-input
-        v-model="filters.projectName"
-        placeholder="输入项目名称搜索"
-        style="width: 220px; margin-right: 10px"
-        clearable
-      />
+      <el-input v-model="filters.projectName" placeholder="输入项目名称搜索" style="width: 220px; margin-right: 10px"
+        clearable />
       <el-input v-model="filters.owner" placeholder="输入当前所属人搜索" style="width: 220px; margin-right: 10px" clearable />
       <el-input v-model="filters.reporter" placeholder="输入上报人员" style="width: 180px; margin-right: 10px" clearable />
       <el-select v-model="filters.source" placeholder="选择故障来源" style="width: 180px; margin-right: 10px" clearable>
@@ -27,21 +23,23 @@
     </div>
 
     <!-- 表格 -->
-    <el-table
-      :data="pagedData"
-      border
-      style="width: 100%; margin-top: 12px;"
-      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
-    >
+    <el-table :data="pagedData" border style="width: 100%; margin-top: 12px;"
+      :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }">
       <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column prop="projectName" label="项目名称" align="center" />
-      <el-table-column prop="reportTime" label="上报时间" align="center" />
+      <el-table-column prop="task.projectName" label="项目名称" align="center" />
+      <el-table-column label="上报时间" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.createdAt | formatDate }}
+        </template>
+      </el-table-column>
       <el-table-column prop="source" label="工单来源" align="center" />
-      <el-table-column prop="reporter" label="上报人员" align="center" />
+      <el-table-column prop="reporter.name" label="上报人员" align="center" />
       <el-table-column label="工单时效" align="center">
         <template slot-scope="{ row }">
-          <span :style="row.timeliness === '已逾期' ? 'color:#ff4d1a;font-weight:bold' : 'color:#39c271;font-weight:bold'">
-            {{ row.timeliness }}
+          <span :style="new Date(row.expectedCompletionTime) < new Date()
+            ? 'color:#ff4d1a;font-weight:bold'
+            : 'color:#39c271;font-weight:bold'">
+            {{ row.expectedCompletionTime | formatDate }}
           </span>
         </template>
       </el-table-column>
@@ -52,7 +50,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="owner" label="当前所属人" align="center" />
+      <el-table-column prop="owner.name" label="当前所属人" align="center" />
       <el-table-column label="操作" width="190" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">详情</el-link>
@@ -65,15 +63,8 @@
     <!-- 底部统计和分页 -->
     <div class="footer-bar">
       <span>共查询到 {{ filteredData.length }} 条</span>
-      <el-pagination
-        small
-        background
-        layout="prev, pager, next"
-        :page-size="pageSize"
-        :current-page.sync="currentPage"
-        :total="filteredData.length"
-        @current-change="handlePageChange"
-      />
+      <el-pagination small background layout="prev, pager, next" :page-size="pageSize" :current-page.sync="currentPage"
+        :total="filteredData.length" @current-change="handlePageChange" />
     </div>
 
     <!-- 悬浮设置按钮（可注释掉） -->
@@ -83,7 +74,7 @@
 
 <script>
 import { getFaultRecords, deleteFaultRecord } from '@/api/faultRecord'
-
+import moment from 'moment'
 export default {
   name: 'WorkOrderPage',
   data() {
@@ -107,6 +98,11 @@ export default {
         limit: 10,
         total: 0
       }
+    }
+  },
+  filters: {
+    formatDate(date) {
+      return moment(date).format('YYYY-MM-DD')
     }
   },
   watch: {

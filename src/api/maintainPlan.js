@@ -15,3 +15,11 @@ export function getMaintainbyId(id) {
     method: 'get',
   })
 }
+
+export function createMaintain(data) {
+  return request({
+    url: '/plan/settask',
+    method: 'post',
+    data
+  })
+}

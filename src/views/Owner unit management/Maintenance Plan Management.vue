@@ -18,7 +18,7 @@
       </el-select>
       <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
       <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-      <el-button type="success" icon="el-icon-check" class="green-btn">一键制定所选计划</el-button>
+      <!-- <el-button type="success" icon="el-icon-check" class="green-btn">一键制定所选计划</el-button> -->
     </div>
 
     <!-- 表格 -->
@@ -60,6 +60,7 @@
         <template slot-scope="{ row }">
           <el-link type="primary" @click="showPlan(row)">计划详情</el-link>
           <el-link type="info" style="margin: 0 8px;" @click="showTask(row)">任务详情</el-link>
+          <el-link type="success" style="margin: 0 8px;" @click="generateTask(row)">制定计划</el-link>
           <el-link type="danger" @click="delRow(row)">删除</el-link>
         </template>
       </el-table-column>
@@ -85,7 +86,7 @@
 </template>
 
 <script>
-import { getMaintainPlans } from '@/api/maintainPlan'
+import { getMaintainPlans, createMaintain } from '@/api/maintainPlan'
 export default {
   name: 'PlanListPage',
   data() {
@@ -143,6 +144,15 @@ export default {
         name: 'TaskDetail',
         query: { id: row.projectId }
       })
+    },
+    async generateTask(row) {
+      const res = await createMaintain({ planId: row._id })
+      if (res.success === true) {
+        this.$message.success('生成任务成功')
+        const res = await getMaintainPlans();
+        console.log(res)
+        this.tableData = res.data;
+      }
     },
     delRow(row) {
       this.tableData = this.tableData.filter(item => item !== row)

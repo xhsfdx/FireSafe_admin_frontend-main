@@ -29,9 +29,9 @@
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="reportTime" label="上报时间" align="center" />
       <el-table-column prop="reporter" label="上报人员" align="center" />
-      <el-table-column prop="timeliness" label="工单时效" align="center" />
+      <el-table-column prop="expectedCompletionTime" label="工单时效" align="center" />
       <el-table-column prop="status" label="工单状态" align="center" />
-      <el-table-column prop="owner" label="当前所属人" align="center" />
+      <el-table-column prop="owner.name" label="当前所属人" align="center" />
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">详情</el-link>

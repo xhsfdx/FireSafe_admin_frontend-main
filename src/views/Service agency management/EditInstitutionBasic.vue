@@ -180,6 +180,7 @@
 <script>
 import axios from 'axios'
 import { uploadImage } from '@/api/upload'
+import { BASE_URL } from '@/utils/request'
 import { getOrganization, updateOrganization } from '@/api/organization';
 export default {
   data() {
@@ -203,6 +204,7 @@ export default {
         businessTypes: [], // 绑定业务类型数据
         enterprisePhotos: [], // 企业照片数组
         organizationPhoto: '', // 企业logo 单张
+        organizationLogo: '',
         businessLicense: '' // 营业执照 单张
       },
       // 表单验证规则
@@ -276,8 +278,8 @@ export default {
       uploadImage(option.file)
         .then(response => {
           if (response.code === 200) {
-            this.PhotoImageUrl = response.filePath // Set preview image URL
-            this.formData.PhotoImageUrl = response.filePath
+            this.PhotoImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
+            this.formData.organizationPhoto = BASE_URL + '/uploads' + response.filePath
             this.$message.success('企业照片上传成功')
           } else {
             this.$message.error('企业照片上传失败: ' + response.message)
@@ -298,8 +300,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.LogoImageUrl = response.filePath // Set preview image URL
-            this.formData.LogoImageUrl = response.filePath
+            this.LogoImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
+            this.formData.organizationLogo = BASE_URL + '/uploads' + response.filePath
             this.$message.success('企业LOGO上传成功')
           } else {
             this.$message.error('企业LOGO上传失败: ' + response.message)
@@ -320,8 +322,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.licenseImageUrl = response.filePath // Set preview image URL
-            this.formData.licenseImageUrl = response.filePath
+            this.licenseImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
+            this.formData.businessLicense = BASE_URL + '/uploads' + response.filePath
             this.$message.success('营业执照上传成功')
           } else {
             this.$message.error('营业执照上传失败: ' + response.message)

@@ -3,7 +3,7 @@
     <div class="header">
       <div class="header-left">
         <div class="company-logo">
-          <img :src="require('@/assets/comlogo.jpeg')" class="company-logo">
+          <img :src="organization.organizationLogo" class="company-logo">
           <!-- 这里可以放置公司 Logo 或默认图标 -->
           <!-- <div class="image-placeholder"> -->
           <!-- <i class="el-icon-picture-outline"></i> -->
@@ -74,12 +74,12 @@
       <div class="section">
         <div class="item">
           <span class="label">企业照片:</span>
-          <span class="value">{{ organization.organizationPhoto }}</span>
+          <img :src="organization.organizationPhoto" alt="" class="photo">
         </div>
         <div class="item">
           <span class="label">营业执照:</span>
-          <span class="value">{{ organization.businessLicense }}</span>
-        </div>
+          <img :src="organization.businessLicense" alt="" class="photo">
+      </div>
       </div>
     </div>
   </div>
@@ -173,6 +173,11 @@ export default {
 
 .image-placeholder .el-icon-picture-outline {
     margin-bottom: 5px;
+}
+
+.photo {
+  width: 8rem;
+  height: 100%;
 }
 
 .company-info h2 {

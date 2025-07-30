@@ -333,13 +333,13 @@ export const asyncRoutes = [
         component: () => import('@/views/Service agency management/Faultworkorder.vue'),
         meta: { title: '故障工单' }
       },
-      {
-        path: 'Additionalmaintenance',
-        name: 'AdditionalMaintenance',
-        hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/Additionalmaintenance.vue'),
-        meta: { title: '附加维保' }
-      },
+      // {
+      //   path: 'Additionalmaintenance',
+      //   name: 'AdditionalMaintenance',
+      //   hidden: true, // 不显示在侧边栏
+      //   component: () => import('@/views/Service agency management/Additionalmaintenance.vue'),
+      //   meta: { title: '附加维保' }
+      // },
       {
         path: 'Workreport',
         name: 'WorkReport',
@@ -382,12 +382,12 @@ export const asyncRoutes = [
         component: () => import('@/views/Owner unit management/Maintenance Plan Management.vue'),
         meta: { title: '维保计划管理' }
       },
-      {
-        path: 'point',
-        name: 'MaintenancePoint',
-        component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
-        meta: { title: '维保点位管理' }
-      },
+      // {
+      //   path: 'point',
+      //   name: 'MaintenancePoint',
+      //   component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
+      //   meta: { title: '维保点位管理' }
+      // },
 
       // 🔧 补全缺失页面
       {
@@ -539,12 +539,12 @@ export const asyncRoutes = [
         component: () => import('@/views/Maintenance and Service Management/Fault Work Order.vue'),
         meta: { title: '故障工单', icon: 'el-icon-warning-outline' }
       },
-      {
-        path: 'support',
-        name: 'AdditionalSupport',
-        component: () => import('@/views/Maintenance and Service Management/Additional maintenance and support.vue'),
-        meta: { title: '附加维护', icon: 'el-icon-s-cooperation' }
-      },
+      // {
+      //   path: 'support',
+      //   name: 'AdditionalSupport',
+      //   component: () => import('@/views/Maintenance and Service Management/Additional maintenance and support.vue'),
+      //   meta: { title: '附加维护', icon: 'el-icon-s-cooperation' }
+      // },
       {
         path: 'report',
         name: 'WorkReport',

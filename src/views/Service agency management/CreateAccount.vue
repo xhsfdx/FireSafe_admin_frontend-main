@@ -75,7 +75,7 @@
 
 <script>
 import PersonList from './personList.vue'
-
+import { createStaff } from '@/api/staff'
 // import PersonCard from './personCard.vue'
 // import PersonList from './personList.vue'
 
@@ -84,7 +84,7 @@ export default {
   data() {
     return {
       account: {
-        phone: '13890873478', // 示例中的电话号码似乎是预填的
+        phone: '', // 示例中的电话号码似乎是预填的
         username: '',
         password: '',
         confirmPassword: ''
@@ -99,44 +99,22 @@ export default {
         alert('密码和确认密码不一致！')
         return
       }
-
+      // get the id from the route params
+      const id = this.$route.params.id
+      createStaff(id, this.account).then(res => { 
+        console.log(res)
+        this.$router.push({ name: 'PersonList' })
+      })
       console.log('提交创建账号:', this.account)
-      // TODO: 在这里调用后端 API 创建账号
-      // const newAccountData = {
-      //   phone: this.account.phone, // 电话号码通常是唯一的标识符，可能不能修改或需要特别处理
-      //   username: this.account.username,
-      //   password: this.account.password,
-      //   // 注意：不应该将 confirmPassword 发送到后端
-      // };
-      // fetch('/api/accounts', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(newAccountData),
-      // })
-      // .then(response => response.json())
-      // .then(data => {
-      //   if (data.success) {
-      //     alert('账号创建成功！');
-      //     this.handleClose(); // 关闭对话框
-      //     // 可能需要刷新父组件的列表等
-      //   } else {
-      //     alert('创建失败: ' + data.error);
-      //   }
-      // })
-      // .catch(error => {
-      //   console.error('创建账号出错:', error);
-      //   alert('创建过程中发生错误。');
-      // });
-
+      
       // 模拟创建成功的提示
-      alert('账号创建成功！(模拟)')
       this.handleClose() // 模拟关闭对话框
     },
 
     // 处理重置按钮点击
     handleReset() {
       this.account = {
-        phone: '13890873478', // 根据图片示例，电话号码重置后可能仍保留预填的值
+        phone: '', // 根据图片示例，电话号码重置后可能仍保留预填的值
         username: '',
         password: '',
         confirmPassword: ''
