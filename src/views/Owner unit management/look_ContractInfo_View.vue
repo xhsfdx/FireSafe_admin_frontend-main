@@ -84,7 +84,7 @@
               <el-input :value="formData.checkCompany" disabled />
             </el-form-item>
             <el-form-item label="合同文件">
-              <el-button size="mini" disabled>查看合同文件</el-button>
+              <el-button v-on:click="handlePreview(formData.fileUrls)" size="mini" disabled>查看合同文件</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -139,6 +139,13 @@ export default {
     },
     nextStep() {
       this.$emit('next')
+    },
+    handlePreview(file) {
+      if (file.length > 0) {
+        window.open(file[0], '_blank')
+      } else {
+        this.$message.warning('暂无预览地址')
+      }
     }
 
   }

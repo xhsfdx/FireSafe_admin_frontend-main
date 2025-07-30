@@ -104,7 +104,7 @@ export default {
           debugOrg: this.formData.debugOrg,
           recordOrg: this.formData.recordOrg,
           note: this.formData.remark,
-          fileUrls: [], // 假设文件上传逻辑会填充这里
+          fileUrls: this.formData.fileUrls, // 假设文件上传逻辑会填充这里
 
           // 建筑信息
           buildings: this.formData.buildingList,

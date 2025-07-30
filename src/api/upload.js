@@ -14,3 +14,18 @@ export function uploadImage(file) {
     }
   })
 }
+
+
+export function uploadDoc(file) {
+  const formData = new FormData()
+  formData.append('doc', file)
+
+  return request({
+    url: '/upload_img/upload_doc', // The endpoint for uploading the file
+    method: 'post', // HTTP method (POST)
+    data: formData, // Sending FormData containing the file
+    headers: {
+      'Content-Type': 'multipart/form-data' // Ensures the request is formatted for file uploads
+    }
+  })
+}
