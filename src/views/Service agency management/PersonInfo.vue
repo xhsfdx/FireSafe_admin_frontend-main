@@ -202,11 +202,11 @@ export default {
             // Handle successful response (e.g., navigate to the staff list)
             console.log(response)
             this.$router.push({ name: 'PersonList' })
-            this.$message.success('Staff saved successfully!')
+            this.$message.success('员工保存成功!')
           })
           .catch(error => {
             // Handle error
-            this.$message.error('Error saving staff: ' + error.message)
+            this.$message.error('员工保存失败!' + error.message)
           })
         }
 
