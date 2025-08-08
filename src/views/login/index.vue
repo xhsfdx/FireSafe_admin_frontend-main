@@ -12,8 +12,8 @@
 
       <div class="right-panel">
         <div class="logo-section">
-          <img :src="require('@/assets/logo.jpeg')" alt="logo" class="logo">
-          <div class="title">四川省消防协会</div>
+          <img :src="require('@/assets/bfxflogo.jpg')" alt="logo" class="logo">
+          <div class="title">四川不凡消防科技有限公司</div>
           <div class="subtitle">消防维保服务管理系统</div>
         </div>
 
