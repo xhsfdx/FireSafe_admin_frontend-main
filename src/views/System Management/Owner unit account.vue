@@ -1,62 +1,94 @@
 <template>
-  <div class="user-manage-page">
-    <!-- 左侧单位栏 -->
-    <div class="left-bar">
-      <el-input v-model="orgFilter" placeholder="请输入单位名称" size="small" class="org-search" clearable />
-      <div class="org-list">
-        <div v-for="item in filteredOrgs" :key="item" :class="['org-item', { active: activeOrg === item }]"
-          @click="activeOrg = item">{{ item }}</div>
-      </div>
-    </div>
-
-    <!-- 右侧主内容 -->
-    <div class="main-panel">
-      <!-- 顶部搜索操作栏 -->
-      <div class="toolbar">
-        <el-input v-model="filters.name" placeholder="姓名" size="small" style="width:150px; margin-right:10px"
-          clearable />
-        <el-input v-model="filters.phone" placeholder="电话" size="small" style="width:150px; margin-right:10px"
-          clearable />
-        <el-select v-model="filters.status" placeholder="账号状态" size="small" style="width:150px; margin-right:10px"
-          clearable>
-          <el-option label="全部" value="" />
-          <el-option label="正常" value="1" />
-          <el-option label="禁用" value="0" />
-        </el-select>
-        <el-button type="primary" icon="el-icon-search" style="margin-right:6px" @click="onSearch">查询</el-button>
-        <el-button icon="el-icon-refresh" style="margin-right:6px" @click="onReset">重置</el-button>
-        <el-button type="primary" icon="el-icon-plus" style="margin-right:6px" @click="onAdd">新增</el-button>
-        <!-- <el-button
-          type="primary"
-          style="background: #885cf7; border-color: #885cf7; margin-right: 0;"
-          icon="el-icon-link"
-          @click="jumpSystem"
-        >跳转到社会单位系统</el-button> -->
+  <div class="owner-account-page">
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <!-- 页面标题 -->
+      <div class="page-header">
+        <h1>业主单位账号管理</h1>
+        <div class="header-info">
+          <span class="account-count">
+            共 {{ tableData.length }} 个账号
+          </span>
+        </div>
       </div>
 
-      <!-- 用户表格 -->
-      <el-table :data="filteredData" border style="width: 100%;" :empty-text="' '"
-        header-cell-class-name="table-header">
-        <el-table-column type="index" label="序号" width="60" align="center" />
-        <el-table-column prop="username" label="用户名" align="center" />
-        <el-table-column prop="name" label="姓名" align="center" />
-        <el-table-column prop="createTime" label="创建时间" align="center" />
-        <el-table-column prop="role" label="用户角色" align="center" />
-        <el-table-column prop="mobile" label="手机号" align="center" />
-        <el-table-column prop="statusText" label="账号状态" align="center" />
-        <el-table-column label="操作" width="100" align="center">
-          <template slot-scope="{ row }">
-            <el-link type="primary" @click="viewDetail(row)">详情</el-link>
-            <el-link type="danger" style="margin-left:10px" @click="deleteRow(row)">删除</el-link>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 搜索和操作栏 -->
+      <div class="search-toolbar">
+        <div class="toolbar-content">
+          <div class="search-filters">
+            <el-input
+              v-model="filters.name"
+              placeholder="姓名"
+              size="small"
+              class="filter-input"
+              clearable
+            />
+            <el-input
+              v-model="filters.phone"
+              placeholder="电话"
+              size="small"
+              class="filter-input"
+              clearable
+            />
+            <el-select
+              v-model="filters.status"
+              placeholder="账号状态"
+              size="small"
+              class="filter-select"
+              clearable
+            >
+              <el-option label="全部" value="" />
+              <el-option label="正常" value="1" />
+              <el-option label="禁用" value="0" />
+            </el-select>
+          </div>
+          <div class="action-buttons">
+            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+            <el-button type="primary" icon="el-icon-plus" @click="onAdd">新增</el-button>
+            <el-button
+              type="primary"
+              style="background: #885cf7; border-color: #885cf7;"
+              icon="el-icon-link"
+              @click="jumpSystem"
+            >跳转到社会单位系统</el-button>
+          </div>
+        </div>
+      </div>
 
-      <!-- 无数据时的自定义内容 -->
-      <div v-if="filteredData.length === 0" class="table-empty">
-        <img :src="require('@/assets/无数据.jpg')" alt="无数据" class="empty-img">
-
-        <div class="empty-text">暂无数据</div>
+      <!-- 数据表格 -->
+      <div class="table-container">
+        <el-table
+          :data="filteredData"
+          border
+          style="width: 100%;"
+          empty-text="暂无数据"
+          header-cell-class-name="table-header"
+          v-loading="loading"
+        >
+          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column prop="username" label="用户名" align="center" />
+          <el-table-column prop="name" label="姓名" align="center" />
+          <el-table-column prop="createTime" label="创建时间" align="center" />
+          <el-table-column prop="role" label="用户角色" align="center" />
+          <el-table-column prop="mobile" label="手机号" align="center" />
+          <el-table-column prop="statusText" label="账号状态" align="center">
+            <template slot-scope="{ row }">
+              <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
+                {{ row.statusText }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="180" align="center">
+            <template slot-scope="{ row }">
+              <div class="table-actions">
+                <el-button size="mini" type="primary" @click="viewDetail(row)">详情</el-button>
+                <el-button size="mini" type="success" @click="editAccount(row)">编辑</el-button>
+                <el-button size="mini" type="danger" @click="deleteRow(row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
     </div>
   </div>
@@ -68,28 +100,19 @@ export default {
   name: 'UserManagePage',
   data() {
     return {
-      orgFilter: '',
-      orgList: ['小学', '高坪汽车站'],
-      activeOrg: '小学',
+      loading: false,
       filters: {
         name: '',
         phone: '',
         status: ''
       },
-      // 加上 org 字段
-      tableData: [
-        // 你可以加更多数据，也可以给 org: '小学' 的条目
-      ]
+      tableData: []
     }
   },
   computed: {
-    filteredOrgs() {
-      if (!this.orgFilter) return this.orgList
-      return this.orgList.filter(o => o.includes(this.orgFilter))
-    },
     filteredData() {
-      // 只显示当前左侧选中的单位的数据
-      let list = this.tableData.filter(row => row.org === this.activeOrg)
+      // 显示所有数据，根据搜索条件过滤
+      let list = this.tableData
       if (this.filters.name) list = list.filter(row => row.name.includes(this.filters.name))
       if (this.filters.phone) list = list.filter(row => row.mobile && row.mobile.includes(this.filters.phone))
       if (this.filters.status) list = list.filter(row => row.status + '' === this.filters.status)
@@ -103,32 +126,44 @@ export default {
 
     async loadData() {
       try {
+        this.loading = true
+        console.log('开始加载客户数据...')
         const res = await getcustomers()
-        const rawData = res.data || []
+        console.log('客户数据响应:', res)
+        
+        if (res.code === 200 && res.data) {
+          const rawData = res.data || []
+          console.log('原始数据:', rawData)
 
-        this.tableData = rawData.map(item => {
-          return {
-            id: item._id,
-            org: item.organization,
-            username: item.username,
-            name: item.name,
-            createTime: this.formatTime(item.createTime),
-            role: item.role,
-            mobile: item.mobile,
-            status: item.user.active ? 1 : 0,
-            statusText: item.user.active ? '正常' : '禁用'
-          }
-        })
+          this.tableData = rawData.map(item => {
+            return {
+              id: item._id,
+              username: item.username || '未设置',
+              name: item.name || '未设置',
+              createTime: this.formatTime(item.createTime),
+              role: item.role || '未设置',
+              mobile: item.mobile || '未设置',
+              status: item.user && item.user.active ? 1 : 0,
+              statusText: item.user && item.user.active ? '正常' : '禁用',
+              // 添加更多字段用于详情显示
+              userId: item.userId || '',
+              organization: item.organization || '',
+              originalData: item // 保存原始数据
+            }
+          })
 
-        // 动态生成 orgList
-        const orgs = [...new Set(this.tableData.map(item => item.org))]
-        this.orgList = orgs
-        this.activeOrg = orgs[0] || ''
+          console.log('处理后的表格数据:', this.tableData)
 
-        this.$message.success('数据加载成功')
+          this.$message.success('数据加载成功')
+        } else {
+          console.error('API响应错误:', res)
+          this.$message.error(res.msg || '加载数据失败')
+        }
       } catch (err) {
-        console.error(err)
-        this.$message.error('加载数据失败')
+        console.error('加载数据失败:', err)
+        this.$message.error('加载数据失败: ' + err.message)
+      } finally {
+        this.loading = false
       }
     },
     formatTime(timeStr) {
@@ -142,7 +177,7 @@ export default {
       return `${Y}-${M}-${D} ${h}:${m}:${s}`
     },
     async onSearch() {
-      this.loadData();
+      this.loadData()
     },
     onReset() {
       this.filters = { name: '', phone: '', status: '' }
@@ -155,7 +190,17 @@ export default {
       window.location.href = 'http://xfgl.diweiyunlian.cn/login?redirect=/basicInforManage'
     },
     viewDetail(row) {
-      // 假设用 username 作为唯一标识，推荐实际用 id
+      // 跳转到详情页面，传递完整数据
+      this.$router.push({
+        path: '/system/customer-detail',
+        query: { 
+          id: row.id,
+          data: JSON.stringify(row.originalData)
+        }
+      })
+    },
+    editAccount(row) {
+      // 跳转到编辑页面
       this.$router.push({
         path: '/system/edit-customer-account',
         query: { id: row.id }
@@ -163,11 +208,10 @@ export default {
     },
     async deleteRow(row) {
       const res = await Deletecustomer(row.id)
-      if (res.code === 200 ){
+      if (res.code === 200) {
         this.$message.error('删除了一条')
-        this.loadData();
-      }
-      else {
+        this.loadData()
+      } else {
         this.$message.error('删除错误')
       }
     },
@@ -179,104 +223,168 @@ export default {
 </script>
 
 <style scoped>
-.user-manage-page {
-  display: flex;
-  height: calc(100vh - 20px);
-  background: #fff;
-  position: relative;
+.owner-account-page {
+  height: 100vh;
+  background: #f5f5f5;
+  padding: 16px;
 }
 
-.left-bar {
-  width: 220px;
-  background: #fcfcfc;
-  border-right: 1px solid #f2f2f2;
-  padding: 16px 0 0 0;
-  min-height: 100vh;
-  box-sizing: border-box;
+/* 主内容区域 */
+.main-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.org-search {
-  margin-bottom: 10px;
-  width: 180px;
-}
-
-.org-list {
-  width: 100%;
-}
-
-.org-item {
-  width: 180px;
-  margin: 0 auto 8px auto;
-  text-align: center;
-  height: 40px;
-  line-height: 40px;
-  border-radius: 6px;
-  color: #222;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.org-item.active {
-  background: #eaf3ff;
-  color: #2186ff;
-  font-weight: bold;
-  border: 1px solid #2186ff;
-}
-
-.main-panel {
-  flex: 1;
-  padding: 0 16px 0 0;
-  min-width: 900px;
-  position: relative;
   background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: calc(100vh - 32px);
 }
 
-.toolbar {
+/* 页面标题 */
+.page-header {
+  padding: 20px;
+  background: #fafbfc;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.page-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.header-info {
   display: flex;
   align-items: center;
-  margin: 14px 0 8px 0;
 }
 
-.el-button {
-  font-size: 15px;
+.account-count {
+  font-size: 14px;
+  color: #606266;
+  display: flex;
+  align-items: center;
+}
+
+/* 搜索工具栏 */
+.search-toolbar {
+  padding: 20px;
+  border-bottom: 1px solid #e4e7ed;
+  background: #fafbfc;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.search-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-input,
+.filter-select {
+  width: 180px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 表格容器 */
+.table-container {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  background: #fff;
+  min-height: 400px;
 }
 
 .table-header {
-  background: #f6f8fc !important;
-  font-weight: bold;
-  font-size: 15px;
+  background: #f5f7fa !important;
+  color: #606266 !important;
+  font-weight: 600 !important;
 }
 
-.table-empty {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 110px;
-  text-align: center;
-  z-index: 2;
-  user-select: none;
+.table-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
 }
 
-.empty-img {
-  width: 110px;
-  opacity: 0.65;
-  margin-bottom: 6px;
+.table-actions .el-button {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.empty-text {
-  color: #99a;
-  font-size: 16px;
+.table-actions .el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.setting-btn {
-  position: fixed;
-  right: 32px;
-  top: 320px;
-  z-index: 10;
-  box-shadow: 0 2px 8px #87b7fd33;
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .filter-input,
+  .filter-select {
+    width: 150px;
+  }
+  
+  .toolbar-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .search-filters {
+    justify-content: center;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .owner-account-page {
+    padding: 8px;
+  }
+  
+  .main-content {
+    height: calc(100vh - 16px);
+  }
+  
+  .toolbar-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .search-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .filter-input,
+  .filter-select {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 </style>

@@ -24,4 +24,4 @@ export function getPaymentStats() {
     url: '/payment/stats',
     method: 'get'
   })
-} 
+}

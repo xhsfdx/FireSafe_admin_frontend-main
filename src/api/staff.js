@@ -28,6 +28,15 @@ export function createStaff(data) {
   })
 }
 
+// 获取人员列表
+export function getStaff(params) {
+  return request({
+    url: '/staff',
+    method: 'get',
+    params
+  })
+}
+
 export function updateRole(id, data) {
   return request({
     url: `/vue-element-admin/staff/${id}`,

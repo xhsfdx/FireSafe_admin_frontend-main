@@ -14,6 +14,7 @@
         />
         <el-button type="primary" icon="el-icon-search" class="ml8" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" class="ml8" @click="onReset">重置</el-button>
+        <el-button type="info" icon="el-icon-refresh" class="ml8" @click="loadLatestData">刷新数据</el-button>
         <el-button type="success" class="ml8" style="background:#3ccf4d;border:none;font-size:16px;" @click="onOneClick">
           <i class="el-icon-link" style="margin-right:4px;" />一键配置勾选项目
         </el-button>
@@ -25,6 +26,8 @@
         class="data-table"
         style="margin-top:18px"
         height="420px"
+        v-loading="loading"
+        element-loading-text="加载最新数据中..."
       >
         <el-table-column type="selection" width="50" />
         <el-table-column prop="index" label="序号" width="70" align="center" />
@@ -49,8 +52,8 @@
       title="配置维保人员"
       :visible.sync="showDialog"
       width="700px"
-      @close="showDialog = false"
       destroy-on-close
+      @close="showDialog = false"
     >
       <DispatchStaff
         :data="currentRow"
@@ -62,6 +65,8 @@
 
 <script>
 import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import { getMaintainPlans } from '@/api/maintainPlan'
+
 export default {
   name: 'RenewwalConfigureMaintenancePersonnel',
   components: { DispatchStaff },
@@ -76,25 +81,44 @@ export default {
       filter: { project: '' },
       tableData: [],
       currentRow: null,
-      showDialog: false
+      showDialog: false,
+      loading: false
+    }
+  },
+  computed: {
+    isOneTimeContract() {
+      return this.formData && ['施工', '评估', '检测'].includes(this.formData.contractType)
     }
   },
   watch: {
     formData: {
       handler(newVal) {
-        if (newVal && newVal.projectList) {
-          if (newVal.dispatchStaffList && newVal.dispatchStaffList.length) {
-            this.tableData = JSON.parse(JSON.stringify(newVal.dispatchStaffList))
-          } else {
-            this.tableData = newVal.projectList.map((p, idx) => ({
-              index: idx + 1,
-              ownerName: p.ownerName || newVal.entrustName || '',
-              projectName: p.name,
+        if (newVal) {
+          // 如果是一次性合同且没有项目信息，创建一个默认项目
+          if (this.isOneTimeContract && (!newVal.projectList || newVal.projectList.length === 0)) {
+            this.tableData = [{
+              index: 1,
+              ownerName: newVal.entrustName || '',
+              projectName: newVal.contractName || '一次性合同项目',
               techLeader: '',
               projectLeader: '',
               onSiteStaff: '',
-              maintainPersons: { technical: '', leader: '', maintainer: [] }
-            }))
+              maintainPersons: { technical: '', leader: '', maintainers: [] }
+            }]
+          } else if (newVal.projectList) {
+            if (newVal.dispatchStaffList && newVal.dispatchStaffList.length) {
+              this.tableData = JSON.parse(JSON.stringify(newVal.dispatchStaffList))
+            } else {
+              this.tableData = newVal.projectList.map((p, idx) => ({
+                index: idx + 1,
+                ownerName: p.ownerName || newVal.entrustName || '',
+                projectName: p.name,
+                techLeader: '',
+                projectLeader: '',
+                onSiteStaff: '',
+                maintainPersons: { technical: '', leader: '', maintainers: [] }
+              }))
+            }
           }
         }
       },
@@ -107,7 +131,70 @@ export default {
     console.log('初始 formData:', this.formData)
     console.log('初始 tableData:', this.tableData)
   },
+  mounted() {
+    // 监听维保人员更新事件
+    window.addEventListener('maintenancePersonnelUpdated', this.handlePersonnelUpdate)
+    // 初始加载最新数据
+    this.loadLatestData()
+  },
+  beforeDestroy() {
+    // 清理事件监听
+    window.removeEventListener('maintenancePersonnelUpdated', this.handlePersonnelUpdate)
+  },
   methods: {
+    // 加载最新的维保人员数据
+    async loadLatestData() {
+      try {
+        console.log('🔄 加载最新的维保人员数据...')
+        this.loading = true
+        
+        const response = await getMaintainPlans({ 
+          page: 1, 
+          limit: 1000
+        })
+        
+        if (response.success && response.data) {
+          console.log('✅ 获取到最新计划数据:', response.data)
+          
+          // 更新表格数据，使用最新的维保人员信息
+          const updatedTableData = this.tableData.map(tableRow => {
+            // 查找对应的计划数据
+            const planData = response.data.find(plan => 
+              plan.projectName === tableRow.projectName
+            )
+            
+            if (planData && planData.maintainPersons) {
+              console.log(`🔄 更新项目 ${tableRow.projectName} 的维保人员信息`)
+              
+              return {
+                ...tableRow,
+                techLeader: planData.maintainPersons.technical?.name || '未分配',
+                projectLeader: planData.maintainPersons.leader?.name || '未分配',
+                onSiteStaff: planData.maintainPersons.maintainers?.map(m => m.name).join('、') || '未分配',
+                maintainPersons: planData.maintainPersons
+              }
+            }
+            
+            return tableRow
+          })
+          
+          this.tableData = updatedTableData
+          console.log('✅ 维保人员数据更新完成')
+        }
+      } catch (error) {
+        console.error('❌ 加载最新维保人员数据失败:', error)
+        this.$message.error('加载最新数据失败，请刷新页面重试')
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    // 处理维保人员更新事件
+    handlePersonnelUpdate(event) {
+      console.log('📢 收到维保人员更新事件:', event.detail)
+      this.loadLatestData()
+    },
+    
     onSearch() {},
     onReset() { this.filter.project = '' },
     onOneClick() { this.$message.success('已一键配置（模拟）') },
@@ -137,16 +224,40 @@ export default {
       this.showDialog = false
     },
     finishCreate() {
-      const cleanTableData = this.tableData.map(row => ({
-        ...row,
-        maintainPersons: {
-          technical: row.maintainPersons?.technical || '',
-          leader: row.maintainPersons?.leader || '',
-          maintainer: Array.isArray(row.maintainPersons?.maintainer) ? row.maintainPersons.maintainer.filter(Boolean) : []
+      // 验证是否配置了维保人员
+      const hasConfiguredStaff = this.tableData.some(row => {
+        const hasConfig = row.maintainPersons &&
+               row.maintainPersons.technical &&
+               row.maintainPersons.leader &&
+               Array.isArray(row.maintainPersons.maintainers) &&
+               row.maintainPersons.maintainers.length > 0
+        return hasConfig
+      })
+
+      if (!hasConfiguredStaff) {
+        this.$message.error('请先配置技术负责人、项目负责人和至少一名现场维保人员！点击"详情"按钮为项目分配维保人员。')
+        return
+      }
+
+      // 确保maintainPersons数据格式正确，避免序列化问题
+      const sanitizedTableData = this.tableData.map(row => {
+        if (row.maintainPersons) {
+          return {
+            ...row,
+            maintainPersons: {
+              technical: row.maintainPersons.technical || null,
+              leader: row.maintainPersons.leader || null,
+              maintainers: Array.isArray(row.maintainPersons.maintainers)
+                ? row.maintainPersons.maintainers.filter(id => id && typeof id === 'string')
+                : []
+            }
+          }
         }
-      }))
-      this.$emit('update', { dispatchStaffList: cleanTableData })
-      this.$emit('submit', { dispatchStaffList: cleanTableData })
+        return row
+      })
+
+      this.$emit('update', { dispatchStaffList: sanitizedTableData })
+      this.$emit('submit', { dispatchStaffList: sanitizedTableData })
     }
   }
 }

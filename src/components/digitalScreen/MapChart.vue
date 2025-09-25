@@ -68,7 +68,6 @@ export default {
           borderWidth: 1,
           textStyle: { color: '#00ffff' },
           formatter: params => {
-            console.log(params)
             const data = params.data || {}
             return [
               params.name,

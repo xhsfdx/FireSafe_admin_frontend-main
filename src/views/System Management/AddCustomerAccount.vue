@@ -12,24 +12,28 @@
           <!-- 业主单位 -->
           <el-form-item label="业主单位" prop="company">
             <el-select v-model="form.company" placeholder="请选择业主单位" filterable :loading="loadingCompanies">
-              <el-option v-for="item in companyOptions" :key="item.value" :label="item.lable"
-                :value="item.value"></el-option>
+              <el-option
+                v-for="item in companyOptions"
+                :key="item.value"
+                :label="item.lable"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <!-- 姓名 -->
           <el-form-item label="姓名" prop="name">
-            <el-input v-model="form.name" placeholder="请输入姓名"></el-input>
+            <el-input v-model="form.name" placeholder="请输入姓名" />
           </el-form-item>
 
           <!-- 用户名 -->
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+            <el-input v-model="form.username" placeholder="请输入用户名" />
           </el-form-item>
 
           <!-- 电话号码 -->
           <el-form-item label="电话号码" prop="phone">
-            <el-input v-model="form.phone" placeholder="请输入电话号码"></el-input>
+            <el-input v-model="form.phone" placeholder="请输入电话号码" />
           </el-form-item>
         </el-col>
 
@@ -38,19 +42,19 @@
           <!-- 用户角色 -->
           <el-form-item label="用户角色" prop="role">
             <el-select v-model="form.role" placeholder="请选择用户角色">
-              <el-option label="社会单位管理员" value="社会单位管理员"></el-option>
-              <el-option label="社会单位人员" value="社会单位人员"></el-option>
+              <el-option label="社会单位管理员" value="社会单位管理员" />
+              <el-option label="社会单位人员" value="社会单位人员" />
             </el-select>
           </el-form-item>
 
           <!-- 输入密码 -->
           <el-form-item label="输入密码" prop="password">
-            <el-input v-model="form.password" type="password" placeholder="请输入密码"></el-input>
+            <el-input v-model="form.password" type="password" placeholder="请输入密码" />
           </el-form-item>
 
           <!-- 确认密码 -->
           <el-form-item label="确认密码" prop="confirmpassword">
-            <el-input v-model="form.confirmpassword" type="password" placeholder="请再次输入密码"></el-input>
+            <el-input v-model="form.confirmpassword" type="password" placeholder="请再次输入密码" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -111,44 +115,59 @@ export default {
     async loadData() {
       try {
         const res = await getcustomers()
-        const rawData = res.data || []
+        console.log('客户数据响应:', res)
+        
+        if (res.code === 200 && res.data) {
+          const rawData = res.data || []
 
-        console.log(rawData)
-        // 动态生成 orgList
-        const orgs = [...new Set(rawData.map(item => item.organization))]
+          // 动态生成 orgList
+          const orgs = [...new Set(rawData.map(item => item.organization).filter(org => org))]
 
-        this.companyOptions = orgs.map(item => ({
-          label: item,
-          value: item
-        }))
+          this.companyOptions = orgs.map(item => ({
+            lable: item,
+            value: item
+          }))
 
-        this.company = orgs[0] || ''
+          this.form.company = orgs[0] || ''
 
-        console.log(this.companyOptions)
-        this.$message.success('数据加载成功')
+          console.log('公司选项:', this.companyOptions)
+          this.$message.success('数据加载成功')
+        } else {
+          this.$message.error(res.msg || '加载数据失败')
+        }
       } catch (err) {
-        console.error(err)
+        console.error('加载数据失败:', err)
         this.$message.error('加载数据失败')
       }
     },
-    onSubmit() {
-      this.$refs.form.validate((valid) => {
+    async onSubmit() {
+      this.$refs.form.validate(async (valid) => {
         if (valid) {
-          // 提交数据
-          const data = {
-            organization: this.form.company,
-            mobile: this.form.phone,
-            name: this.form.name,
-            username: this.form.username,
-            password: this.form.password,
-            role: this.form.role
-          }
-          const res = Createcustomer(data)
-          if (res.code === 200) {
-            this.$message.success(res.msg)
-          }
-          else {
-            this.$message.error("创建用户失败")
+          try {
+            // 提交数据
+            const data = {
+              organization: this.form.company,
+              mobile: this.form.phone,
+              name: this.form.name,
+              username: this.form.username,
+              password: this.form.password,
+              role: this.form.role
+            }
+            
+            console.log('提交数据:', data)
+            const res = await Createcustomer(data)
+            console.log('创建响应:', res)
+            
+            if (res.code === 200) {
+              this.$message.success(res.msg || '创建用户成功')
+              // 重置表单
+              this.$refs.form.resetFields()
+            } else {
+              this.$message.error(res.msg || '创建用户失败')
+            }
+          } catch (error) {
+            console.error('创建用户失败:', error)
+            this.$message.error('创建用户失败')
           }
         } else {
           console.log('表单验证失败')

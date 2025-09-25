@@ -180,7 +180,7 @@
 <script>
 import axios from 'axios'
 import { uploadImage } from '@/api/upload'
-import { getOrganization, updateOrganization } from '@/api/organization';
+import { getOrganization, updateOrganization } from '@/api/organization'
 export default {
   data() {
     return {
@@ -247,21 +247,21 @@ export default {
     // 保存按钮点击事件
     async onLoad() {
       try {
-        const res = await getOrganization();
+        const res = await getOrganization()
         console.log(res)
-        this.formData = res.data;
+        this.formData = res.data
       } catch (error) {
         this.$message.error(`出现错误${error.msg}`)
       }
     },
     saveInfo() {
-      this.$refs.enterpriseForm.validate( async (valid) => {
+      this.$refs.enterpriseForm.validate(async(valid) => {
         if (valid) {
           // 表单验证通过，可以提交数据到后端
           console.log('表单数据:', this.formData)
           // 触发保存数据的后端请求
-          
-          const res = await updateOrganization(this.formData);
+
+          const res = await updateOrganization(this.formData)
           console.log(res.data)
           // 这里只是模拟保存成功
           this.$message.success('保存成功')

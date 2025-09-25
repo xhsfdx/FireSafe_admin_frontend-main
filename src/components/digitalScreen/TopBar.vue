@@ -126,6 +126,10 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    digital() {
+      // 数字可视化大屏按钮点击事件
+      this.$message.info('您当前已在数字可视化大屏页面')
+    },
     servicesystem() {
       this.$router.push({ name: 'AgencyBasicInfo' })
     },

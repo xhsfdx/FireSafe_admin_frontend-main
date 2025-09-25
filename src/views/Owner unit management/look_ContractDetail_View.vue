@@ -1,6 +1,6 @@
 <template>
   <div class="add-page-container">
-    <el-card class="box-card" v-loading="loading">
+    <el-card v-loading="loading" class="box-card">
       <!-- Custom Steps -->
       <div class="custom-steps">
         <div class="step-item" :class="{ 'active': activeStep === 0, 'completed': activeStep > 0 }">
@@ -248,4 +248,4 @@ export default {
   background-color: #ccc;
   margin: 0 10px;
 }
-</style> 
+</style>

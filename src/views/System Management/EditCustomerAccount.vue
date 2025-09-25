@@ -16,30 +16,43 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="120px" class="edit-form">
         <el-row :gutter="50">
           <el-col :span="12">
-            <el-form-item label="业主单位" prop="org">
-              <el-input v-model="form.organization" placeholder="请选择单位" />
+            <el-form-item label="业主单位" prop="organization">
+              <el-input v-model="form.organization" placeholder="请输入业主单位" />
             </el-form-item>
             <el-form-item label="姓名" prop="name">
-              <el-input v-model="form.name" />
+              <el-input v-model="form.name" placeholder="请输入姓名" />
             </el-form-item>
             <el-form-item label="用户名" prop="username">
-              <el-input v-model="form.username" disabled />
+              <el-input v-model="form.username" placeholder="请输入用户名" />
             </el-form-item>
             <el-form-item label="电话号码" prop="phone">
-              <el-input v-model="form.phone" />
+              <el-input v-model="form.phone" placeholder="请输入电话号码" />
+            </el-form-item>
+            <el-form-item label="用户ID" prop="userId">
+              <el-input v-model="form.userId" placeholder="用户ID" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="用户角色" prop="role">
-              <el-select v-model="form.role" disabled>
+              <el-select v-model="form.role" placeholder="请选择用户角色">
                 <el-option label="社会单位管理员" value="社会单位管理员" />
+                <el-option label="社会单位人员" value="社会单位人员" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="账号状态" prop="status">
+              <el-select v-model="form.status" placeholder="请选择账号状态">
+                <el-option label="正常" :value="1" />
+                <el-option label="禁用" :value="0" />
               </el-select>
             </el-form-item>
             <el-form-item label="输入密码" prop="password">
-              <el-input v-model="form.password" type="password" placeholder="请输入用户名的密码" />
+              <el-input v-model="form.password" type="password" placeholder="留空则不修改密码" />
             </el-form-item>
             <el-form-item label="确认密码" prop="confirmPassword">
               <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码" />
+            </el-form-item>
+            <el-form-item label="备注信息" prop="remark">
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" :rows="3" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -63,23 +76,31 @@ export default {
         username: '',
         phone: '',
         role: '',
+        userId: '',
+        status: 1,
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        remark: ''
       },
       originForm: {},
       rules: {
-        organization: [{ required: true, message: '请选择业主单位', trigger: 'change' }],
+        organization: [{ required: true, message: '请输入业主单位', trigger: 'blur' }],
         name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-        phone: [{ required: true, message: '请输入电话号码', trigger: 'blur' }],
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        phone: [
+          { required: true, message: '请输入电话号码', trigger: 'blur' },
+          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+        ],
+        role: [{ required: true, message: '请选择用户角色', trigger: 'change' }],
+        status: [{ required: true, message: '请选择账号状态', trigger: 'change' }],
         password: [{ required: false, message: '请输入密码', trigger: 'blur' }],
         confirmPassword: [
           { required: false, message: '请再次输入密码', trigger: 'blur' },
           {
             validator: (rule, value, callback) => {
-              if (value !== this.form.password) {
+              if (this.form.password && value !== this.form.password) {
                 callback(new Error('两次密码输入不一致'))
               } else {
-                 console.log('fuck password')
                 callback()
               }
             }, trigger: 'blur'
@@ -100,36 +121,40 @@ export default {
           return
         }
 
+        console.log('获取用户详情，ID:', id)
         const res = await getcustomerDetail(id)
+        console.log('用户详情响应:', res)
+        
         if (res.code === 200 && res.data) {
           const data = res.data
 
           // 填充 this.form（保留响应式）
           Object.assign(this.form, {
-            organization: data.organization,
-            name: data.name,
-            username: data.username,
-            phone: data.mobile,
-            role: data.role,
+            organization: data.organization || '',
+            name: data.name || '',
+            username: data.username || '',
+            phone: data.mobile || '',
+            role: data.role || '',
+            userId: data.userId || '',
+            status: data.user && data.user.active ? 1 : 0,
             password: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            remark: data.remark || ''
           })
 
           // 保存一份原始数据用于对比
           this.originForm = { ...this.form }
-          console.log('fuck A')
           this.$message.success('加载成功')
         } else {
           this.$message.error(res.msg || '获取详情失败')
         }
       } catch (err) {
-        console.error(err)
+        console.error('获取用户详情失败:', err)
         this.$message.error('接口请求失败')
       }
     },
     async onSave() {
-      console.log('fuck B')
-      const self = this; // 保存 this
+      const self = this // 保存 this
       this.$refs.form.validate(async valid => {
         if (valid) {
           const id = this.$route.query.id
@@ -137,16 +162,21 @@ export default {
             this.$message.error('缺少用户ID')
             return
           }
+          
           // 生成变更字段对象
           const updateData = {}
 
           // 对比初始数据和当前表单，生成差异字段
-          const fields = ['organization', 'name', 'username', 'phone', 'role', 'password']
-          console.log('fuck c')
+          const fields = ['organization', 'name', 'username', 'phone', 'role', 'status', 'remark', 'password']
           fields.forEach(key => {
             if (key === 'password') {
               if (self.form.password) {
                 updateData.password = self.form.password // 密码不做对比，填写了就更新
+              }
+            } else if (key === 'phone') {
+              // 手机号字段映射
+              if (self.form.phone !== self.originForm.phone) {
+                updateData.mobile = self.form.phone
               }
             } else if (self.form[key] !== self.originForm[key]) {
               updateData[key] = self.form[key]
@@ -159,7 +189,10 @@ export default {
           }
 
           try {
+            console.log('更新数据:', updateData)
             const res = await Updatecustomer(id, updateData)
+            console.log('更新响应:', res)
+            
             if (res.code === 200) {
               this.$message.success('保存成功！')
               this.$router.back()
@@ -167,11 +200,9 @@ export default {
               this.$message.error(res.msg || '保存失败')
             }
           } catch (err) {
-            console.error(err)
+            console.error('更新用户失败:', err)
             this.$message.error('接口请求失败')
           }
-
-          // 提交逻辑
         }
       })
     },

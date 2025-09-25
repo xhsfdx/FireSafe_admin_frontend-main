@@ -20,7 +20,7 @@
                 <el-option label="项目维保" value="项目维保" />
               </el-select>
               <div v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
-                <i class="el-icon-info"></i> 一次性合同仅需填写基本信息，维保相关内容将自动清空
+                <i class="el-icon-info" /> 一次性合同仅需填写基本信息，维保相关内容将自动清空
               </div>
             </el-form-item>
             <el-form-item label="合同时间" required>
@@ -65,8 +65,12 @@
               <el-input v-model="form.designOrg" placeholder="请输入设计单位" />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }"
-                placeholder="请输入备注说明" />
+              <el-input
+                v-model="form.remark"
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 3 }"
+                placeholder="请输入备注说明"
+              />
             </el-form-item>
           </el-col>
           <!-- 右栏 -->
@@ -117,7 +121,7 @@
         <span class="tip">(注：建筑物面积请填写纯数字，例如:0.00)</span>
         <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-              <el-table v-if="!['施工', '评估', '检测'].includes(form.contractType)" :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
+      <el-table v-if="!['施工', '评估', '检测'].includes(form.contractType)" :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
         <el-table-column prop="name" label="* 建筑信息" align="center">
           <template slot-scope="scope">
             <el-input v-model="scope.row.name" placeholder="请输入建筑名称" />
@@ -145,8 +149,12 @@
         </el-table-column>
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
-            <el-button v-if="buildingList.length > 1" type="text" style="color:#f56c6c"
-              @click="removeRow(scope.$index)">删除</el-button>
+            <el-button
+              v-if="buildingList.length > 1"
+              type="text"
+              style="color:#f56c6c"
+              @click="removeRow(scope.$index)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -161,16 +169,23 @@
         合同维保内容
         <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-              <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
+      <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
         <!-- 左侧树形列表 + 全选 -->
         <el-col :span="6">
           <div style="margin-bottom:12px;">
-            <el-checkbox v-model="treeCheckAll" @change="handleCheckAll" style="margin-left:2px;">一键全选</el-checkbox>
+            <el-checkbox v-model="treeCheckAll" style="margin-left:2px;" @change="handleCheckAll">一键全选</el-checkbox>
           </div>
           <el-tabs v-model="activeTab" class="tab-tree">
             <el-tab-pane label="平台标准系统" name="standard">
-              <el-tree ref="maintTree" :data="maintTree" show-checkbox node-key="id" :default-checked-keys="checkedKeys"
-                :expand-on-click-node="false" @check="handleTreeCheck" />
+              <el-tree
+                ref="maintTree"
+                :data="maintTree"
+                show-checkbox
+                node-key="id"
+                :default-checked-keys="checkedKeys"
+                :expand-on-click-node="false"
+                @check="handleTreeCheck"
+              />
             </el-tab-pane>
             <el-tab-pane label="自建标准系统" name="custom">
               <div class="tab-empty">暂无内容</div>
@@ -220,7 +235,7 @@ export default {
       form: {
         entrustName: '', dateStart: '', dateEnd: '', contractName: '', contractNo: '',
         contractType: '', payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
-        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: ''
+        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: '', fileUrls: []
       },
       rules: {
         entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
@@ -242,6 +257,12 @@ export default {
         if (!newData || !Object.keys(newData).length) return
 
         console.log('合同信息页接收数据:', newData)
+        console.log('关键字段数据:', {
+          designOrg: newData.designOrg,
+          debugOrg: newData.debugOrg,
+          recordOrg: newData.recordOrg,
+          remark: newData.remark
+        })
 
         this.form = {
           ...this.form,
@@ -261,13 +282,23 @@ export default {
           designOrg: newData.designOrg || '',
           debugOrg: newData.debugOrg || '',
           recordOrg: newData.recordOrg || '',
-          remark: newData.remark || ''
-        }
-
-        if (newData.buildingList && newData.buildingList.length > 0) {
-          this.buildingList = JSON.parse(JSON.stringify(newData.buildingList))
+          remark: newData.remark || '',
+          fileUrls: newData.fileUrls || []
         }
         
+        console.log('设置后的表单数据:', {
+          designOrg: this.form.designOrg,
+          debugOrg: this.form.debugOrg,
+          recordOrg: this.form.recordOrg,
+          remark: this.form.remark
+        })
+
+        if (newData.buildingList && newData.buildingList.length > 0) {
+          console.log('续签合同信息页接收到的建筑信息:', newData.buildingList)
+          this.buildingList = JSON.parse(JSON.stringify(newData.buildingList))
+          console.log('续签合同信息页设置后的建筑信息:', this.buildingList)
+        }
+
         this.checkedMaintList = newData.checkedMaintList || []
         this.$nextTick(() => {
           this.updateCheckedKeysFromList()
@@ -293,7 +324,7 @@ export default {
 
       const leafNodes = this.getAllLeafNodes(this.maintTree)
       const listKeys = new Set(this.checkedMaintList.map(item => item.content))
-      
+
       this.checkedKeys = leafNodes
         .filter(node => listKeys.has(node.label))
         .map(node => node.id)
@@ -303,28 +334,30 @@ export default {
       }
     },
     transformToTree(data) {
-      // period: 1 => '月检'
+      // 参考 add new contract information.vue 的转换逻辑
       const getPeriodLabel = (p) => {
         if (!p) return ''
-        if (p == 1) return '月检'
-        if (p == 12) return '年检'
-        return `每${p}月`
+        if (p === 1) return '月检'
+        if (p === 12) return '年检'
+        return `${p}`
       }
+
       return data.map(system => ({
-        id: system.id,
-        label: system.name,
-        children: (system.children || []).map(project => ({
-          id: project.id,
-          label: project.projectName,
-          children: (project.children || []).map(item => ({
-            id: item.id,
-            label: item.content,
+        id: system._id,
+        label: system.category,
+        children: (system.devices || []).map(device => ({
+          id: device._id,
+          label: device.device,
+          children: (device.items || []).map(item => ({
+            id: item._id,
+            label: item.maintainSlim,
             data: {
-              system: system.name,
-              item: project.projectName,
-              content: item.content,
-              period: getPeriodLabel(item.period),
-              standard: item.attention || '',
+              id: item._id,
+              system: system.category,
+              item: device.device,
+              content: item.maintainContent,
+              period: getPeriodLabel(item.frequency),
+              standard: item.attention || ''
             }
           }))
         }))
@@ -355,11 +388,14 @@ export default {
     },
     async loadMaintainTree() {
       try {
-        const res = await fetch('/maintainTree.json')
-        const rawData = await res.json()
+        // 参考 add new contract information.vue 的加载方式
+        const { getMaintainStandardItems } = await import('@/api/contract')
+        const res = await getMaintainStandardItems()
+        const rawData = res.data
         this.maintTree = this.transformToTree(rawData)
         this.updateCheckedKeysFromList()
       } catch (err) {
+        console.error('加载维保项目失败:', err)
         this.$message.error('加载维保项目失败')
       }
     },
@@ -402,34 +438,19 @@ export default {
       })
       return arr
     },
-    // 生成右侧表格完整内容
+    // 生成右侧表格完整内容 - 参考 add new contract information.vue 的逻辑
     updateCheckedMaintList() {
-      // 获取所有被选中的节点 id（包括半选）
-      const checkedIds = [
-        ...this.$refs.maintTree.getCheckedKeys(true),
-        ...this.$refs.maintTree.getHalfCheckedKeys()
-      ]
-      // 递归收集所有被选中节点的所有子孙节点中有 data 字段的节点
-      const collectAllCheckedDataNodes = (nodes, arr = []) => {
-        nodes.forEach(n => {
-          if (checkedIds.includes(n.id)) {
-            // 只要被选中，递归收集其所有子孙节点的 data
-            const collectDescendantData = (node) => {
-              if (node.data) arr.push(node.data)
-              if (node.children && node.children.length) {
-                node.children.forEach(child => collectDescendantData(child))
-              }
-            }
-            collectDescendantData(n)
-          } else if (n.children && n.children.length) {
-            collectAllCheckedDataNodes(n.children, arr)
-          }
+      if (!this.$refs.maintTree) return
+
+      const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
+      this.checkedMaintList = checkedNodes
+        .filter(n => !n.children || n.children.length === 0)
+        .map(n => n.data || {
+          system: n.label,
+          item: '', content: '', period: '', standard: ''
         })
-        return arr
-      }
-      // 去重（防止多层嵌套重复）
-      const allData = collectAllCheckedDataNodes(this.maintTree)
-      this.checkedMaintList = Array.from(new Set(allData.map(d => JSON.stringify(d)))).map(s => JSON.parse(s))
+
+      console.log('更新后的维保内容列表:', this.checkedMaintList)
     },
     nextStep() {
       // 如果是一次性合同，临时移除维保方式的验证规则
@@ -438,20 +459,20 @@ export default {
         this.rules.maintType = []
         this.form.maintType = '' // 确保维保方式为空
       }
-      
+
       this.$refs.form.validate(valid => {
         // 恢复原始验证规则
         this.rules = originalRules
-        
+
         if (!valid) return
-        
+
         // 确保传递完整的表单数据，包括 dispatchStaffList
         const updateData = {
           ...this.form,
           buildingList: this.buildingList,
           checkedMaintList: this.checkedMaintList
         }
-        
+
         console.log('合同信息页面 nextStep 传递数据:', updateData)
         this.$emit('update', updateData)
         this.$emit('next')
@@ -465,14 +486,14 @@ export default {
     },
     async fetchContractDetail(id) {
       // 伪代码：实际请替换为你的API调用
-      if (!this.$api || !this.$api.getContractDetail) return;
+      if (!this.$api || !this.$api.getContractDetail) return
       const res = await this.$api.getContractDetail(id)
       if (res && res.data) {
         this.form = { ...this.form, ...res.data }
         this.buildingList = res.data.buildings || []
         this.checkedMaintList = res.data.maintainItems || []
       }
-    },
+    }
   }
 }
 </script>

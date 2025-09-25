@@ -6,9 +6,9 @@
         v-model="searchKeyword"
         :fetch-suggestions="querySearch"
         placeholder="输入关键字搜索地点"
-        @select="handleSelect"
         clearable
         style="width: 100%"
+        @select="handleSelect"
       />
       <div id="search-result-panel" />
     </div>
@@ -44,7 +44,7 @@ export default {
     }
   },
   data() {
-    const self = this;
+    const self = this
     return {
       searchKeyword: '',
       zoom: 15,
@@ -54,29 +54,29 @@ export default {
       selectedLocation: null,
       mapEvents: {
         init(map) {
-          self.initSearch(map);
+          self.initSearch(map)
           // 单击地图获取经纬度和地址
           map.on('click', (e) => {
-            const { lng, lat } = e.lnglat;
-            self.markerPosition = [lng, lat];
-            self.getAddressByLngLat([lng, lat]);
-          });
-        },
+            const { lng, lat } = e.lnglat
+            self.markerPosition = [lng, lat]
+            self.getAddressByLngLat([lng, lat])
+          })
+        }
       },
       plugin: [
         {
           pName: 'Geocoder',
           events: {
             init(o) {
-              self.geocoder = o;
-            },
-          },
-        },
+              self.geocoder = o
+            }
+          }
+        }
       ],
       geocoder: null,
       autoComplete: null,
       placeSearch: null
-    };
+    }
   },
   watch: {
     address(newVal) {
@@ -140,48 +140,48 @@ export default {
       })
     },
     initSearch(map) {
-      const AMap = window.AMap;
-      this.placeSearch = new AMap.PlaceSearch({ map: map, panel: 'search-result-panel' });
+      const AMap = window.AMap
+      this.placeSearch = new AMap.PlaceSearch({ map: map, panel: 'search-result-panel' })
       // 这里不再用autoComplete.on('select')，而是用el-autocomplete
       this.placeSearch.on('listElementClick', (e) => {
-        const { lng, lat } = e.data.location;
-        this.center = [lng, lat];
-        this.markerPosition = [lng, lat];
-        this.selectedAddress = e.data.address + e.data.name;
+        const { lng, lat } = e.data.location
+        this.center = [lng, lat]
+        this.markerPosition = [lng, lat]
+        this.selectedAddress = e.data.address + e.data.name
         this.selectedLocation = {
           address: this.selectedAddress,
           longitude: lng,
-          latitude: lat,
-        };
-      });
+          latitude: lat
+        }
+      })
     },
     getAddressByLngLat(lnglat) {
       this.geocoder.getAddress(lnglat, (status, result) => {
         if (status === 'complete' && result.regeocode) {
-          this.selectedAddress = result.regeocode.formattedAddress;
+          this.selectedAddress = result.regeocode.formattedAddress
           this.selectedLocation = {
             address: this.selectedAddress,
             longitude: lnglat[0],
-            latitude: lnglat[1],
-          };
+            latitude: lnglat[1]
+          }
         } else {
-          this.selectedAddress = '地址解析失败';
-          this.selectedLocation = null;
+          this.selectedAddress = '地址解析失败'
+          this.selectedLocation = null
         }
-      });
+      })
     },
     handleConfirm() {
       if (!this.selectedLocation) {
-        this.$message.warning('请先在地图上选择一个地点');
-        return;
+        this.$message.warning('请先在地图上选择一个地点')
+        return
       }
-      this.$emit('confirm', this.selectedLocation);
+      this.$emit('confirm', this.selectedLocation)
     },
     handleCancel() {
-      this.$emit('cancel');
-    },
-  },
-};
+      this.$emit('cancel')
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -222,4 +222,4 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-</style> 
+</style>
