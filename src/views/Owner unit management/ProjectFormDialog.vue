@@ -8,17 +8,17 @@
         <el-form-item label="项目地址" prop="address">
           <div class="address-input-container">
             <el-autocomplete
-            v-model="form.address"
+              v-model="form.address"
               :fetch-suggestions="querySearchAsync"
-            placeholder="请输入地址"
+              placeholder="请输入地址"
               class="address-input"
-              @select="handleSelect"
-              @input="onAddressInput"
-              @blur="onAddressBlur"
               :debounce="300"
               value-key="value"
               :trigger-on-focus="false"
               :highlight-first-item="true"
+              @select="handleSelect"
+              @input="onAddressInput"
+              @blur="onAddressBlur"
             >
               <template slot-scope="{ item }">
                 <div class="address-suggestion">
@@ -28,13 +28,13 @@
               </template>
             </el-autocomplete>
             <div class="address-buttons">
-              <el-button 
-                icon="el-icon-location" 
-                @click="manualGeocode"
+              <el-button
+                icon="el-icon-location"
                 :loading="geocoding"
                 title="手动定位"
                 type="primary"
                 size="small"
+                @click="manualGeocode"
               />
             </div>
           </div>
@@ -76,9 +76,9 @@
               <el-option label="简阳市" value="简阳市" />
             </el-option-group>
             <el-option-group label="南充市">
-            <el-option label="顺庆区" value="顺庆区" />
-            <el-option label="高坪区" value="高坪区" />
-            <el-option label="嘉陵区" value="嘉陵区" />
+              <el-option label="顺庆区" value="顺庆区" />
+              <el-option label="高坪区" value="高坪区" />
+              <el-option label="嘉陵区" value="嘉陵区" />
               <el-option label="南部县" value="南部县" />
               <el-option label="营山县" value="营山县" />
               <el-option label="蓬安县" value="蓬安县" />
@@ -339,12 +339,15 @@
 </template>
 
 <script>
-import MapDialog from './MapDialog.vue'
+// import MapDialog from './MapDialog.vue'
 
 export default {
   name: 'ProjectFormDialog',
   props: {
-    formData: Object
+    formData: {
+      type: Object,
+      default: () => ({})
+    }
   },
   data() {
     return {
@@ -376,17 +379,6 @@ export default {
       }
     }
   },
-  mounted() {
-    // 延迟加载地图，确保DOM已渲染
-    this.$nextTick(() => {
-      setTimeout(() => {
-    this.loadMap()
-      }, 100)
-    })
-    
-    // 初始化表单数据
-    this.initFormData()
-  },
   watch: {
     formData: {
       handler(newVal) {
@@ -394,6 +386,17 @@ export default {
       },
       immediate: true
     }
+  },
+  mounted() {
+    // 延迟加载地图，确保DOM已渲染
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.loadMap()
+      }, 100)
+    })
+
+    // 初始化表单数据
+    this.initFormData()
   },
   methods: {
     // 初始化表单数据
@@ -416,7 +419,7 @@ export default {
         console.log('🔧 重置为空白表单')
       }
     },
-    
+
     // 重置表单
     resetForm() {
       this.form = {
@@ -433,25 +436,25 @@ export default {
         this.$refs.projectForm.clearValidate()
       }
     },
-    
+
     // 加载高德地图 API
     loadMap() {
       console.log('开始加载地图...')
-      
+
       // 检查是否已经加载了高德地图API
       if (window.AMap) {
         console.log('高德地图API已存在，直接初始化')
         this.initMap(window.AMap)
         return
       }
-      
+
       // 检查AMapLoader是否存在
       if (!window.AMapLoader) {
         console.error('AMapLoader不存在，尝试动态加载')
         this.loadAMapScript()
         return
       }
-      
+
       console.log('使用AMapLoader加载地图')
       window.AMapLoader.load({
         key: '9e88da7280b6a01c17010e78fdd66f1e', // 使用测试API key
@@ -472,14 +475,14 @@ export default {
     // 动态加载高德地图脚本
     loadAMapScript() {
       console.log('动态加载高德地图脚本')
-      
+
       // 检查是否已经加载了脚本
       if (document.querySelector('script[src*="amap"]')) {
         console.log('高德地图脚本已存在，等待加载完成')
         this.waitForAMap()
         return
       }
-      
+
       const script = document.createElement('script')
       script.src = 'https://webapi.amap.com/maps?v=1.4.15&key=9e88da7280b6a01c17010e78fdd66f1e&plugin=AMap.Geocoder,AMap.PlaceSearch,AMap.Autocomplete,AMap.DistrictSearch'
       script.onload = () => {
@@ -497,7 +500,7 @@ export default {
     waitForAMap() {
       let attempts = 0
       const maxAttempts = 50
-      
+
       const checkAMap = () => {
         attempts++
         if (window.AMap) {
@@ -510,7 +513,7 @@ export default {
           this.showMapError()
         }
       }
-      
+
       checkAMap()
     },
 
@@ -532,43 +535,42 @@ export default {
 
     initMap(AMap) {
       console.log('开始初始化地图，AMap版本:', AMap.version)
-      
+
       const mapContainer = document.getElementById('mapContainer')
       if (!mapContainer) {
         console.error('地图容器不存在')
         this.showMapError()
         return
       }
-      
+
       console.log('地图容器找到，尺寸:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight)
-      
+
       try {
-      this.map = new AMap.Map('mapContainer', {
-        zoom: 16,
+        this.map = new AMap.Map('mapContainer', {
+          zoom: 16,
           center: [106.1107, 30.8379], // 南充市中心坐标
           resizeEnable: true,
           mapStyle: 'amap://styles/normal'
         })
-        
+
         console.log('地图初始化成功')
-        
+
         // 等待地图加载完成
         this.map.on('complete', () => {
           console.log('地图加载完成')
           this.mapLoaded = true
-          
+
           // 延迟初始化服务，确保AMap对象完全可用
           setTimeout(() => {
             this.initMapServices(AMap)
           }, 500)
         })
-        
+
         // 地图加载失败处理
         this.map.on('error', (e) => {
           console.error('地图加载错误:', e)
           this.showMapError()
         })
-        
       } catch (error) {
         console.error('地图初始化失败:', error)
         this.showMapError()
@@ -582,7 +584,7 @@ export default {
       console.log('AMap.Geocoder:', AMap.Geocoder)
       console.log('AMap.PlaceSearch:', AMap.PlaceSearch)
       console.log('AMap.AutoComplete:', AMap.AutoComplete)
-      
+
       try {
         // 初始化地理编码服务
         if (AMap.Geocoder) {
@@ -594,7 +596,7 @@ export default {
         } else {
           console.error('❌ AMap.Geocoder 不存在')
         }
-        
+
         // 初始化地点搜索服务
         if (AMap.PlaceSearch) {
           this.placeSearch = new AMap.PlaceSearch({
@@ -606,7 +608,7 @@ export default {
         } else {
           console.error('❌ AMap.PlaceSearch 不存在')
         }
-        
+
         // 初始化自动补全服务
         if (AMap.Autocomplete) {
           this.autoComplete = new AMap.Autocomplete({
@@ -625,17 +627,16 @@ export default {
           this.setMarker(e.lnglat)
           this.reverseGeocode(e.lnglat)
         })
-        
+
         console.log('✅ 地图点击事件绑定成功')
 
         // 如果有传入的数据，初始化表单
         if (this.formData) {
           this.initFormData()
         }
-        
+
         // 显示服务初始化完成提示
         this.$message.success('地图服务初始化完成')
-        
       } catch (error) {
         console.error('❌ 地图服务初始化失败:', error)
         // 地图服务初始化失败，不显示提示
@@ -647,21 +648,21 @@ export default {
       console.log('=== 地址自动补全查询开始 ===')
       console.log('查询字符串:', queryString)
       console.log('回调函数:', callback)
-      
+
       if (!queryString) {
         console.log('查询字符串为空，返回空数组')
         callback([])
         return
       }
-      
+
       console.log('正在搜索地址:', queryString)
-      
+
       // 优先使用高德地图自动补全服务
       if (this.autoComplete) {
         console.log('使用高德地图自动补全服务')
         this.autoComplete.search(queryString, (status, result) => {
           console.log('高德地图自动补全搜索结果:', { status, result })
-          
+
           if (status === 'complete' && result.tips && result.tips.length > 0) {
             const suggestions = result.tips.map(tip => {
               const suggestion = {
@@ -673,11 +674,11 @@ export default {
                 adcode: tip.adcode,
                 typecode: tip.typecode
               }
-              
+
               console.log('处理高德地图建议项:', suggestion)
               return suggestion
             })
-            
+
             console.log('高德地图地址建议列表:', suggestions)
             callback(suggestions)
           } else {
@@ -698,12 +699,12 @@ export default {
         this.searchWithWebAPI(queryString, callback)
         return
       }
-      
+
       console.log('使用地点搜索进行自动补全:', queryString)
-      
+
       this.placeSearch.search(queryString, (status, result) => {
         console.log('地点搜索自动补全结果:', { status, result })
-        
+
         if (status === 'complete' && result.poiList && result.poiList.pois && result.poiList.pois.length > 0) {
           const suggestions = result.poiList.pois.slice(0, 10).map(poi => ({
             value: poi.name,
@@ -714,7 +715,7 @@ export default {
             adcode: poi.adcode,
             typecode: poi.typecode
           }))
-          
+
           console.log('地点搜索建议列表:', suggestions)
           callback(suggestions)
         } else {
@@ -727,15 +728,15 @@ export default {
     // 使用高德地图Web服务API进行地址搜索
     searchWithWebAPI(queryString, callback) {
       console.log('使用高德地图Web服务API搜索:', queryString)
-      
+
       const apiKey = '9e88da7280b6a01c17010e78fdd66f1e'
       const url = `https://restapi.amap.com/v3/assistant/inputtips?key=${apiKey}&keywords=${encodeURIComponent(queryString)}&city=全国&output=json`
-      
+
       fetch(url)
         .then(response => response.json())
         .then(data => {
           console.log('Web API搜索结果:', data)
-          
+
           if (data.status === '1' && data.tips && data.tips.length > 0) {
             const suggestions = data.tips.map(tip => ({
               value: tip.name,
@@ -749,7 +750,7 @@ export default {
               adcode: tip.adcode,
               typecode: tip.typecode
             }))
-            
+
             console.log('Web API建议列表:', suggestions)
             callback(suggestions)
           } else {
@@ -767,7 +768,7 @@ export default {
     // 本地地址建议（备选方案）
     getLocalAddressSuggestions(queryString, callback) {
       console.log('使用本地地址建议:', queryString)
-      
+
       // 扩展的地址建议列表
       const addressSuggestions = [
         // 四川省南充市
@@ -776,7 +777,7 @@ export default {
         { value: '四川省南充市高坪区', name: '高坪区', address: '四川省南充市高坪区', location: { lng: 106.1189, lat: 30.7816 }, district: '高坪区' },
         { value: '四川省南充市嘉陵区', name: '嘉陵区', address: '四川省南充市嘉陵区', location: { lng: 106.0719, lat: 30.7629 }, district: '嘉陵区' },
         { value: '四川省南充市', name: '南充市', address: '四川省南充市', location: { lng: 106.1107, lat: 30.8379 }, district: '南充市' },
-        
+
         // 重庆市
         { value: '重庆市北碚区天生路2号', name: '天生路2号', address: '重庆市北碚区天生路2号', location: { lng: 106.4344, lat: 29.8254 }, district: '北碚区' },
         { value: '重庆市北碚区', name: '北碚区', address: '重庆市北碚区', location: { lng: 106.4344, lat: 29.8254 }, district: '北碚区' },
@@ -785,7 +786,7 @@ export default {
         { value: '重庆市南岸区', name: '南岸区', address: '重庆市南岸区', location: { lng: 106.5606, lat: 29.5232 }, district: '南岸区' },
         { value: '重庆市沙坪坝区', name: '沙坪坝区', address: '重庆市沙坪坝区', location: { lng: 106.4572, lat: 29.5410 }, district: '沙坪坝区' },
         { value: '重庆市', name: '重庆市', address: '重庆市', location: { lng: 106.5516, lat: 29.5630 }, district: '重庆市' },
-        
+
         // 四川省其他城市
         { value: '四川省成都市锦江区', name: '锦江区', address: '四川省成都市锦江区', location: { lng: 104.0805, lat: 30.6586 }, district: '锦江区' },
         { value: '四川省成都市青羊区', name: '青羊区', address: '四川省成都市青羊区', location: { lng: 104.0618, lat: 30.6744 }, district: '青羊区' },
@@ -813,27 +814,26 @@ export default {
         { value: '四川省甘孜藏族自治州', name: '甘孜藏族自治州', address: '四川省甘孜藏族自治州', location: { lng: 101.9638, lat: 30.0507 }, district: '甘孜藏族自治州' },
         { value: '四川省阿坝藏族羌族自治州', name: '阿坝藏族羌族自治州', address: '四川省阿坝藏族羌族自治州', location: { lng: 102.2214, lat: 31.8994 }, district: '阿坝藏族羌族自治州' }
       ]
-      
+
       // 根据输入内容过滤建议
-      const filteredSuggestions = addressSuggestions.filter(item => 
-        item.value.includes(queryString) || 
+      const filteredSuggestions = addressSuggestions.filter(item =>
+        item.value.includes(queryString) ||
         item.name.includes(queryString) ||
         item.address.includes(queryString) ||
         item.district.includes(queryString)
       )
-      
+
       console.log('过滤后的建议:', filteredSuggestions)
       callback(filteredSuggestions)
     },
 
-
     // 选择地址建议
     handleSelect(item) {
       console.log('选择地址建议:', item)
-      
+
       // 更新地址
       this.form.address = item.value
-      
+
       // 如果有位置信息，直接使用
       if (item.location && item.location.lng && item.location.lat) {
         console.log('使用建议中的位置信息:', item.location)
@@ -846,7 +846,7 @@ export default {
         console.log('建议中没有位置信息，进行地理编码')
         this.geocodeAddress(item.value)
       }
-      
+
       // 自动识别区域
       if (item.district) {
         this.autoDetectDistrict(item.district)
@@ -859,7 +859,7 @@ export default {
     // 地址输入处理
     onAddressInput(value) {
       console.log('地址输入事件触发:', value)
-      
+
       if (!value) {
         // 清空地址时，清空地图标记和区域
         if (this.marker) {
@@ -869,10 +869,10 @@ export default {
         this.form.area = '' // 清空区域选择
         return
       }
-      
+
       // 立即尝试自动识别区域
       this.autoDetectDistrict(value)
-      
+
       // 延迟执行地理编码，避免频繁调用
       clearTimeout(this.geocodeTimer)
       this.geocodeTimer = setTimeout(() => {
@@ -898,11 +898,11 @@ export default {
     // 地址输入框失焦处理
     onAddressBlur() {
       console.log('地址输入框失焦，当前地址:', this.form.address)
-      
+
       if (this.form.address && this.form.address.trim()) {
         // 失焦时也触发区域自动识别
         this.autoDetectDistrict(this.form.address)
-        
+
         // 失焦时也触发地理编码
         clearTimeout(this.geocodeTimer)
         this.geocodeTimer = setTimeout(() => {
@@ -918,7 +918,7 @@ export default {
         // 请先输入地址，不显示提示
         return
       }
-      
+
       console.log('手动触发地理编码:', this.form.address)
       this.geocodeAddress(this.form.address)
     },
@@ -932,7 +932,7 @@ export default {
       console.log('地图加载状态:', this.mapLoaded)
       console.log('自动补全服务:', this.autoComplete)
       console.log('地点搜索服务:', this.placeSearch)
-      
+
       // 直接测试坐标映射功能
       console.log('直接测试坐标映射功能')
       this.useCoordinateMapping('重庆市北碚区天生路2号')
@@ -943,11 +943,11 @@ export default {
       console.log('=== 测试地址建议功能 ===')
       console.log('自动补全服务状态:', this.autoComplete)
       console.log('地点搜索服务状态:', this.placeSearch)
-      
+
       // 测试地址建议
       const testQuery = '四川大学'
       console.log('测试查询:', testQuery)
-      
+
       this.querySearchAsync(testQuery, (suggestions) => {
         console.log('地址建议测试结果:', suggestions)
         if (suggestions && suggestions.length > 0) {
@@ -966,64 +966,63 @@ export default {
       console.log('地理编码服务状态:', !!this.geocoder)
       console.log('地图状态:', !!this.map)
       console.log('地图加载状态:', this.mapLoaded)
-      
+
       if (!this.map) {
         console.error('地图未初始化')
         // 地图未初始化，不显示提示
         return
       }
-      
+
       if (!this.mapLoaded) {
         console.error('地图未加载完成')
         // 地图正在加载中，不显示提示
         return
       }
-      
+
       this.geocoding = true
       console.log('开始进行地理编码...', address)
-      
+
       // 如果地理编码服务不可用，直接使用地点搜索
       if (!this.geocoder) {
         console.log('地理编码服务不可用，使用地点搜索作为备选方案')
         this.searchPlaceAsFallback(address)
         return
       }
-      
+
       // 使用地理编码服务
       this.geocoder.getLocation(address, (status, result) => {
         this.geocoding = false
         console.log('地理编码结果:', { status, result })
-        
+
         if (status === 'complete' && result.geocodes && result.geocodes.length > 0) {
           const geocode = result.geocodes[0]
           const point = geocode.location
-          
+
           console.log('地理编码成功:', {
             address: geocode.formattedAddress,
             location: point,
             level: geocode.level
           })
-          
+
           // 更新表单位置信息
-            this.form.location = { lng: point.lng, lat: point.lat }
-          
+          this.form.location = { lng: point.lng, lat: point.lat }
+
           // 设置地图标记
-            this.setMarker(point)
-          
+          this.setMarker(point)
+
           // 移动地图中心到新位置
           this.map.setCenter(point)
-          
+
           // 自动识别区域
           if (geocode.formattedAddress) {
             this.autoDetectDistrict(geocode.formattedAddress)
           }
-          
+
           // 显示成功提示
           // 地址定位成功，不显示提示
-          
-          } else {
+        } else {
           console.error('地理编码失败:', status, result)
-          
+
           // 尝试使用地点搜索作为备选方案
           this.searchPlaceAsFallback(address)
         }
@@ -1037,40 +1036,39 @@ export default {
         this.geocoding = false
         return
       }
-      
+
       console.log('使用地点搜索作为备选方案:', address)
-      
+
       this.placeSearch.search(address, (status, result) => {
         this.geocoding = false
         console.log('地点搜索结果:', { status, result })
-        
+
         if (status === 'complete' && result.poiList && result.poiList.pois && result.poiList.pois.length > 0) {
           const poi = result.poiList.pois[0]
           const point = poi.location
-          
+
           console.log('地点搜索成功:', {
             name: poi.name,
             address: poi.address,
             location: point
           })
-          
+
           // 更新表单位置信息
           this.form.location = { lng: point.lng, lat: point.lat }
-          
+
           // 设置地图标记
           this.setMarker(point)
-          
+
           // 移动地图中心到新位置
           this.map.setCenter(point)
-          
+
           // 自动识别区域
           if (poi.address) {
             this.autoDetectDistrict(poi.address)
           }
-          
+
           // 显示成功提示
           // 地址定位成功，不显示提示
-          
         } else {
           console.error('地点搜索也失败了:', status, result)
           // 尝试使用第三方地理编码服务作为最后的备选方案
@@ -1082,13 +1080,13 @@ export default {
     // 第三方地理编码服务（备选方案）
     tryThirdPartyGeocoding(address) {
       console.log('尝试使用第三方地理编码服务:', address)
-      
+
       // 使用百度地图的地理编码API作为备选
       const baiduGeocodingUrl = `https://api.map.baidu.com/geocoding/v2/?address=${encodeURIComponent(address)}&output=json&ak=YOUR_BAIDU_AK`
-      
+
       // 或者使用腾讯地图的地理编码API
       const tencentGeocodingUrl = `https://apis.map.qq.com/ws/geocoder/v1/?address=${encodeURIComponent(address)}&key=YOUR_TENCENT_KEY`
-      
+
       // 由于没有其他API Key，我们使用一个简单的坐标映射作为演示
       this.useCoordinateMapping(address)
     },
@@ -1096,7 +1094,7 @@ export default {
     // 使用坐标映射（演示用）
     useCoordinateMapping(address) {
       console.log('使用坐标映射:', address)
-      
+
       // 一些常见地址的坐标映射
       const coordinateMap = {
         '重庆市北碚区天生路2号': { lng: 106.4344, lat: 29.8254 },
@@ -1138,7 +1136,7 @@ export default {
         '四川民族学院': { lng: 101.9632, lat: 30.0504 },
         '阿坝师范学院': { lng: 103.5807, lat: 31.4746 }
       }
-      
+
       // 查找匹配的坐标
       let matchedCoordinate = null
       for (const [key, coord] of Object.entries(coordinateMap)) {
@@ -1147,26 +1145,26 @@ export default {
           break
         }
       }
-      
+
       if (matchedCoordinate) {
         console.log('找到匹配的坐标:', matchedCoordinate)
-        
+
         // 确保坐标格式正确
         const position = [matchedCoordinate.lng, matchedCoordinate.lat]
         console.log('格式化后的坐标:', position)
-        
+
         // 更新表单位置信息
         this.form.location = matchedCoordinate
-        
+
         // 设置地图标记
         this.setMarker(position)
-        
+
         // 移动地图中心到新位置
         this.map.setCenter(position)
-        
+
         // 显示成功提示
         // 地址定位成功（使用坐标映射），不显示提示
-        
+
         // 自动识别区域
         this.autoDetectDistrict(address)
       } else {
@@ -1201,10 +1199,10 @@ export default {
 
         console.log('创建标记，位置:', markerPosition)
 
-      this.marker = new AMap.Marker({
+        this.marker = new AMap.Marker({
           position: markerPosition,
-        map: this.map
-      })
+          map: this.map
+        })
 
         this.map.setCenter(markerPosition)
         console.log('标记设置成功')
@@ -1216,13 +1214,13 @@ export default {
     // 逆地理编码
     reverseGeocode(position) {
       if (!this.geocoder) return
-      
+
       this.geocoder.getAddress(position, (status, result) => {
         if (status === 'complete' && result.regeocode) {
           const address = result.regeocode.formattedAddress
           console.log('逆地理编码结果:', address)
           this.form.address = address
-          
+
           // 自动识别区域
           this.autoDetectDistrict(address)
         } else {
@@ -1234,9 +1232,9 @@ export default {
     // 自动识别区域
     autoDetectDistrict(address) {
       if (!address) return
-      
+
       console.log('正在识别区域:', address)
-      
+
       // 区域映射（四川省和重庆市所有区县）
       const districtMap = {
         // 成都市
@@ -1244,76 +1242,76 @@ export default {
         '龙泉驿区': '龙泉驿区', '青白江区': '青白江区', '新都区': '新都区', '温江区': '温江区', '双流区': '双流区',
         '郫都区': '郫都区', '新津区': '新津区', '金堂县': '金堂县', '大邑县': '大邑县', '蒲江县': '蒲江县',
         '都江堰市': '都江堰市', '彭州市': '彭州市', '邛崃市': '邛崃市', '崇州市': '崇州市', '简阳市': '简阳市',
-        
+
         // 自贡市
         '自流井区': '自流井区', '贡井区': '贡井区', '大安区': '大安区', '沿滩区': '沿滩区', '荣县': '荣县', '富顺县': '富顺县',
-        
+
         // 攀枝花市
         '东区': '东区', '西区': '西区', '仁和区': '仁和区', '米易县': '米易县', '盐边县': '盐边县',
-        
+
         // 泸州市
         '江阳区': '江阳区', '纳溪区': '纳溪区', '龙马潭区': '龙马潭区', '泸县': '泸县', '合江县': '合江县', '叙永县': '叙永县', '古蔺县': '古蔺县',
-        
+
         // 德阳市
         '旌阳区': '旌阳区', '罗江区': '罗江区', '中江县': '中江县', '广汉市': '广汉市', '什邡市': '什邡市', '绵竹市': '绵竹市',
-        
+
         // 绵阳市
         '涪城区': '涪城区', '游仙区': '游仙区', '安州区': '安州区', '三台县': '三台县', '盐亭县': '盐亭县', '梓潼县': '梓潼县',
         '北川羌族自治县': '北川羌族自治县', '平武县': '平武县', '江油市': '江油市',
-        
+
         // 广元市
         '利州区': '利州区', '昭化区': '昭化区', '朝天区': '朝天区', '旺苍县': '旺苍县', '青川县': '青川县', '剑阁县': '剑阁县', '苍溪县': '苍溪县',
-        
+
         // 遂宁市
         '船山区': '船山区', '安居区': '安居区', '蓬溪县': '蓬溪县', '射洪市': '射洪市', '大英县': '大英县',
-        
+
         // 内江市
         '市中区': '市中区', '东兴区': '东兴区', '威远县': '威远县', '资中县': '资中县', '隆昌市': '隆昌市',
-        
+
         // 乐山市
         '市中区': '市中区', '沙湾区': '沙湾区', '五通桥区': '五通桥区', '金口河区': '金口河区', '犍为县': '犍为县', '井研县': '井研县',
         '夹江县': '夹江县', '沐川县': '沐川县', '峨边彝族自治县': '峨边彝族自治县', '马边彝族自治县': '马边彝族自治县', '峨眉山市': '峨眉山市',
-        
+
         // 南充市
         '顺庆区': '顺庆区', '高坪区': '高坪区', '嘉陵区': '嘉陵区', '南部县': '南部县', '营山县': '营山县',
         '蓬安县': '蓬安县', '仪陇县': '仪陇县', '西充县': '西充县', '阆中市': '阆中市',
-        
+
         // 眉山市
         '东坡区': '东坡区', '彭山区': '彭山区', '仁寿县': '仁寿县', '洪雅县': '洪雅县', '丹棱县': '丹棱县', '青神县': '青神县',
-        
+
         // 宜宾市
         '翠屏区': '翠屏区', '南溪区': '南溪区', '叙州区': '叙州区', '江安县': '江安县', '长宁县': '长宁县', '高县': '高县',
         '珙县': '珙县', '筠连县': '筠连县', '兴文县': '兴文县', '屏山县': '屏山县',
-        
+
         // 广安市
         '广安区': '广安区', '前锋区': '前锋区', '岳池县': '岳池县', '武胜县': '武胜县', '邻水县': '邻水县', '华蓥市': '华蓥市',
-        
+
         // 达州市
         '通川区': '通川区', '达川区': '达川区', '宣汉县': '宣汉县', '开江县': '开江县', '大竹县': '大竹县', '渠县': '渠县', '万源市': '万源市',
-        
+
         // 雅安市
         '雨城区': '雨城区', '名山区': '名山区', '荥经县': '荥经县', '汉源县': '汉源县', '石棉县': '石棉县', '天全县': '天全县', '芦山县': '芦山县', '宝兴县': '宝兴县',
-        
+
         // 巴中市
         '巴州区': '巴州区', '恩阳区': '恩阳区', '通江县': '通江县', '南江县': '南江县', '平昌县': '平昌县',
-        
+
         // 资阳市
         '雁江区': '雁江区', '安岳县': '安岳县', '乐至县': '乐至县',
-        
+
         // 阿坝州
         '马尔康市': '马尔康市', '汶川县': '汶川县', '理县': '理县', '茂县': '茂县', '松潘县': '松潘县', '九寨沟县': '九寨沟县',
         '金川县': '金川县', '小金县': '小金县', '黑水县': '黑水县', '壤塘县': '壤塘县', '阿坝县': '阿坝县', '若尔盖县': '若尔盖县', '红原县': '红原县',
-        
+
         // 甘孜州
         '康定市': '康定市', '泸定县': '泸定县', '丹巴县': '丹巴县', '九龙县': '九龙县', '雅江县': '雅江县', '道孚县': '道孚县', '炉霍县': '炉霍县',
         '甘孜县': '甘孜县', '新龙县': '新龙县', '德格县': '德格县', '白玉县': '白玉县', '石渠县': '石渠县', '色达县': '色达县', '理塘县': '理塘县',
         '巴塘县': '巴塘县', '乡城县': '乡城县', '稻城县': '稻城县', '得荣县': '得荣县',
-        
+
         // 凉山州
         '西昌市': '西昌市', '木里藏族自治县': '木里藏族自治县', '盐源县': '盐源县', '德昌县': '德昌县', '会理县': '会理县', '会东县': '会东县',
         '宁南县': '宁南县', '普格县': '普格县', '布拖县': '布拖县', '金阳县': '金阳县', '昭觉县': '昭觉县', '喜德县': '喜德县', '冕宁县': '冕宁县',
         '越西县': '越西县', '甘洛县': '甘洛县', '美姑县': '美姑县', '雷波县': '雷波县',
-        
+
         // 重庆市
         '渝中区': '渝中区', '大渡口区': '大渡口区', '江北区': '江北区', '沙坪坝区': '沙坪坝区', '九龙坡区': '九龙坡区',
         '南岸区': '南岸区', '北碚区': '北碚区', '綦江区': '綦江区', '大足区': '大足区', '渝北区': '渝北区',
@@ -1321,7 +1319,7 @@ export default {
         '永川区': '永川区', '南川区': '南川区', '璧山区': '璧山区', '铜梁区': '铜梁区', '潼南区': '潼南区',
         '荣昌区': '荣昌区', '开州区': '开州区', '梁平区': '梁平区', '武隆区': '武隆区'
       }
-      
+
       // 遍历区域映射，找到匹配的区域
       for (const [key, value] of Object.entries(districtMap)) {
         if (address.includes(key)) {
@@ -1330,7 +1328,7 @@ export default {
           return
         }
       }
-      
+
       // 如果没有找到匹配的区域，尝试从地址中提取
       if (address.includes('四川省')) {
         const parts = address.split('四川省')
@@ -1343,7 +1341,7 @@ export default {
           }
         }
       }
-      
+
       // 特殊地址处理 - 根据学校名称推断区域
       const schoolDistrictMap = {
         '电子科技大学': '成华区',
@@ -1423,7 +1421,7 @@ export default {
         '四川幼儿师范高等专科学校': '江油市',
         '川北幼儿师范高等专科学校': '利州区'
       }
-      
+
       // 检查是否包含学校名称
       for (const [schoolName, district] of Object.entries(schoolDistrictMap)) {
         if (address.includes(schoolName)) {
@@ -1432,7 +1430,7 @@ export default {
           return
         }
       }
-      
+
       // 根据地址关键词推断区域
       const keywordDistrictMap = {
         '沙河': '成华区',
@@ -1457,7 +1455,7 @@ export default {
         '蒲江': '蒲江县',
         '新津': '新津区'
       }
-      
+
       // 检查是否包含区域关键词
       for (const [keyword, district] of Object.entries(keywordDistrictMap)) {
         if (address.includes(keyword)) {
@@ -1466,7 +1464,7 @@ export default {
           return
         }
       }
-      
+
       console.log('未能自动识别区域，请手动选择')
     },
 
@@ -1474,7 +1472,7 @@ export default {
     initFormData() {
       if (this.formData) {
         this.form = { ...this.formData }
-        
+
         // 如果有位置信息，在地图上显示
         if (this.form.location && this.form.location.lng && this.form.location.lat) {
           this.$nextTick(() => {

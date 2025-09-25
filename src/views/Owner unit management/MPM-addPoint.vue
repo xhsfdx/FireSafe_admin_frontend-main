@@ -117,8 +117,8 @@
           size="large"
           :loading="saving"
           :disabled="saving"
-          @click="handleSave"
           style="width: 160px; font-size: 18px;"
+          @click="handleSave"
         >
           {{ saving ? '保存中...' : '保存' }}
         </el-button>
@@ -212,15 +212,15 @@ export default {
         }
 
         console.log('开始获取项目维保内容，项目ID:', this.projectInfo.projectId)
-        
+
         // 调用后端API获取项目的维保内容
         const response = await request.get(`/point/maintainPoint/${this.projectInfo.projectId}/checkpoint`)
-        
+
         console.log('项目维保内容API响应:', response)
-        
+
         if (response.success && response.data && response.data.plan) {
           const planData = response.data.plan
-          
+
           // 获取维保项目列表
           if (planData.maintainStardItem && planData.maintainStardItem.length > 0) {
             // 等待树形数据加载完成后再设置勾选
@@ -250,7 +250,7 @@ export default {
       }
 
       console.log('设置树形控件勾选状态，项目维保项目ID:', maintenanceItemIds)
-      
+
       // 找到所有匹配的叶子节点ID
       const matchedIds = []
       this.maintTree.forEach(system => {
@@ -264,19 +264,18 @@ export default {
       })
 
       console.log('匹配到的树形节点ID:', matchedIds)
-      
+
       // 设置勾选状态
       this.checkedKeys = matchedIds
       this.$refs.maintTree.setCheckedKeys(matchedIds)
-      
+
       // 更新右侧表格
       this.updateCheckedMaintList()
-      
+
       // 更新全选状态
       const allIds = this.getAllLeafIds(this.maintTree)
       this.treeCheckAll = matchedIds.length === allIds.length
     },
-
 
     // 获取周期标签
     getPeriodLabel(p) {
@@ -292,7 +291,7 @@ export default {
         this.loading = true
         const res = await getMaintainStandardItems()
         console.log('getMaintainStandardItems API响应:', res)
-        
+
         if (res && res.data) {
           this.maintTree = this.transformToTree(res.data)
           console.log('转换后的树形数据:', this.maintTree)
@@ -391,10 +390,10 @@ export default {
         console.warn('树形控件引用不存在')
         return
       }
-      
+
       const checkedNodes = this.$refs.maintTree.getCheckedNodes(true)
       console.log('树形控件勾选的节点:', checkedNodes)
-      
+
       this.checkedMaintList = checkedNodes
         .filter(n => !n.children || n.children.length === 0) // 只处理叶子节点
         .filter(n => n.data && n.data.id) // 确保有维保项目ID
@@ -410,7 +409,6 @@ export default {
       console.log('转换后的维保项目列表:', this.checkedMaintList)
       console.log('维保项目ID列表:', this.checkedMaintList.map(item => item.id))
     },
-
 
     // 保存方法
     handleSave() {
@@ -580,7 +578,6 @@ export default {
   font-size: 14px;
   color: #666;
 }
-
 
 .tab-tree {
   background: #fff;

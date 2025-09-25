@@ -36,10 +36,10 @@
         <div class="table-header">
           <h3 class="table-title">维保内容</h3>
         </div>
-        
-        <el-table 
-          :data="checkedMaintList" 
-          border 
+
+        <el-table
+          :data="checkedMaintList"
+          border
           style="width: 100%;"
         >
           <el-table-column type="index" label="序号" width="55" align="center" />
@@ -109,7 +109,7 @@ export default {
           console.log('尝试直接获取点位数据...')
           const pointResponse = await request.get(`/Maintain/checkpoint/${pointId}`)
           console.log('直接点位API响应:', pointResponse)
-          
+
           if (pointResponse.success && pointResponse.data) {
             const targetPoint = pointResponse.data
             console.log('直接获取到的点位数据:', targetPoint)
@@ -227,11 +227,11 @@ export default {
         console.log('=== 开始加载已选择的维保项目 ===')
         console.log('选择的项目ID列表:', selectedItemIds)
         console.log('选择的项目数量:', selectedItemIds.length)
-        
+
         // 获取所有标准维保项目
         const res = await getMaintainStandardItems()
         console.log('getMaintainStandardItems API响应:', res)
-        
+
         // 检查不同的响应格式
         let rawData = null
         if (res && res.data) {
@@ -244,9 +244,9 @@ export default {
           rawData = res.data
           console.log('使用 res.success.data 格式')
         }
-        
+
         console.log('提取的原始数据:', rawData)
-        
+
         if (rawData) {
           console.log('原始数据长度:', rawData.length)
           // 从所有维保项目中筛选出已选择的项目
@@ -268,7 +268,7 @@ export default {
     // 从所有维保项目中筛选出已选择的项目
     getSelectedMaintenanceItems(allData, selectedItemIds) {
       console.log('开始筛选维保项目，要匹配的ID数量:', selectedItemIds.length)
-      
+
       const getPeriodLabel = (p) => {
         if (!p) return ''
         if (p === 1) return '月检'
@@ -279,7 +279,7 @@ export default {
       const selectedItems = []
       let totalItems = 0
       let matchedItems = 0
-      
+
       // 遍历所有维保项目数据
       allData.forEach((system) => {
         if (system.devices && system.devices.length > 0) {
@@ -287,14 +287,14 @@ export default {
             if (device.items && device.items.length > 0) {
               device.items.forEach((item) => {
                 totalItems++
-                
+
                 // 检查当前项目是否在已选择的ID列表中
                 const isSelected = selectedItemIds.some(selectedId => {
                   const selectedIdStr = selectedId.toString()
                   const itemIdStr = item._id.toString()
                   return selectedIdStr === itemIdStr
                 })
-                
+
                 if (isSelected) {
                   matchedItems++
                   // 找到匹配的项目，添加到已选择列表
@@ -313,16 +313,15 @@ export default {
           })
         }
       })
-      
+
       console.log('筛选完成 - 总项目数:', totalItems, '匹配项目数:', matchedItems)
       return selectedItems
     },
 
-
     // 返回上一页
     goBack() {
       this.$router.go(-1)
-    },
+    }
 
   }
 }

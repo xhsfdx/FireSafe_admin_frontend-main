@@ -59,12 +59,12 @@
       <!-- 数据表格 -->
       <div class="table-container">
         <el-table
+          v-loading="loading"
           :data="filteredData"
           border
           style="width: 100%;"
           empty-text="暂无数据"
           header-cell-class-name="table-header"
-          v-loading="loading"
         >
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="username" label="用户名" align="center" />
@@ -130,7 +130,7 @@ export default {
         console.log('开始加载客户数据...')
         const res = await getcustomers()
         console.log('客户数据响应:', res)
-        
+
         if (res.code === 200 && res.data) {
           const rawData = res.data || []
           console.log('原始数据:', rawData)
@@ -193,7 +193,7 @@ export default {
       // 跳转到详情页面，传递完整数据
       this.$router.push({
         path: '/system/customer-detail',
-        query: { 
+        query: {
           id: row.id,
           data: JSON.stringify(row.originalData)
         }
@@ -340,17 +340,17 @@ export default {
   .filter-select {
     width: 150px;
   }
-  
+
   .toolbar-content {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
-  
+
   .search-filters {
     justify-content: center;
   }
-  
+
   .action-buttons {
     justify-content: center;
   }
@@ -360,28 +360,28 @@ export default {
   .owner-account-page {
     padding: 8px;
   }
-  
+
   .main-content {
     height: calc(100vh - 16px);
   }
-  
+
   .toolbar-content {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .search-filters {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .filter-input,
   .filter-select {
     width: 100%;
   }
-  
+
   .action-buttons {
     justify-content: center;
     flex-wrap: wrap;

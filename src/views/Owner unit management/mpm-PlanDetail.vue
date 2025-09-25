@@ -5,7 +5,7 @@
       <div class="card-title-txt">维保计划详情</div>
       <div class="plan-tip">提示：本计划制定后，系统会自动生成<span class="emph">{{ plan.startTime }}</span> - <span class="emph">{{ plan.endTime }}</span>中的（月计划）的所有任务。</div>
     </div>
-    
+
     <!-- 头部详情 -->
     <div class="detail-header">
       <el-row :gutter="30" class="plan-info-row">

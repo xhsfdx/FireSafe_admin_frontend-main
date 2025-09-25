@@ -2,7 +2,7 @@
   <div class="edit-maintenance-project-page">
     <div class="header-bar">
       <span class="title">编辑自建维保项目</span>
-      <el-button type="primary" size="medium" style="float: right;" @click="onSave" :loading="loading">保存</el-button>
+      <el-button type="primary" size="medium" style="float: right;" :loading="loading" @click="onSave">保存</el-button>
     </div>
 
     <el-form
@@ -17,18 +17,18 @@
       <div v-for="(item, index) in maintenanceItems" :key="item.id" class="maintenance-item">
         <div class="item-header">
           <span class="item-title">维保项目 {{ index + 1 }}</span>
-          <el-button 
-            v-if="maintenanceItems.length > 1" 
-            type="danger" 
-            icon="el-icon-delete" 
-            size="mini" 
-            @click="removeItem(index)"
+          <el-button
+            v-if="maintenanceItems.length > 1"
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
             class="remove-btn"
+            @click="removeItem(index)"
           >
             删除
           </el-button>
         </div>
-        
+
         <!-- 第一行：消防系统/设施 + 维保项目 -->
         <el-row :gutter="16">
           <el-col :span="8">
@@ -144,11 +144,11 @@ export default {
         this.loading = true
         const res = await getMaintainProject(this.projectId)
         console.log('项目详情响应:', res)
-        
+
         if (res.success && res.data) {
           const data = res.data
           console.log('原始数据:', data)
-          
+
           // 处理maintenanceItems数组，转换为可读的字符串
           let maintenanceItemsStr = ''
           if (data.maintenanceItems && Array.isArray(data.maintenanceItems)) {
@@ -173,7 +173,7 @@ export default {
           } else if (typeof data.maintenanceItems === 'string') {
             maintenanceItemsStr = data.maintenanceItems
           }
-          
+
           // 初始化维保项目列表
           this.maintenanceItems = [
             {
@@ -185,7 +185,7 @@ export default {
               standard: data.description || data.standard || ''
             }
           ]
-          
+
           console.log('处理后的表单数据:', this.form)
         } else {
           this.$message.error(res.message || '获取项目详情失败')
@@ -204,16 +204,16 @@ export default {
           this.loading = true
           try {
             // 验证所有维保项目都有必填字段
-            const hasEmptyRequiredFields = this.maintenanceItems.some(item => 
+            const hasEmptyRequiredFields = this.maintenanceItems.some(item =>
               !item.system || !item.project || !item.cycle || !item.content
             )
-            
+
             if (hasEmptyRequiredFields) {
               this.$message.error('请填写所有必填字段')
               this.loading = false
               return
             }
-            
+
             // 准备保存数据 - 保存第一个维保项目的数据到主记录
             const firstItem = this.maintenanceItems[0]
             const data = {
@@ -225,11 +225,11 @@ export default {
               // 如果有多个维保项目，将额外的项目作为数组保存
               additionalItems: this.maintenanceItems.slice(1)
             }
-            
+
             console.log('更新数据:', data)
             const res = await updateMaintainProject(this.projectId, data)
             console.log('更新响应:', res)
-            
+
             if (res.success) {
               this.$message.success('保存成功！')
               // 返回上一页
@@ -246,7 +246,7 @@ export default {
         }
       })
     },
-    
+
     addMaintenanceItem() {
       const newId = Math.max(...this.maintenanceItems.map(item => item.id)) + 1
       this.maintenanceItems.push({
@@ -258,7 +258,7 @@ export default {
         standard: ''
       })
     },
-    
+
     removeItem(index) {
       if (this.maintenanceItems.length > 1) {
         this.maintenanceItems.splice(index, 1)

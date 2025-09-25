@@ -116,7 +116,7 @@ export default {
       try {
         const res = await getcustomers()
         console.log('客户数据响应:', res)
-        
+
         if (res.code === 200 && res.data) {
           const rawData = res.data || []
 
@@ -141,7 +141,7 @@ export default {
       }
     },
     async onSubmit() {
-      this.$refs.form.validate(async (valid) => {
+      this.$refs.form.validate(async(valid) => {
         if (valid) {
           try {
             // 提交数据
@@ -153,11 +153,11 @@ export default {
               password: this.form.password,
               role: this.form.role
             }
-            
+
             console.log('提交数据:', data)
             const res = await Createcustomer(data)
             console.log('创建响应:', res)
-            
+
             if (res.code === 200) {
               this.$message.success(res.msg || '创建用户成功')
               // 重置表单

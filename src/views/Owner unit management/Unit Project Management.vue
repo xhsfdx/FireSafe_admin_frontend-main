@@ -163,42 +163,42 @@ export default {
       if (this.pagination.page === 1) {
         return index + 1
       }
-      
+
       // 如果不是第一页，需要计算前面页面的实际数据条数
       // 这里我们使用一个简化的方法：基于当前页面的数据条数来推算
       // 第一页有7条数据，所以第二页从8开始
       if (this.pagination.page === 2) {
-        return 7 + index + 1  // 7 + 0 + 1 = 8, 7 + 1 + 1 = 9
+        return 7 + index + 1 // 7 + 0 + 1 = 8, 7 + 1 + 1 = 9
       }
-      
+
       // 如果有更多页面，可以继续扩展这个逻辑
       return index + 1
     },
     // 获取总数据条数（基于当前页面的序号计算）
     getTotalCount() {
       if (this.tableData.length === 0) return 0
-      
+
       // 调试信息
       console.log('分页信息:', {
         page: this.pagination.page,
         limit: this.pagination.limit,
         dataLength: this.tableData.length
       })
-      
+
       // 基于实际数据条数计算最后一条的序号
       let lastIndex
       if (this.pagination.page === 1) {
         lastIndex = this.tableData.length
       } else if (this.pagination.page === 2) {
-        lastIndex = 7 + this.tableData.length  // 第一页7条 + 当前页数据条数
+        lastIndex = 7 + this.tableData.length // 第一页7条 + 当前页数据条数
       } else {
         lastIndex = this.tableData.length
       }
-      
+
       console.log('序号计算:', {
         lastIndex
       })
-      
+
       return lastIndex
     },
     // 加载数据
@@ -235,7 +235,7 @@ export default {
               contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '￥0',
               days: days
             }
-            
+
             // 调试信息：检查每个项目的ID映射
             console.log(`项目 ${index + 1} 数据映射:`, {
               原始contractId: item.contractId,
@@ -252,7 +252,7 @@ export default {
             this.pagination.total = res.pagination.total || 0
             this.pagination.page = res.pagination.page || 1
             this.pagination.limit = res.pagination.limit || 20
-            
+
             // 调试信息
             console.log('后端返回的分页信息:', res.pagination)
             console.log('设置后的分页信息:', {
@@ -354,18 +354,18 @@ export default {
       console.log('使用的合同ID:', row.id)
       console.log('业主单位名称:', row.ownerName)
       console.log('委托单位名称:', row.entrustName)
-      
+
       // 优先使用项目ID，如果没有则使用合同ID
       // 后端现在可以同时处理项目ID和合同ID
       const targetId = row.projectid || row.id
-      
+
       // 验证是否有有效的ID
       if (!targetId) {
         console.error('❌ 没有有效的项目ID或合同ID')
         this.$message.error('无法获取项目详情：缺少项目ID或合同ID')
         return
       }
-      
+
       console.log('🎯 最终传递的目标ID:', targetId)
       console.log('🎯 跳转URL参数:', {
         id: targetId,
@@ -373,10 +373,10 @@ export default {
         ownerName: row.ownerName,
         entrustName: row.entrustName
       })
-      
+
       this.$router.push({
         name: 'UnitDetail',
-        query: { 
+        query: {
           id: targetId, // 传递项目ID或合同ID
           contractId: row.id, // 传递合同ID作为备用标识
           ownerName: row.ownerName,
@@ -389,26 +389,26 @@ export default {
       console.log('🚀 准备跳转到续签页面，行数据:', row)
       console.log('使用的项目ID:', row.projectid)
       console.log('使用的合同ID:', row.id)
-      
+
       // 传递完整的参数，确保续签页面能正确返回
       const targetId = row.projectid || row.id
-      
+
       if (!targetId) {
         console.error('❌ 没有有效的项目ID或合同ID')
         this.$message.error('无法进行续签：缺少项目ID或合同ID')
         return
       }
-      
+
       console.log('🎯 续签页面跳转参数:', {
         id: targetId,
         contractId: row.id,
         ownerName: row.ownerName,
         entrustName: row.entrustName
       })
-      
+
       this.$router.push({
         name: 'RenewalPage',
-        query: { 
+        query: {
           id: targetId,
           contractId: row.id,
           ownerName: row.ownerName,

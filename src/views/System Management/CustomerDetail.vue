@@ -14,14 +14,14 @@
       <div class="profile-header">
         <div class="avatar-section">
           <div class="user-avatar">
-            <i class="el-icon-user-solid"></i>
+            <i class="el-icon-user-solid" />
           </div>
           <div class="user-info">
             <h2 class="user-name">{{ customerData.name || '未设置' }}</h2>
             <p class="user-role">{{ customerData.role || '未设置' }}</p>
             <el-tag :type="customerData.user && customerData.user.active ? 'success' : 'danger'" size="medium">
-              <i class="el-icon-circle-check" v-if="customerData.user && customerData.user.active"></i>
-              <i class="el-icon-circle-close" v-else></i>
+              <i v-if="customerData.user && customerData.user.active" class="el-icon-circle-check" />
+              <i v-else class="el-icon-circle-close" />
               {{ customerData.user && customerData.user.active ? '正常' : '禁用' }}
             </el-tag>
           </div>
@@ -39,34 +39,34 @@
       <el-col :span="12">
         <div class="info-card">
           <div class="card-header">
-            <i class="el-icon-user"></i>
+            <i class="el-icon-user" />
             <h3>基本信息</h3>
           </div>
           <div class="card-content">
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-postcard"></i>
+                <i class="el-icon-postcard" />
                 <span>客户ID</span>
               </div>
               <div class="info-value">{{ customerData._id || '未设置' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-user"></i>
+                <i class="el-icon-user" />
                 <span>用户名</span>
               </div>
               <div class="info-value">{{ customerData.username || '未设置' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-phone"></i>
+                <i class="el-icon-phone" />
                 <span>手机号</span>
               </div>
               <div class="info-value">{{ customerData.mobile || '未设置' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-s-custom"></i>
+                <i class="el-icon-s-custom" />
                 <span>用户角色</span>
               </div>
               <div class="info-value">{{ customerData.role || '未设置' }}</div>
@@ -79,34 +79,34 @@
       <el-col :span="12">
         <div class="info-card">
           <div class="card-header">
-            <i class="el-icon-office-building"></i>
+            <i class="el-icon-office-building" />
             <h3>组织信息</h3>
           </div>
           <div class="card-content">
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-office-building"></i>
+                <i class="el-icon-office-building" />
                 <span>业主单位</span>
               </div>
               <div class="info-value">{{ customerData.organization || '未设置' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-postcard"></i>
+                <i class="el-icon-postcard" />
                 <span>用户ID</span>
               </div>
               <div class="info-value">{{ customerData.userId || '未设置' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-time"></i>
+                <i class="el-icon-time" />
                 <span>创建时间</span>
               </div>
               <div class="info-value">{{ formatTime(customerData.createTime) }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-refresh"></i>
+                <i class="el-icon-refresh" />
                 <span>更新时间</span>
               </div>
               <div class="info-value">{{ formatTime(customerData.updateTime) }}</div>
@@ -122,20 +122,20 @@
       <el-col :span="12">
         <div class="info-card">
           <div class="card-header">
-            <i class="el-icon-info"></i>
+            <i class="el-icon-info" />
             <h3>扩展信息</h3>
           </div>
           <div class="card-content">
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-edit-outline"></i>
+                <i class="el-icon-edit-outline" />
                 <span>备注信息</span>
               </div>
               <div class="info-value">{{ customerData.remark || '无' }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-key"></i>
+                <i class="el-icon-key" />
                 <span>权限列表</span>
               </div>
               <div class="info-value">
@@ -155,20 +155,20 @@
       <el-col :span="12">
         <div class="info-card">
           <div class="card-header">
-            <i class="el-icon-data-line"></i>
+            <i class="el-icon-data-line" />
             <h3>登录统计</h3>
           </div>
           <div class="card-content">
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-time"></i>
+                <i class="el-icon-time" />
                 <span>最后登录</span>
               </div>
               <div class="info-value">{{ formatTime(customerData.lastLoginTime) }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">
-                <i class="el-icon-data-analysis"></i>
+                <i class="el-icon-data-analysis" />
                 <span>登录次数</span>
               </div>
               <div class="info-value">
@@ -183,7 +183,7 @@
     <!-- 操作记录 -->
     <div class="info-card" style="margin-top: 20px;">
       <div class="card-header">
-        <i class="el-icon-document"></i>
+        <i class="el-icon-document" />
         <h3>操作记录</h3>
       </div>
       <div class="card-content">
@@ -250,7 +250,7 @@ export default {
       if (!timeStr) return '未设置'
       const d = new Date(timeStr)
       if (isNaN(d.getTime())) return '时间格式错误'
-      
+
       const Y = d.getFullYear()
       const M = (d.getMonth() + 1).toString().padStart(2, '0')
       const D = d.getDate().toString().padStart(2, '0')
@@ -464,28 +464,28 @@ export default {
   .customer-detail-page {
     padding: 10px;
   }
-  
+
   .profile-header {
     flex-direction: column;
     gap: 20px;
     text-align: center;
   }
-  
+
   .avatar-section {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .user-avatar {
     margin-right: 0;
   }
-  
+
   .info-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .info-label {
     min-width: auto;
   }

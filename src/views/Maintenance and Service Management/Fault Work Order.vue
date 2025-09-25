@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-warning-outline"></i>
+            <i class="el-icon-warning-outline" />
           </div>
           <div class="title-info">
             <h1 class="page-title">故障工单</h1>
@@ -15,7 +15,7 @@
         <div class="header-stats">
           <div class="stat-card stat-total">
             <div class="stat-icon">
-              <i class="el-icon-s-data"></i>
+              <i class="el-icon-s-data" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ filteredData.length }}</div>
@@ -24,7 +24,7 @@
           </div>
           <div class="stat-card stat-completed">
             <div class="stat-icon">
-              <i class="el-icon-circle-check"></i>
+              <i class="el-icon-circle-check" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getCompletedCount() }}</div>
@@ -33,7 +33,7 @@
           </div>
           <div class="stat-card stat-pending">
             <div class="stat-icon">
-              <i class="el-icon-loading"></i>
+              <i class="el-icon-loading" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getPendingCount() }}</div>
@@ -42,7 +42,7 @@
           </div>
           <div class="stat-card stat-overdue">
             <div class="stat-icon">
-              <i class="el-icon-warning"></i>
+              <i class="el-icon-warning" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getOverdueCount() }}</div>
@@ -52,107 +52,107 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 查询筛选区域 -->
     <div class="search-section">
       <div class="search-header">
-        <h3><i class="el-icon-search"></i> 筛选条件</h3>
-        <el-button 
-          type="text" 
-          @click="toggleSearchBar"
+        <h3><i class="el-icon-search" /> 筛选条件</h3>
+        <el-button
+          type="text"
           class="toggle-btn"
+          @click="toggleSearchBar"
         >
           {{ searchBarVisible ? '收起' : '展开' }}
-          <i :class="searchBarVisible ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+          <i :class="searchBarVisible ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" />
         </el-button>
       </div>
-      
+
       <el-collapse-transition>
         <div v-show="searchBarVisible" class="search-bar">
-        <div class="search-row">
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-office-building"></i> 项目名称
-            </label>
-      <el-input
-        v-model="filters.projectName"
-              placeholder="请输入项目名称进行搜索" 
-              prefix-icon="el-icon-search"
-              clearable 
-            />
+          <div class="search-row">
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-office-building" /> 项目名称
+              </label>
+              <el-input
+                v-model="filters.projectName"
+                placeholder="请输入项目名称进行搜索"
+                prefix-icon="el-icon-search"
+                clearable
+              />
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-user" /> 当前所属人
+              </label>
+              <el-input
+                v-model="filters.owner"
+                placeholder="请输入当前所属人进行搜索"
+                prefix-icon="el-icon-user"
+                clearable
+              />
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-phone" /> 上报人员
+              </label>
+              <el-input
+                v-model="filters.reporter"
+                placeholder="请输入上报人员"
+                prefix-icon="el-icon-phone"
+                clearable
+              />
+            </div>
           </div>
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-user"></i> 当前所属人
-            </label>
-            <el-input 
-              v-model="filters.owner" 
-              placeholder="请输入当前所属人进行搜索" 
-              prefix-icon="el-icon-user"
-              clearable 
-            />
+
+          <div class="search-row">
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-warning-outline" /> 故障来源
+              </label>
+              <el-select v-model="filters.source" placeholder="请选择故障来源" clearable>
+                <el-option label="例行转故障" value="例行转故障" />
+                <el-option label="紧急上报" value="紧急上报" />
+                <el-option label="日常巡检" value="日常巡检" />
+              </el-select>
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-time" /> 工单状态
+              </label>
+              <el-select v-model="filters.status" placeholder="请选择工单状态" clearable>
+                <el-option label="待处理" value="待处理" />
+                <el-option label="已接单" value="已接单" />
+                <el-option label="已分配" value="已分配" />
+                <el-option label="已沟通" value="已沟通" />
+                <el-option label="已签到" value="已签到" />
+                <el-option label="处理中" value="处理中" />
+                <el-option label="已解决" value="已解决" />
+                <el-option label="已评价" value="已评价" />
+                <el-option label="已关闭" value="已关闭" />
+              </el-select>
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-warning" /> 工单时效
+              </label>
+              <el-select v-model="filters.timeliness" placeholder="请选择工单时效" clearable>
+                <el-option label="正常" value="正常" />
+                <el-option label="已逾期" value="已逾期" />
+              </el-select>
+            </div>
           </div>
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-phone"></i> 上报人员
-            </label>
-            <el-input 
-              v-model="filters.reporter" 
-              placeholder="请输入上报人员" 
-              prefix-icon="el-icon-phone"
-        clearable
-      />
+
+          <div class="search-row">
+            <div class="search-item search-actions">
+              <el-button type="primary" icon="el-icon-search" class="search-btn" @click="onSearch">
+                查询
+              </el-button>
+              <el-button icon="el-icon-refresh" class="reset-btn" @click="onReset">
+                重置
+              </el-button>
+            </div>
           </div>
-        </div>
-        
-        <div class="search-row">
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-warning-outline"></i> 故障来源
-            </label>
-            <el-select v-model="filters.source" placeholder="请选择故障来源" clearable>
-        <el-option label="例行转故障" value="例行转故障" />
-              <el-option label="紧急上报" value="紧急上报" />
-              <el-option label="日常巡检" value="日常巡检" />
-      </el-select>
-          </div>
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-time"></i> 工单状态
-            </label>
-            <el-select v-model="filters.status" placeholder="请选择工单状态" clearable>
-              <el-option label="待处理" value="待处理" />
-              <el-option label="已接单" value="已接单" />
-              <el-option label="已分配" value="已分配" />
-              <el-option label="已沟通" value="已沟通" />
-              <el-option label="已签到" value="已签到" />
-              <el-option label="处理中" value="处理中" />
-              <el-option label="已解决" value="已解决" />
-              <el-option label="已评价" value="已评价" />
-              <el-option label="已关闭" value="已关闭" />
-      </el-select>
-          </div>
-          <div class="search-item">
-            <label class="search-label">
-              <i class="el-icon-warning"></i> 工单时效
-            </label>
-            <el-select v-model="filters.timeliness" placeholder="请选择工单时效" clearable>
-              <el-option label="正常" value="正常" />
-        <el-option label="已逾期" value="已逾期" />
-      </el-select>
-          </div>
-        </div>
-        
-        <div class="search-row">
-          <div class="search-item search-actions">
-            <el-button type="primary" icon="el-icon-search" @click="onSearch" class="search-btn">
-              查询
-            </el-button>
-            <el-button icon="el-icon-refresh" @click="onReset" class="reset-btn">
-              重置
-            </el-button>
-          </div>
-        </div>
         </div>
       </el-collapse-transition>
     </div>
@@ -160,77 +160,77 @@
     <!-- 数据表格区域 -->
     <div class="table-section">
       <div class="table-header">
-        <h3><i class="el-icon-s-grid"></i> 工单列表</h3>
+        <h3><i class="el-icon-s-grid" /> 工单列表</h3>
       </div>
-      
+
       <div class="table-container">
-    <el-table
-      :data="pagedData"
-          stripe
+        <el-table
           v-loading="loading"
+          :data="pagedData"
+          stripe
           element-loading-text="数据加载中..."
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           class="work-order-table"
-          :header-cell-style="{ 
-            background: '#f5f7fa', 
+          :header-cell-style="{
+            background: '#f5f7fa',
             color: '#606266',
             fontWeight: 'bold',
             fontSize: '14px'
           }"
           empty-text="暂无数据"
-    >
-      <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column prop="projectName" label="项目名称" align="center" />
-      <el-table-column prop="reportTime" label="上报时间" align="center" />
-      <el-table-column prop="source" label="工单来源" align="center" />
-      <el-table-column prop="reporter" label="上报人员" align="center" />
-      <el-table-column label="工单时效" align="center">
-        <template slot-scope="{ row }">
-          <el-tag
-            :type="getTimelinessType(row.timeliness)"
-            size="small"
-            style="font-weight: bold;"
-          >
-            {{ row.timeliness || '正常' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="工单状态" align="center">
-        <template slot-scope="{ row }">
-          <el-tag
-            :type="getWorkOrderStatusType(row.status)"
-            size="small"
-            style="font-weight: bold;"
-          >
-            {{ row.status || '待处理' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="owner" label="当前所属人" align="center" />
-      <el-table-column label="操作" width="280" align="center">
-        <template slot-scope="{ row }">
-          <el-link type="primary" @click="viewDetail(row)">详情</el-link>
-          <el-link style="margin-left:10px;color:#18b7fc" @click="viewFaultOrderReport(row)">报告预览</el-link>
-          <el-dropdown v-if="getAvailableActions(row).length > 0" @command="(command) => handleAction(command, row)" style="margin-left:10px">
-            <el-link type="warning">
-              操作<i class="el-icon-arrow-down el-icon--right"></i>
-            </el-link>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item 
-                v-for="action in getAvailableActions(row)" 
-                :key="action.command" 
-                :command="action.command"
-                :disabled="action.disabled"
+        >
+          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column prop="projectName" label="项目名称" align="center" />
+          <el-table-column prop="reportTime" label="上报时间" align="center" />
+          <el-table-column prop="source" label="工单来源" align="center" />
+          <el-table-column prop="reporter" label="上报人员" align="center" />
+          <el-table-column label="工单时效" align="center">
+            <template slot-scope="{ row }">
+              <el-tag
+                :type="getTimelinessType(row.timeliness)"
+                size="small"
+                style="font-weight: bold;"
               >
-                {{ action.label }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-          <el-link style="margin-left:10px;color:#ff4d1a" @click="onDelete(row)">删除</el-link>
-        </template>
-      </el-table-column>
-    </el-table>
+                {{ row.timeliness || '正常' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="工单状态" align="center">
+            <template slot-scope="{ row }">
+              <el-tag
+                :type="getWorkOrderStatusType(row.status)"
+                size="small"
+                style="font-weight: bold;"
+              >
+                {{ row.status || '待处理' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="owner" label="当前所属人" align="center" />
+          <el-table-column label="操作" width="280" align="center">
+            <template slot-scope="{ row }">
+              <el-link type="primary" @click="viewDetail(row)">详情</el-link>
+              <el-link style="margin-left:10px;color:#18b7fc" @click="viewFaultOrderReport(row)">报告预览</el-link>
+              <el-dropdown v-if="getAvailableActions(row).length > 0" style="margin-left:10px" @command="(command) => handleAction(command, row)">
+                <el-link type="warning">
+                  操作<i class="el-icon-arrow-down el-icon--right" />
+                </el-link>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item
+                    v-for="action in getAvailableActions(row)"
+                    :key="action.command"
+                    :command="action.command"
+                    :disabled="action.disabled"
+                  >
+                    {{ action.label }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+              <el-link style="margin-left:10px;color:#ff4d1a" @click="onDelete(row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
     </div>
 
@@ -238,22 +238,20 @@
     <div class="pagination-section">
       <div class="pagination-info">
         <span class="info-text">
-          <i class="el-icon-info"></i>
+          <i class="el-icon-info" />
           共查询到 <strong>{{ filteredData.length }}</strong> 条记录，
-          当前显示第 <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
+          当前显示第 <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
           <strong>{{ Math.min(currentPage * pageSize, filteredData.length) }}</strong> 条
         </span>
       </div>
       <div class="pagination-container">
-      <el-pagination
-        background
+        <el-pagination
+          background
           layout="total, prev, pager, next, sizes"
           :page-sizes="[10, 20, 50, 100]"
-        :page-size="pageSize"
-        :current-page.sync="currentPage"
-        :total="filteredData.length"
-        @current-change="handlePageChange"
-          @size-change="handleSizeChange"
+          :page-size="pageSize"
+          :current-page.sync="currentPage"
+          :total="filteredData.length"
           class="custom-pagination"
           :page-size-text="'条/页'"
           :total-text="'共'"
@@ -261,7 +259,9 @@
           :prev-text="'上一页'"
           :next-text="'下一页'"
           :jumper-text="'跳至'"
-      />
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
       </div>
     </div>
 
@@ -271,10 +271,10 @@
 </template>
 
 <script>
-import { 
-  getFaultOrders, 
-  deleteFaultOrder, 
-  acceptFaultOrder, 
+import {
+  getFaultOrders,
+  deleteFaultOrder,
+  acceptFaultOrder,
   assignFaultOrder,
   markAsResolved,
   rateFaultOrder
@@ -338,7 +338,7 @@ export default {
         if (res.success) {
           // 检查数据结构，可能是 res.data.list 或 res.data
           const data = res.data?.list || res.data || []
-          
+
           // 处理数据，确保状态和时效正确显示
           this.tableData = data.map(item => ({
             ...item,
@@ -346,11 +346,11 @@ export default {
             timeliness: this.calculateTimeliness(item),
             owner: this.getCurrentOwner(item)
           }))
-          
+
           this.filteredData = this.tableData
           console.log('故障工单表格数据:', this.tableData)
           console.log('故障工单总数:', this.filteredData.length)
-          
+
           if (res.pagination) {
             this.pagination.total = res.pagination.total
             this.pagination.page = res.pagination.page
@@ -388,7 +388,7 @@ export default {
       this.currentPage = page
       this.updatePagedData()
     },
-    
+
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1
@@ -422,7 +422,7 @@ export default {
     onSetting() {
       this.$message.info('设置')
     },
-    
+
     // 获取时效类型
     getTimelinessType(timeliness) {
       switch (timeliness) {
@@ -434,7 +434,7 @@ export default {
           return 'success'
       }
     },
-    
+
     // 获取工单状态类型
     getWorkOrderStatusType(status) {
       switch (status) {
@@ -450,60 +450,59 @@ export default {
           return 'info'
       }
     },
-    
+
     // 统计方法
     getCompletedCount() {
-      return this.filteredData.filter(item => 
+      return this.filteredData.filter(item =>
         item.status === '已解决' || item.status === '已评价' || item.status === '已关闭'
       ).length
     },
-    
+
     getPendingCount() {
-      return this.filteredData.filter(item => 
-        item.status === '待处理' || item.status === '已接单' || item.status === '已分配' || 
+      return this.filteredData.filter(item =>
+        item.status === '待处理' || item.status === '已接单' || item.status === '已分配' ||
         item.status === '已沟通' || item.status === '已签到' || item.status === '处理中'
       ).length
     },
-    
+
     getOverdueCount() {
-      return this.filteredData.filter(item => 
+      return this.filteredData.filter(item =>
         item.timeliness === '已逾期'
       ).length
     },
-    
-    
+
     toggleSearchBar() {
       this.searchBarVisible = !this.searchBarVisible
     },
-    
+
     // 获取主状态（根据位掩码计算）
     getMainStatus(item) {
       if (!item.statusMask) return '待处理'
-      
+
       // 根据位掩码判断状态
-      if (item.statusMask & 256) return '已关闭'  // CLOSED
-      if (item.statusMask & 128) return '已评价'  // RATED
-      if (item.statusMask & 64) return '已解决'   // RESOLVED
-      if (item.statusMask & 32) return '处理中'   // IN_PROGRESS
-      if (item.statusMask & 16) return '已签到'   // SIGNED_IN
-      if (item.statusMask & 8) return '已沟通'    // COMMUNICATED
-      if (item.statusMask & 4) return '已分配'    // ASSIGNED
-      if (item.statusMask & 2) return '已接单'    // ACCEPTED
-      if (item.statusMask & 1) return '待处理'    // PENDING
-      
+      if (item.statusMask & 256) return '已关闭' // CLOSED
+      if (item.statusMask & 128) return '已评价' // RATED
+      if (item.statusMask & 64) return '已解决' // RESOLVED
+      if (item.statusMask & 32) return '处理中' // IN_PROGRESS
+      if (item.statusMask & 16) return '已签到' // SIGNED_IN
+      if (item.statusMask & 8) return '已沟通' // COMMUNICATED
+      if (item.statusMask & 4) return '已分配' // ASSIGNED
+      if (item.statusMask & 2) return '已接单' // ACCEPTED
+      if (item.statusMask & 1) return '待处理' // PENDING
+
       return '待处理'
     },
-    
+
     // 计算时效（是否逾期）
     calculateTimeliness(item) {
       if (!item.expectedCompletionTime) return '正常'
-      
+
       const now = new Date()
       const expectedTime = new Date(item.expectedCompletionTime)
-      
+
       return now > expectedTime ? '已逾期' : '正常'
     },
-    
+
     // 获取当前所属人
     getCurrentOwner(item) {
       // 优先显示分配的人员
@@ -513,7 +512,7 @@ export default {
         }
         return item.assignedTo[0].name || '已分配' // 如果是对象，返回name
       }
-      
+
       // 其次显示接单人员
       if (item.acceptedBy) {
         if (typeof item.acceptedBy === 'string') {
@@ -521,15 +520,15 @@ export default {
         }
         return item.acceptedBy.name || '已接单' // 如果是对象，返回name
       }
-      
+
       return '未分配'
     },
-    
+
     // 获取可用操作
     getAvailableActions(row) {
       const actions = []
       const status = row.status || '待处理'
-      
+
       switch (status) {
         case '待处理':
           actions.push(
@@ -568,10 +567,10 @@ export default {
           )
           break
       }
-      
+
       return actions
     },
-    
+
     // 处理操作命令
     async handleAction(command, row) {
       try {
@@ -603,7 +602,7 @@ export default {
         this.$message.error('操作失败，请重试')
       }
     },
-    
+
     // 接单操作
     async acceptOrder(row) {
       try {
@@ -618,7 +617,7 @@ export default {
         this.$message.error('接单失败')
       }
     },
-    
+
     // 分配工单
     async assignOrder(row) {
       // 这里应该打开一个对话框选择工作人员
@@ -627,7 +626,7 @@ export default {
         cancelButtonText: '取消',
         inputPattern: /.+/,
         inputErrorMessage: '请输入工作人员ID'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const staffIds = value.split(',').map(id => id.trim()).filter(id => id)
         const res = await assignFaultOrder(row._id, { staffIds })
         if (res.success) {
@@ -640,7 +639,7 @@ export default {
         this.$message.info('已取消分配')
       })
     },
-    
+
     // 添加沟通记录
     async addCommunication(row) {
       this.$prompt('请输入沟通内容:', '添加沟通记录', {
@@ -649,7 +648,7 @@ export default {
         inputType: 'textarea',
         inputPattern: /.+/,
         inputErrorMessage: '请输入沟通内容'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         // 这里需要当前用户ID，暂时使用固定值
         const staffId = 'current_user_id' // 应该从用户状态获取
         const res = await addCommunicationLog(row._id, { staffId, content: value })
@@ -663,12 +662,12 @@ export default {
         this.$message.info('已取消添加')
       })
     },
-    
+
     // 添加签到记录
     async addSignIn(row) {
       // 获取当前位置
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
+        navigator.geolocation.getCurrentPosition(async(position) => {
           try {
             const staffId = 'current_user_id' // 应该从用户状态获取
             const res = await addSignInLog(row._id, {
@@ -692,7 +691,7 @@ export default {
         this.$message.error('浏览器不支持地理位置服务')
       }
     },
-    
+
     // 标记为已解决
     async markResolved(row) {
       try {
@@ -708,7 +707,7 @@ export default {
         // 用户取消无需处理
       }
     },
-    
+
     // 评价工单
     async rateOrder(row) {
       this.$prompt('请为工单评分（1-5分）:', '评价工单', {
@@ -717,7 +716,7 @@ export default {
         inputType: 'number',
         inputPattern: /^[1-5]$/,
         inputErrorMessage: '请输入1-5之间的数字'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const comment = await new Promise((resolve) => {
           this.$prompt('请输入评价内容（可选）:', '评价工单', {
             confirmButtonText: '确定',
@@ -725,7 +724,7 @@ export default {
             inputType: 'textarea'
           }).then(({ value: commentValue }) => resolve(commentValue)).catch(() => resolve(''))
         })
-        
+
         const res = await rateFaultOrder(row._id, { rating: parseInt(value), comment })
         if (res.success) {
           this.$message.success('评价成功')
@@ -737,7 +736,7 @@ export default {
         this.$message.info('已取消评价')
       })
     },
-    
+
     // 关闭工单
     async closeOrder(row) {
       try {
@@ -792,7 +791,6 @@ export default {
   flex-wrap: wrap;
   gap: 24px;
 }
-
 
 .title-section {
   display: flex;
@@ -1142,16 +1140,16 @@ export default {
     flex-direction: column;
     gap: 24px;
   }
-  
+
   .header-stats {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .search-row {
     flex-direction: column;
   }
-  
+
   .search-item {
     min-width: 100%;
   }
@@ -1161,35 +1159,35 @@ export default {
   .work-order-page {
     padding: 16px 20px;
   }
-  
+
   .page-header {
     padding: 20px;
   }
-  
+
   .search-section, .table-section {
     margin-bottom: 24px;
   }
-  
+
   .pagination-section {
     flex-direction: column;
     gap: 16px;
     margin-top: 24px;
   }
-  
+
   .table-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .table-actions {
     justify-content: center;
   }
-  
+
   .search-bar {
     padding: 20px;
   }
-  
+
   .search-row {
     gap: 16px;
     margin-bottom: 16px;

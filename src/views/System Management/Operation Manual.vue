@@ -12,35 +12,35 @@
           @select="handleMenuSelect"
         >
           <el-menu-item index="register">
-            <i class="el-icon-user"></i>
+            <i class="el-icon-user" />
             <span>注册、登录</span>
           </el-menu-item>
           <el-menu-item index="dashboard">
-            <i class="el-icon-s-home"></i>
+            <i class="el-icon-s-home" />
             <span>系统概览</span>
           </el-menu-item>
           <el-menu-item index="agency">
-            <i class="el-icon-office-building"></i>
+            <i class="el-icon-office-building" />
             <span>服务机构管理</span>
           </el-menu-item>
           <el-menu-item index="project">
-            <i class="el-icon-folder"></i>
+            <i class="el-icon-folder" />
             <span>项目管理</span>
           </el-menu-item>
           <el-menu-item index="maintenance">
-            <i class="el-icon-s-tools"></i>
+            <i class="el-icon-s-tools" />
             <span>维护业务管理</span>
           </el-menu-item>
           <el-menu-item index="system">
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-setting" />
             <span>系统管理</span>
           </el-menu-item>
           <el-menu-item index="troubleshooting">
-            <i class="el-icon-warning"></i>
+            <i class="el-icon-warning" />
             <span>常见问题</span>
           </el-menu-item>
           <el-menu-item index="contact">
-            <i class="el-icon-phone"></i>
+            <i class="el-icon-phone" />
             <span>联系我们</span>
           </el-menu-item>
         </el-menu>
@@ -49,7 +49,7 @@
 
     <!-- 右侧内容区域 -->
     <div class="manual-content">
-      
+
       <div class="content-body">
         <div class="pdf-container">
           <iframe
@@ -81,7 +81,7 @@ export default {
       // 这里可以根据选择的章节跳转到PDF的对应页面
       this.jumpToSection(index)
     },
-    
+
     jumpToSection(section) {
       // 根据章节跳转到PDF的对应页面
       const pageMap = {
@@ -94,17 +94,17 @@ export default {
         'troubleshooting': 40,
         'contact': 50
       }
-      
+
       const page = pageMap[section] || 1
       const newUrl = `/web/viewer.html?file=/pdf/3.pdf&toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&nav=0&zoom=auto&pagemode=none&disableworker=true#page=${page}`
       this.pdfUrl = newUrl
     },
-    
+
     zoomIn() {
       // 放大功能
       this.$message.info('放大功能')
     },
-    
+
     zoomOut() {
       // 缩小功能
       this.$message.info('缩小功能')
@@ -191,7 +191,6 @@ export default {
   background: #fff;
 }
 
-
 .content-body {
   flex: 1;
   position: relative;
@@ -243,17 +242,17 @@ export default {
     width: 320px;
     transform: translateX(-15px);
   }
-  
+
   .pdf-container {
     left: -80px;
     width: calc(100% - 5px);
     top: 0;
   }
-  
+
   .pdf-iframe {
     transform: scale(1.3) translateX(-120px);
   }
-  
+
   .manual-sidebar::after {
     right: -70px;
     width: 70px;
@@ -265,28 +264,28 @@ export default {
     width: 280px;
     transform: translateX(-10px);
   }
-  
+
   .sidebar-header h3 {
     font-size: 14px;
   }
-  
+
   .manual-menu .el-menu-item {
     height: 45px;
     line-height: 45px;
     padding-left: 15px;
     font-size: 13px;
   }
-  
+
   .pdf-container {
     left: -60px;
     width: calc(100% - 5px);
     top: 0;
   }
-  
+
   .pdf-iframe {
     transform: scale(1.25) translateX(-90px);
   }
-  
+
   .manual-sidebar::after {
     right: -60px;
     width: 60px;
@@ -297,13 +296,13 @@ export default {
   .manual-container {
     flex-direction: column;
   }
-  
+
   .manual-sidebar {
     width: 100%;
     height: auto;
     max-height: 200px;
   }
-  
+
   .manual-content {
     height: calc(100vh - 200px);
   }

@@ -107,25 +107,25 @@ export default {
       const { planId, projectId } = this.$route.query
       console.log('路由查询参数:', this.$route.query)
       console.log('获取到的planId:', planId)
-      
+
       if (planId) {
         try {
           // 根据planId从API加载实际的计划数据
           console.log('尝试从API加载计划信息，planId:', planId)
           const response = await request.get(`/plan/${planId}`)
           console.log('API响应:', response)
-          
+
           if (response.success && response.data) {
             const planData = response.data
             // 优先使用路由参数，API数据作为补充
             const { projectName, ownerName, planType, projectManager, maintenancePersonnel } = this.$route.query
             console.log('路由参数中的项目信息:', { projectName, ownerName, planType })
-            console.log('API返回的项目信息:', { 
-              projectName: planData.projectName, 
-              ownerName: planData.ownerName, 
-              planType: planData.planType 
+            console.log('API返回的项目信息:', {
+              projectName: planData.projectName,
+              ownerName: planData.ownerName,
+              planType: planData.planType
             })
-            
+
             this.planInfo = {
               projectName: projectName || planData.projectName || '',
               projectManager: projectManager || planData.projectManager || '',
@@ -180,11 +180,11 @@ export default {
       try {
         this.loading = true
         console.log('开始加载系统维保数据')
-        
+
         // 获取所有标准维保项目
         const res = await getMaintainStandardItems()
         console.log('getMaintainStandardItems API响应:', res)
-        
+
         // 检查不同的响应格式
         let rawData = null
         if (res && res.data) {
@@ -197,16 +197,16 @@ export default {
           rawData = res.data
           console.log('使用 res.success.data 格式')
         }
-        
+
         console.log('提取的原始数据:', rawData)
-        
+
         if (rawData && Array.isArray(rawData)) {
           console.log('原始数据长度:', rawData.length)
           this.allMaintenanceItems = rawData
-          
+
           // 根据计划中的maintenanceItems生成维保内容列表
           this.generateMaintenanceListFromPlan(rawData)
-          
+
           console.log('系统维保数据加载完成')
         } else {
           console.error('获取标准维保项目失败，响应格式:', res)
@@ -224,12 +224,12 @@ export default {
     generateMaintenanceListFromPlan(rawData) {
       console.log('开始根据计划生成维保内容列表')
       console.log('计划中的maintenanceItems:', this.planInfo.maintenanceItems)
-      
+
       // 获取计划中已选择的维保项目ID列表
       const selectedItemIds = this.planInfo.maintenanceItems || []
       console.log('计划中已选择的维保项目ID数量:', selectedItemIds.length)
       console.log('计划中的前5个ID示例:', selectedItemIds.slice(0, 5))
-      
+
       // 提取ID字符串列表 - 处理对象格式的ID
       const selectedIdStrings = selectedItemIds.map(item => {
         if (typeof item === 'string') {
@@ -241,31 +241,31 @@ export default {
           return null
         }
       }).filter(id => id !== null)
-      
+
       console.log('提取的ID字符串列表:', selectedIdStrings.slice(0, 5))
-      
+
       if (selectedItemIds.length === 0) {
         console.log('计划中没有维保项目，显示空列表')
         this.maintenanceList = []
         return
       }
-      
+
       const maintenanceItems = []
-      
+
       // 遍历所有标准维保项目，只选择计划中存在的项目
       let totalItems = 0
       let matchedItems = 0
-      
+
       rawData.forEach(system => {
         if (system.devices && system.devices.length > 0) {
           system.devices.forEach(device => {
             if (device.items && device.items.length > 0) {
               device.items.forEach(item => {
                 totalItems++
-                
+
                 // 检查当前项目是否在计划的选择列表中
                 const isSelected = selectedIdStrings.includes(item._id.toString())
-                
+
                 // 添加详细的ID匹配调试信息
                 if (totalItems <= 5) { // 只打印前5个项目的调试信息
                   console.log(`检查项目 ${totalItems}:`, {
@@ -274,7 +274,7 @@ export default {
                     selectedIdStrings: selectedIdStrings.slice(0, 3) // 显示前3个ID用于对比
                   })
                 }
-                
+
                 if (isSelected) {
                   matchedItems++
                   const getPeriodLabel = (p) => {
@@ -283,7 +283,7 @@ export default {
                     if (p === 12) return '年检'
                     return p.toString()
                   }
-                  
+
                   maintenanceItems.push({
                     id: item._id,
                     systemCategory: system.category,
@@ -298,19 +298,18 @@ export default {
           })
         }
       })
-      
+
       console.log('ID匹配统计:', {
         总项目数: totalItems,
         匹配项目数: matchedItems,
         计划中的ID数量: selectedItemIds.length,
         提取的ID字符串数量: selectedIdStrings.length
       })
-      
+
       this.maintenanceList = maintenanceItems
       console.log('根据计划生成的维保内容列表:', this.maintenanceList)
       console.log('计划中的维保项目总数:', this.maintenanceList.length)
     },
-
 
     // 保存计划
     async savePlan() {
@@ -323,7 +322,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'info'
-      }).then(async () => {
+      }).then(async() => {
         // 准备计划数据
         const planData = {
           planId: this.planInfo.planId,
@@ -343,14 +342,14 @@ export default {
             planDefinedStatus: '已制定',
             planStatus: '进行中'
           }
-          
+
           console.log('调用后端API更新计划状态:', statusData)
           const result = await updateMaintenancePlanStatus(this.planInfo.planId, statusData)
-          
+
           if (result && result.success) {
             console.log('后端状态更新成功:', result)
             this.$message.success(`成功为项目"${this.planInfo.projectName}"制定系统维保计划`)
-            
+
             // 将状态更新信息存储到localStorage
             const statusUpdateData = {
               planId: this.planInfo.planId,
@@ -361,7 +360,7 @@ export default {
             }
             console.log('存储状态更新信息到localStorage:', statusUpdateData)
             localStorage.setItem('planStatusUpdate', JSON.stringify(statusUpdateData))
-            
+
             // 直接通过事件总线通知父页面更新状态
             this.$bus && this.$bus.$emit('plan-status-updated', statusUpdateData)
 
@@ -376,7 +375,7 @@ export default {
           // 如果API调用失败，使用临时方案：直接更新状态
           console.warn('API调用失败，使用临时方案:', apiError)
           this.$message.success(`成功为项目"${this.planInfo.projectName}"制定系统维保计划`)
-          
+
           // 将状态更新信息存储到localStorage
           const statusUpdateData = {
             planId: this.planInfo.planId,
@@ -387,7 +386,7 @@ export default {
           }
           console.log('存储状态更新信息到localStorage:', statusUpdateData)
           localStorage.setItem('planStatusUpdate', JSON.stringify(statusUpdateData))
-          
+
           // 直接通过事件总线通知父页面更新状态
           this.$bus && this.$bus.$emit('plan-status-updated', statusUpdateData)
 

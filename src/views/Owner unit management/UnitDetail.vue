@@ -133,49 +133,49 @@ export default {
       contractId: null
     }
   },
-  mounted() {
-    console.log('🚀 UnitDetail组件已挂载，开始加载详情')
-    this.loadDetail()
-  },
   // 添加路由变化监听，确保每次路由变化都重新加载数据
   watch: {
     '$route'(to, from) {
-      console.log('🔄 路由变化 detected:', { 
-        to: to.query, 
+      console.log('🔄 路由变化 detected:', {
+        to: to.query,
         from: from.query,
         toPath: to.path,
         fromPath: from.path
       })
-      
+
       // 如果是从项目详情页面离开（返回），不触发数据加载
       if (from.path === '/owner/UnitDetail' && to.path === '/owner/project') {
         console.log('🔄 检测到返回操作，不重新加载数据')
         return
       }
-      
+
       // 如果是从续签页面返回，也不触发数据加载
       if (from.path === '/owner/renewal' && to.path === '/owner/UnitDetail') {
         console.log('🔄 检测到从续签页面返回，不重新加载数据')
         return
       }
-      
+
       // 检查是否有参数变化，或者是从其他页面跳转过来的
       const hasIdChange = to.query.id !== from.query.id
       const hasContractIdChange = to.query.contractId !== from.query.contractId
       const hasOwnerNameChange = to.query.ownerName !== from.query.ownerName
       const isNewNavigation = !from.query.id && to.query.id
-      
+
       if (hasIdChange || hasContractIdChange || hasOwnerNameChange || isNewNavigation) {
         console.log('🔄 检测到参数变化，重新加载数据')
         console.log('🔄 变化详情:', {
           hasIdChange,
-          hasContractIdChange, 
+          hasContractIdChange,
           hasOwnerNameChange,
           isNewNavigation
         })
         this.loadDetail()
       }
     }
+  },
+  mounted() {
+    console.log('🚀 UnitDetail组件已挂载，开始加载详情')
+    this.loadDetail()
   },
   methods: {
     // 获取状态标签类型
@@ -250,31 +250,31 @@ export default {
         createTime: '',
         updateTime: ''
       }
-      
+
       const id = this.$route.query.id
       const contractId = this.$route.query.contractId
       const ownerName = this.$route.query.ownerName
       const entrustName = this.$route.query.entrustName
-      
+
       console.log('🚀 UnitDetail页面接收到的参数:', this.$route.query)
       console.log('使用的项目ID:', id)
       console.log('使用的合同ID:', contractId)
       console.log('业主单位名称:', ownerName)
       console.log('委托单位名称:', entrustName)
       console.log('🔄 开始加载详情数据，时间戳:', new Date().toISOString())
-      
+
       if (!id && !contractId) {
         console.log('❌ 未传入项目ID或合同ID，当前路由参数:', this.$route.query)
         console.log('❌ 当前路由路径:', this.$route.path)
         console.log('❌ 当前路由名称:', this.$route.name)
-        
+
         // 检查是否是从其他页面返回导致的空参数，如果是则直接返回项目列表页面
         if (this.$route.path === '/owner/UnitDetail') {
           console.log('🔄 检测到无效参数，直接返回项目列表页面')
           this.$router.push({ name: 'UnitProject' })
           return
         }
-        
+
         // 只有在明确需要显示错误时才显示错误消息
         if (this.$route.query && Object.keys(this.$route.query).length > 0) {
           this.$message.error('未传入项目ID或合同ID')
@@ -293,10 +293,10 @@ export default {
       const targetId = id || contractId
       this.contractId = targetId
       this.loading = true
-      
+
       console.log('🎯 最终使用的目标ID:', targetId)
       console.log('🎯 ID类型判断:', id ? '项目ID' : '合同ID')
-      
+
       // 先设置基本信息，确保页面有内容显示
       this.projectDetail = {
         projectName: ownerName || '加载中...',
@@ -313,18 +313,18 @@ export default {
         createTime: '',
         updateTime: ''
       }
-      
+
       try {
         console.log('🔄 正在从后端获取项目详情，ID:', targetId)
         console.log('🔄 API调用URL: /api/contracts/' + targetId)
         console.log('🔄 开始调用fetchProjectDetail API...')
-        
+
         const res = await fetchProjectDetail(targetId)
         console.log('📋 后端返回的项目详情数据:', res)
         console.log('📋 响应状态:', res ? 'success' : 'failed')
         console.log('📋 响应数据:', res?.data)
         console.log('📋 响应类型:', typeof res)
-        
+
         // 如果API调用成功但返回404，尝试使用传入的基本信息
         if (res && res.success === false && res.message === '项目未找到') {
           console.log('⚠️ 项目未找到，使用传入的基本信息显示页面')
@@ -347,7 +347,7 @@ export default {
           this.loading = false
           return
         }
-        
+
         if (res.success && res.data) {
           const item = res.data
           console.log('✅ 成功获取项目详情数据:', item)
@@ -377,7 +377,7 @@ export default {
             createTime: this.formatDate(item.createdAt) || '',
             updateTime: this.formatDate(item.updatedAt) || ''
           }
-          
+
           console.log('✅ 项目详情数据处理完成:', this.projectDetail)
           console.log('✅ 最终显示的项目名称:', this.projectDetail.projectName)
           console.log('✅ 最终显示的业主单位:', this.projectDetail.ownerName)
@@ -409,7 +409,7 @@ export default {
         console.error('❌ 错误响应:', e.response)
         console.error('❌ 错误状态:', e.response?.status)
         console.error('❌ 错误数据:', e.response?.data)
-        
+
         // 根据错误类型显示不同的提示信息
         if (e.response && e.response.status === 404) {
           console.log('❌ 404错误：项目或合同不存在')
@@ -424,7 +424,7 @@ export default {
           console.log('❌ 其他错误：网络异常或接口出错')
           this.$message.error('网络异常或接口出错: ' + (e.message || '未知错误'))
         }
-        
+
         // 显示错误状态的数据，但保留传入的基本信息
         this.projectDetail = {
           projectName: ownerName || '数据获取失败',

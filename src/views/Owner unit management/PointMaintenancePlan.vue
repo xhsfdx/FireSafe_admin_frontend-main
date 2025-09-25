@@ -200,25 +200,25 @@ export default {
       const { planId, projectId } = this.$route.query
       console.log('路由查询参数:', this.$route.query)
       console.log('获取到的planId:', planId)
-      
+
       if (planId) {
         try {
           // 根据planId从API加载实际的计划数据
           console.log('尝试从API加载计划信息，planId:', planId)
           const response = await request.get(`/plan/${planId}`)
           console.log('API响应:', response)
-          
+
           if (response.success && response.data) {
             const planData = response.data
             // 优先使用路由参数，API数据作为补充
             const { projectName, ownerName, planType, projectManager, maintenancePersonnel } = this.$route.query
             console.log('路由参数中的项目信息:', { projectName, ownerName, planType })
-            console.log('API返回的项目信息:', { 
-              projectName: planData.projectName, 
-              ownerName: planData.ownerName, 
-              planType: planData.planType 
+            console.log('API返回的项目信息:', {
+              projectName: planData.projectName,
+              ownerName: planData.ownerName,
+              planType: planData.planType
             })
-            
+
             this.planInfo = {
               projectName: projectName || planData.projectName || '',
               projectManager: projectManager || planData.projectManager || '',
@@ -307,7 +307,7 @@ export default {
 
             // 应用搜索过滤
             this.applySearchFilter()
-            
+
             console.log('点位列表处理完成，第一个点位的项目信息:', this.allPointList[0]?.projectName)
             console.log('planInfo中的项目信息:', this.planInfo.projectName)
             console.log('当前planInfo完整信息:', this.planInfo)
@@ -431,7 +431,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'info'
-      }).then(async () => {
+      }).then(async() => {
         try {
           // 准备计划数据
           const planData = {
@@ -455,15 +455,15 @@ export default {
               planDefinedStatus: '已制定',
               planStatus: '进行中'
             }
-            
+
             console.log('调用后端API更新计划状态:', statusData)
             const result = await updateMaintenancePlanStatus(this.planInfo.planId, statusData)
-            
+
             if (result && result.success) {
               console.log('后端状态更新成功:', result)
               this.$message.success(`成功为项目"${this.planInfo.projectName}"制定点位维保计划`)
               this.planCreated = true // 标记计划已创建
-              
+
               // 将状态更新信息存储到localStorage
               const statusUpdateData = {
                 planId: this.planInfo.planId,
@@ -474,10 +474,10 @@ export default {
               }
               console.log('存储状态更新信息到localStorage:', statusUpdateData)
               localStorage.setItem('planStatusUpdate', JSON.stringify(statusUpdateData))
-              
+
               // 直接通过事件总线通知父页面更新状态
               this.$bus && this.$bus.$emit('plan-status-updated', statusUpdateData)
-              
+
               // 返回上一页
               setTimeout(() => {
                 this.goBack()
@@ -490,7 +490,7 @@ export default {
             console.warn('API调用失败，使用临时方案:', apiError)
             this.$message.success(`成功为项目"${this.planInfo.projectName}"制定点位维保计划`)
             this.planCreated = true // 标记计划已创建
-            
+
             // 将状态更新信息存储到localStorage
             const statusUpdateData = {
               planId: this.planInfo.planId,
@@ -501,10 +501,10 @@ export default {
             }
             console.log('存储状态更新信息到localStorage:', statusUpdateData)
             localStorage.setItem('planStatusUpdate', JSON.stringify(statusUpdateData))
-            
+
             // 直接通过事件总线通知父页面更新状态
             this.$bus && this.$bus.$emit('plan-status-updated', statusUpdateData)
-            
+
             // 返回上一页
             setTimeout(() => {
               this.goBack()
@@ -525,7 +525,7 @@ export default {
       const query = this.$route.query
       console.log('返回时查询参数:', query)
       console.log('计划是否已创建:', this.planCreated)
-      
+
       if (this.planCreated && query.planId) {
         console.log('制定成功，准备返回并更新状态')
         this.$router.push({

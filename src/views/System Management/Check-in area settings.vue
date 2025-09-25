@@ -45,11 +45,11 @@
         :page-size="pageSize"
         :current-page.sync="currentPage"
         :total="filteredData.length"
-        @current-change="handlePageChange"
         :page-size-text="'条/页'"
         :total-text="'共 {total} 条'"
         :go-to-text="'前往'"
         :jump-text="'页'"
+        @current-change="handlePageChange"
       />
     </div>
 
@@ -159,7 +159,7 @@ export default {
           page: this.currentPage,
           limit: this.pageSize
         }
-        
+
         if (this.filters.unit) {
           params.unitName = this.filters.unit
         }
@@ -203,30 +203,30 @@ export default {
       this.currentPage = 1
       this.loadData()
     },
-    
+
     onReset() {
       this.filters.unit = ''
       this.currentPage = 1
       this.loadData()
     },
-    
+
     updatePagedData() {
       const start = (this.currentPage - 1) * this.pageSize
       this.pagedData = this.filteredData.slice(start, start + this.pageSize)
     },
-    
+
     handlePageChange(page) {
       this.currentPage = page
       this.loadData()
     },
-    
+
     viewDetail(row) {
       this.dialogIndex = this.rawData.findIndex(item => item._id === row._id)
-      this.dialogData = { 
+      this.dialogData = {
         ...row,
         coordinates: row.coordinates || { lng: 106.110698, lat: 30.799492 }
       }
-      
+
       // 设置地图中心点
       if (row.coordinates && row.coordinates.lng && row.coordinates.lat) {
         this.mapCenter = [row.coordinates.lng, row.coordinates.lat]
@@ -235,14 +235,14 @@ export default {
       }
       this.dialogVisible = true
     },
-    
+
     adjustRange(delta) {
       let val = this.dialogData.range + delta
       if (val < 1) val = 1
       if (val > 20) val = 20
       this.dialogData.range = val
     },
-    
+
     async saveEdit() {
       if (this.dialogIndex > -1) {
         try {
@@ -251,7 +251,7 @@ export default {
             coordinates: this.dialogData.coordinates,
             address: this.dialogData.address || ''
           }
-          
+
           const res = await updateCheckinRegion(this.dialogData._id, updateData)
           if (res.success) {
             this.$message.success('保存成功')
@@ -363,13 +363,13 @@ export default {
   .checkin-region-page {
     padding: 16px;
   }
-  
+
   .search-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .search-filters,
   .search-actions {
     justify-content: center;
@@ -381,20 +381,20 @@ export default {
     padding: 12px;
     min-width: auto;
   }
-  
+
   .main-content {
     padding: 16px;
   }
-  
+
   .filter-select {
     width: 100%;
   }
-  
+
   .search-actions {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .search-actions .el-button {
     width: 100%;
   }

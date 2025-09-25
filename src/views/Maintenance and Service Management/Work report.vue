@@ -31,46 +31,46 @@
     <!-- 表格 -->
     <div class="table-container">
       <el-table
+        v-loading="loading"
         :data="pagedData"
         border
         style="width: 100%; margin-top: 12px;"
         :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
         empty-text="暂无数据"
-        v-loading="loading"
         @selection-change="onSelectionChange"
       >
-      <el-table-column type="selection" width="48" align="center" />
-      <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column prop="projectName" label="项目名称" align="center" min-width="200" />
-      <el-table-column prop="orgName" label="业主单位名称" align="center" min-width="150" />
-      <el-table-column prop="type" label="上报类型" align="center" width="120">
-        <template slot-scope="{ row }">
-          <el-tag :type="getTypeTagType(row.type)" size="small">
-            {{ row.type }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="reportTime" label="上报时间" align="center" width="160">
-        <template slot-scope="{ row }">
-          {{ formatDateTime(row.reportTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="处理状态" align="center" width="120">
-        <template slot-scope="{ row }">
-          <el-tag :type="getStatusTagType(row.status)" size="small">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="200" align="center" fixed="right">
-        <template slot-scope="{ row }">
-          <div class="action-buttons">
-            <el-button size="mini" type="primary" @click="viewDetail(row)" class="action-btn">详情</el-button>
-            <el-button size="mini" type="success" @click="downloadReport(row)" class="action-btn">下载</el-button>
-            <el-button size="mini" type="warning" @click="editReport(row)" class="action-btn">编辑</el-button>
-          </div>
-        </template>
-      </el-table-column>
+        <el-table-column type="selection" width="48" align="center" />
+        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column prop="projectName" label="项目名称" align="center" min-width="200" />
+        <el-table-column prop="orgName" label="业主单位名称" align="center" min-width="150" />
+        <el-table-column prop="type" label="上报类型" align="center" width="120">
+          <template slot-scope="{ row }">
+            <el-tag :type="getTypeTagType(row.type)" size="small">
+              {{ row.type }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="reportTime" label="上报时间" align="center" width="160">
+          <template slot-scope="{ row }">
+            {{ formatDateTime(row.reportTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="处理状态" align="center" width="120">
+          <template slot-scope="{ row }">
+            <el-tag :type="getStatusTagType(row.status)" size="small">
+              {{ row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template slot-scope="{ row }">
+            <div class="action-buttons">
+              <el-button size="mini" type="primary" class="action-btn" @click="viewDetail(row)">详情</el-button>
+              <el-button size="mini" type="success" class="action-btn" @click="downloadReport(row)">下载</el-button>
+              <el-button size="mini" type="warning" class="action-btn" @click="editReport(row)">编辑</el-button>
+            </div>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -83,8 +83,6 @@
         :page-size="pageSize"
         :current-page.sync="currentPage"
         :total="tableData.length"
-        @current-change="handlePageChange"
-        @size-change="handleSizeChange"
         class="custom-pagination"
         :page-size-text="'条/页'"
         :total-text="'共'"
@@ -92,6 +90,8 @@
         :prev-text="'上一页'"
         :next-text="'下一页'"
         :jumper-text="'跳至'"
+        @current-change="handlePageChange"
+        @size-change="handleSizeChange"
       />
     </div>
 
@@ -180,7 +180,7 @@ export default {
           if (this.tableData.length > 0) {
             console.log('处理后第一个数据项的orgName:', this.tableData[0].orgName)
           }
-          
+
           if (res.pagination) {
             this.pagination.total = res.pagination.total
             this.pagination.page = res.pagination.page
@@ -220,11 +220,11 @@ export default {
         this.$message.warning('请先选择要下载的报告')
         return
       }
-      
+
       try {
         const ids = this.selectedRows.map(row => row._id)
         const res = await batchDownloadWorkReports(ids)
-        
+
         // 创建下载链接
         const blob = new Blob([res], { type: 'application/zip' })
         const url = window.URL.createObjectURL(blob)
@@ -235,7 +235,7 @@ export default {
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
-        
+
         this.$message.success('批量下载成功')
       } catch (error) {
         console.error('批量下载失败:', error)
@@ -251,7 +251,7 @@ export default {
     onSetting() {
       this.$message.info('设置')
     },
-    
+
     // 获取类型标签样式
     getTypeTagType(type) {
       const typeMap = {
@@ -262,7 +262,7 @@ export default {
       }
       return typeMap[type] || 'info'
     },
-    
+
     // 获取状态标签样式
     getStatusTagType(status) {
       const statusMap = {
@@ -273,21 +273,20 @@ export default {
       }
       return statusMap[status] || 'info'
     },
-    
+
     // 格式化日期时间
     formatDateTime(date) {
       if (!date) return '未设置'
       return new Date(date).toLocaleString('zh-CN')
     },
-    
-    
+
     // 下载单个报告
     async downloadReport(row) {
       try {
         this.$message.info(`正在下载 ${row.projectName} 的报告...`)
-        
+
         const res = await downloadWorkReport(row._id)
-        
+
         // 创建下载链接
         const blob = new Blob([res], { type: 'application/pdf' })
         const url = window.URL.createObjectURL(blob)
@@ -298,25 +297,25 @@ export default {
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
-        
+
         this.$message.success('下载完成')
       } catch (error) {
         console.error('下载失败:', error)
         this.$message.error('下载失败，请重试')
       }
     },
-    
+
     // 编辑报告
     editReport(row) {
       this.$message.info(`编辑 ${row.projectName} 的报告功能开发中...`)
     },
-    
+
     // 分页处理
     handlePageChange(page) {
       this.currentPage = page
       this.updatePagedData()
     },
-    
+
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1

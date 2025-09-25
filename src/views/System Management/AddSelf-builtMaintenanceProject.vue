@@ -107,11 +107,11 @@ export default {
               maintenanceItems: this.form.maintenanceItems ? this.form.maintenanceItems.split(',').map(item => item.trim()).filter(item => item) : [],
               status: this.form.status
             }
-            
+
             console.log('提交数据:', data)
             const res = await createMaintainProject(data)
             console.log('创建响应:', res)
-            
+
             if (res.success) {
               this.$message.success('保存成功！')
               // 重置表单
@@ -130,7 +130,7 @@ export default {
         }
       })
     },
-    
+
     addExtraContent() {
       this.$message.info('自定义内容扩展区域，可根据需要实现')
     }

@@ -13,11 +13,11 @@
 
     <!-- 表格容器 -->
     <div class="table-container">
-      <el-table 
+      <el-table
         v-loading="loading"
-        :data="tableData" 
-        border 
-        style="width: 100%;" 
+        :data="tableData"
+        border
+        style="width: 100%;"
         empty-text="暂无数据"
         header-cell-class-name="table-header"
       >
@@ -50,12 +50,12 @@
         :page-size="pagination.limit"
         layout="total, sizes, prev, pager, next, jumper"
         :total="pagination.total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
         :page-size-text="'条/页'"
         :total-text="'共 {total} 条'"
         :go-to-text="'前往'"
         :jump-text="'页'"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
       />
     </div>
   </div>
@@ -93,7 +93,7 @@ export default {
           page: this.pagination.page,
           limit: this.pagination.limit
         }
-        
+
         if (this.filters.system) {
           params.type = this.filters.system
         }
@@ -104,7 +104,7 @@ export default {
         console.log('请求参数:', params)
         const res = await getMaintainProjects(params)
         console.log('维保项目API响应:', res)
-        
+
         if (res.success) {
           // 处理后端返回的数据结构，提取checkpoints数据
           const processedData = []
@@ -123,7 +123,7 @@ export default {
               })
             }
           })
-          
+
           this.tableData = processedData
           this.pagination.total = processedData.length
         } else {
@@ -136,33 +136,32 @@ export default {
         this.loading = false
       }
     },
-    
+
     onSearch() {
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     onReset() {
       this.filters.system = ''
       this.filters.project = ''
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     onAdd() {
       // 跳转到新增自建维保项目页面
       this.$router.push({ name: 'AddSelfBuiltMaintenanceProject' })
     },
-    
+
     viewDetail(row) {
       // 跳转到编辑页面
-      this.$router.push({ 
-        name: 'EditSelfBuiltMaintenanceProject', 
-        params: { id: row._id } 
+      this.$router.push({
+        name: 'EditSelfBuiltMaintenanceProject',
+        params: { id: row._id }
       })
     },
-    
-    
+
     async deleteProject(row) {
       try {
         await this.$confirm('确定要删除这个维保项目吗？', '提示', {
@@ -170,7 +169,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         })
-        
+
         const res = await deleteMaintainProject(row._id)
         if (res.success) {
           this.$message.success('删除成功')
@@ -185,13 +184,13 @@ export default {
         }
       }
     },
-    
+
     handleSizeChange(val) {
       this.pagination.limit = val
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     handleCurrentChange(val) {
       this.pagination.page = val
       this.loadData()
@@ -254,7 +253,7 @@ export default {
   .maintain-project-page {
     padding: 16px;
   }
-  
+
   .search-bar {
     flex-direction: column;
     align-items: stretch;
@@ -266,15 +265,15 @@ export default {
   .maintain-project-page {
     padding: 12px;
   }
-  
+
   .table-container {
     padding: 16px;
   }
-  
+
   .search-bar {
     padding: 12px 16px;
   }
-  
+
   .pagination-container {
     padding: 12px 16px;
   }

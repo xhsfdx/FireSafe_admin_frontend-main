@@ -566,12 +566,12 @@ export default {
     // 处理建筑信息列表
     processBuildingList(buildings) {
       console.log('处理建筑信息列表:', buildings)
-      
+
       if (!buildings || !Array.isArray(buildings) || buildings.length === 0) {
         console.log('没有建筑信息，返回默认空行')
         return [{ name: '', area: '', floor: '', height: '', remark: '' }]
       }
-      
+
       const processedBuildings = buildings.map(b => {
         console.log('处理建筑信息:', b)
         return {
@@ -582,19 +582,19 @@ export default {
           remark: b.remark || ''
         }
       })
-      
+
       console.log('处理后的建筑信息:', processedBuildings)
       return processedBuildings
     },
     // 处理维保内容列表
     processMaintainItems(maintainItems) {
       console.log('处理维保内容列表:', maintainItems)
-      
+
       if (!maintainItems || !Array.isArray(maintainItems) || maintainItems.length === 0) {
         console.log('没有维保内容，返回空数组')
         return []
       }
-      
+
       const processedItems = maintainItems.map(item => {
         console.log('处理维保内容:', item)
         return {
@@ -606,7 +606,7 @@ export default {
           maintainContent: item.maintainContent || item.standard || ''
         }
       })
-      
+
       console.log('处理后的维保内容:', processedItems)
       return processedItems
     }

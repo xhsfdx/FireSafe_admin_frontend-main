@@ -11,7 +11,7 @@
       <el-col :span="12">
         <el-card class="left-card">
           <div v-if="loading" class="loading-container">
-            <i class="el-icon-loading"></i>
+            <i class="el-icon-loading" />
             <p>正在加载维保人员数据...</p>
           </div>
           <el-tabs v-else v-model="activeTab" type="card">
@@ -143,7 +143,7 @@
         </el-card>
       </el-col>
     </el-row>
-    
+
   </div>
 </template>
 
@@ -199,12 +199,12 @@ export default {
     console.log('🚀🚀🚀 路由query:', this.$route.query)
     console.log('🚀🚀🚀 planId计算属性值:', this.planId)
     console.log('🚀🚀🚀 taskId值:', this.$route.query.taskId)
-    
+
     // 检查认证状态
     const token = this.$store.getters.token
     console.log('🚀🚀🚀 当前认证token:', token ? '已存在' : '不存在')
     console.log('🚀🚀🚀 token值:', token)
-    
+
     this.loadStaffData()
   },
   methods: {
@@ -296,18 +296,18 @@ export default {
             console.log('当前this.data:', this.data)
             console.log('当前planId:', this.planId)
             console.log('当前路由query:', this.$route.query)
-            
+
             // 临时解决方案：创建一些模拟数据来测试UI逻辑
             console.log('🔧 创建模拟数据来测试UI逻辑')
             const mockMaintainPersons = {
               technical: '68994e4f49f881b4dd401b62', // 假设的技术负责人ID
-              leader: '688b21d24d6f777ef6efb6c7',    // 假设的项目负责人ID
+              leader: '688b21d24d6f777ef6efb6c7', // 假设的项目负责人ID
               maintainers: ['68994e4f49f881b4dd401b62'] // 假设的维护人员ID
             }
             console.log('模拟数据:', mockMaintainPersons)
             this.initializeFromData(mockMaintainPersons)
           }
-          
+
           // 右侧保持空白，等待用户新选择
           console.log('右侧保持空白状态，等待用户新选择')
         } else {
@@ -357,8 +357,8 @@ export default {
 
       if (maintainPersons.technical) {
         // 处理两种数据格式：纯ID字符串或包含用户信息的对象
-        const techId = typeof maintainPersons.technical === 'string' 
-          ? maintainPersons.technical 
+        const techId = typeof maintainPersons.technical === 'string'
+          ? maintainPersons.technical
           : maintainPersons.technical._id || maintainPersons.technical.id
         const techUser = this.findUserById('tech', techId)
         if (techUser) {
@@ -372,8 +372,8 @@ export default {
 
       if (maintainPersons.leader) {
         // 处理两种数据格式：纯ID字符串或包含用户信息的对象
-        const leaderId = typeof maintainPersons.leader === 'string' 
-          ? maintainPersons.leader 
+        const leaderId = typeof maintainPersons.leader === 'string'
+          ? maintainPersons.leader
           : maintainPersons.leader._id || maintainPersons.leader.id
         const managerUser = this.findUserById('manager', leaderId)
         if (managerUser) {
@@ -389,8 +389,8 @@ export default {
         console.log('初始化已保存的现场维保人员，数量:', maintainPersons.maintainers.length)
         maintainPersons.maintainers.forEach((item, index) => {
           // 处理两种数据格式：纯ID字符串或包含用户信息的对象
-          const workerId = typeof item === 'string' 
-            ? item 
+          const workerId = typeof item === 'string'
+            ? item
             : item._id || item.id
           const workerUser = this.findUserById('worker', workerId)
           if (workerUser) {
@@ -414,7 +414,7 @@ export default {
       console.log(`🔍 findUserById: 查找类型=${roleType}, 目标ID=${id}`)
       console.log(`🔍 findUserById: 当前${roleType}列表包含 ${this.userPool[roleType].length} 名员工`)
       console.log(`🔍 findUserById: ${roleType}列表内容:`, this.userPool[roleType].map(u => ({ id: u.id, name: u.name })))
-      
+
       const user = this.userPool[roleType].find(user => {
         const userId = String(user.id)
         const targetId = String(id)
@@ -422,7 +422,7 @@ export default {
         console.log(`  比较: user.id=${userId}, targetId=${targetId}, 匹配=${match}`)
         return match
       })
-      
+
       if (!user) {
         console.warn(`❌ 在 ${roleType} 列表中未找到ID为 ${id} 的用户`)
       } else {
@@ -458,7 +458,6 @@ export default {
         }
       }
     },
-
 
     // 判断技术负责人是否被选中
     isTechSelected(user) {
@@ -512,12 +511,12 @@ export default {
         console.log('=== 开始加载已保存的人员配置 ===')
         console.log('当前planId:', this.planId)
         console.log('当前路由query:', this.$route.query)
-        
+
         if (this.planId) {
           console.log('调用getMaintenancePlan API，planId:', this.planId)
           const response = await getMaintenancePlan(this.planId)
           console.log('getMaintenancePlan API完整响应:', response)
-          
+
           if (response && response.success && response.data) {
             console.log('API调用成功，响应数据结构:', {
               success: response.success,
@@ -526,7 +525,7 @@ export default {
               hasMaintainPersons: !!(response.data && response.data.maintainPersons),
               maintainPersons: response.data.maintainPersons
             })
-            
+
             if (response.data.maintainPersons) {
               console.log('找到已保存的人员配置，开始初始化:', response.data.maintainPersons)
               this.initializeFromData(response.data.maintainPersons)
@@ -559,23 +558,23 @@ export default {
     async reloadPlanData() {
       try {
         console.log('重新加载计划数据...')
-        
+
         // 如果有planId，重新加载计划数据
         if (this.planId) {
           const response = await getMaintenancePlan(this.planId)
-          
+
           if (response.success && response.data) {
             console.log('重新加载的计划数据:', response.data)
-            
+
             // 更新本地存储的计划数据
             const planData = response.data
             localStorage.setItem('currentPlanData', JSON.stringify(planData))
-            
+
             // 通知父组件数据已更新（使用window事件代替$bus）
             window.dispatchEvent(new CustomEvent('planDataUpdated', { detail: planData }))
-            
+
             console.log('计划数据已重新加载并更新')
-            
+
             // 重新加载当前页面的数据
             await this.loadStaffData()
           } else {
@@ -663,7 +662,7 @@ export default {
       // 获取任务ID或计划ID - 优先从props获取，其次从路由获取
       const taskId = this.data.taskId || this.data._id || this.$route.query.taskId
       const planId = this.data.planId || this.$route.query.planId
-      
+
       console.log('=== ID获取调试信息 ===')
       console.log('当前路由query:', this.$route.query)
       console.log('当前props data:', this.data)
@@ -671,7 +670,7 @@ export default {
       console.log('planId值:', planId)
       console.log('taskId类型:', typeof taskId)
       console.log('planId类型:', typeof planId)
-      
+
       // 检查是否是在新增合同流程中（没有具体的任务ID或计划ID）
       let isNewContractFlow = !taskId && !planId && this.data.projectName
 
@@ -682,7 +681,7 @@ export default {
       console.log('data.projectName值:', this.data.projectName)
       console.log('isNewContractFlow:', isNewContractFlow)
       console.log('完整data对象:', this.data)
-      
+
       // 简化逻辑：如果没有ID但有项目名称，就认为是新增合同流程
       if (!taskId && !planId) {
         if (this.data && this.data.projectName) {
@@ -696,13 +695,12 @@ export default {
           return
         }
       }
-      
+
       if (isNewContractFlow) {
         console.log('✅ 检测到新增合同流程，跳过ID验证')
       } else {
         console.log('✅ 获取到的ID信息:', { taskId, planId })
       }
-
 
       // 构造返回数据
       const maintainPersons = {
@@ -710,7 +708,7 @@ export default {
         leader: this.selected.manager.id,
         maintainers: this.selected.workerIds.filter(id => typeof id === 'string' && id.length > 0)
       }
-      
+
       // 确保所有ID都是字符串格式
       console.log('workerIds原始数据:', this.selected.workerIds)
       console.log('workerIds类型检查:', this.selected.workerIds.map(id => ({ id, type: typeof id, isArray: Array.isArray(id) })))
@@ -743,18 +741,18 @@ export default {
               workers: this.selected.workers
             }
           }
-          
+
           // 触发submit事件，将数据传递给父组件
           this.$emit('submit', result)
           this.$message.success('人员配置已保存！')
           return
         }
-        
+
         // 保存到后端
         this.$message.info('正在保存人员配置...')
-        
+
         let response
-        
+
         // 判断是计划数据还是任务数据
         if (planId) {
           // 更新计划数据
@@ -772,12 +770,12 @@ export default {
           this.$message.error('无法确定是计划还是任务，请检查参数')
           return
         }
-        
+
         console.log('保存响应结果:', response)
-        
+
         if (response.success) {
           this.$message.success('人员配置保存成功！')
-          
+
           // 将新选择的配置更新到已保存配置（左侧显示）
           this.savedConfig = {
             tech: this.selected.tech,
@@ -785,7 +783,7 @@ export default {
             workers: [...this.selected.workers],
             workerIds: [...this.selected.workerIds]
           }
-          
+
           // 清空右侧的新选择，等待下次选择
           this.selected = {
             tech: null,
@@ -793,7 +791,7 @@ export default {
             workers: [],
             workerIds: []
           }
-          
+
           // 向父组件发送数据，包含完整的人员信息
           this.$emit('submit', {
             maintainPersons,
@@ -803,18 +801,18 @@ export default {
               workers: this.savedConfig.workers
             }
           })
-          
+
           // 发送全局事件，通知其他页面维保人员已更新
-          window.dispatchEvent(new CustomEvent('maintenancePersonnelUpdated', { 
+          window.dispatchEvent(new CustomEvent('maintenancePersonnelUpdated', {
             detail: {
               planId: this.planId,
               maintainPersons: maintainPersons,
               timestamp: new Date().toISOString()
             }
           }))
-          
+
           console.log('📢 已发送维保人员更新事件')
-          
+
           // 延迟返回上一页
           setTimeout(() => {
             this.$router.go(-1)
@@ -826,12 +824,12 @@ export default {
         console.error('保存人员配置失败:', error)
         console.error('错误响应:', error.response)
         console.error('错误数据:', error.response?.data)
-        
+
         // 显示详细的错误信息
         if (error.response?.data) {
           const errorData = error.response.data
           console.log('详细错误信息:', errorData)
-          
+
           if (errorData.details) {
             this.$message.error(`保存失败：${errorData.message} - ${errorData.details.errorType || errorData.error || '未知错误'}`)
           } else {

@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-s-tools"></i>
+            <i class="el-icon-s-tools" />
           </div>
           <div class="title-info">
             <h1 class="page-title">例行维保详情</h1>
@@ -13,41 +13,41 @@
           </div>
         </div>
         <div class="header-actions">
-          <el-button @click="goBack" icon="el-icon-arrow-left">
+          <el-button icon="el-icon-arrow-left" @click="goBack">
             返回列表
           </el-button>
-          <el-button 
-            v-if="canEdit" 
-            type="primary" 
-            @click="editTask" 
+          <el-button
+            v-if="canEdit"
+            type="primary"
             icon="el-icon-edit"
+            @click="editTask"
           >
             编辑任务
           </el-button>
-          <el-button 
-            v-if="canAccept" 
-            type="success" 
-            @click="acceptTask" 
+          <el-button
+            v-if="canAccept"
+            type="success"
             icon="el-icon-check"
             :loading="actionLoading"
+            @click="acceptTask"
           >
             接单
           </el-button>
-          <el-button 
-            v-if="canComplete" 
-            type="warning" 
-            @click="completeTask" 
+          <el-button
+            v-if="canComplete"
+            type="warning"
             icon="el-icon-circle-check"
             :loading="actionLoading"
+            @click="completeTask"
           >
             完成
           </el-button>
-          <el-button 
-            v-if="canRate" 
-            type="info" 
-            @click="rateTask" 
+          <el-button
+            v-if="canRate"
+            type="info"
             icon="el-icon-star-on"
             :loading="actionLoading"
+            @click="rateTask"
           >
             评价
           </el-button>
@@ -59,7 +59,7 @@
     <div class="stats-section">
       <div class="stat-card stat-total">
         <div class="stat-icon">
-          <i class="el-icon-s-data"></i>
+          <i class="el-icon-s-data" />
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ taskInfo.total || 0 }}</div>
@@ -68,7 +68,7 @@
       </div>
       <div class="stat-card stat-completed">
         <div class="stat-icon">
-          <i class="el-icon-circle-check"></i>
+          <i class="el-icon-circle-check" />
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ taskInfo.checked || 0 }}</div>
@@ -77,7 +77,7 @@
       </div>
       <div class="stat-card stat-pending">
         <div class="stat-icon">
-          <i class="el-icon-view"></i>
+          <i class="el-icon-view" />
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ taskInfo.unchecked || 0 }}</div>
@@ -86,7 +86,7 @@
       </div>
       <div class="stat-card stat-overdue">
         <div class="stat-icon">
-          <i class="el-icon-s-tools"></i>
+          <i class="el-icon-s-tools" />
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ taskInfo.faults || 0 }}</div>
@@ -119,7 +119,7 @@
         <h3 class="card-title">维保任务详情</h3>
         <el-button class="setting-btn" type="primary" icon="el-icon-setting" circle @click="onSetting" />
       </div>
-      
+
       <div class="task-info-grid">
         <div class="info-item">
           <span class="item-label">项目名称</span>
@@ -168,7 +168,7 @@
         <div class="info-item">
           <span class="item-label">故障列表</span>
           <span class="item-value">
-            <el-link type="primary" @click="toFaultDetail" class="detail-link">
+            <el-link type="primary" class="detail-link" @click="toFaultDetail">
               详情 <i class="el-icon-arrow-right" />
             </el-link>
           </span>
@@ -182,7 +182,7 @@
       <div class="stats-section">
         <div class="stat-card stat-total">
           <div class="stat-icon">
-            <i class="el-icon-pie-chart"></i>
+            <i class="el-icon-pie-chart" />
           </div>
           <div class="stat-content">
             <div class="stat-num">{{ taskInfo.total || 1 }}</div>
@@ -191,7 +191,7 @@
         </div>
         <div class="stat-card stat-unchecked">
           <div class="stat-icon">
-            <i class="el-icon-view"></i>
+            <i class="el-icon-view" />
           </div>
           <div class="stat-content">
             <div class="stat-num">{{ taskInfo.unchecked || 1 }}</div>
@@ -200,7 +200,7 @@
         </div>
         <div class="stat-card stat-checked">
           <div class="stat-icon">
-            <i class="el-icon-check"></i>
+            <i class="el-icon-check" />
           </div>
           <div class="stat-content">
             <div class="stat-num">{{ taskInfo.checked || 0 }}</div>
@@ -209,7 +209,7 @@
         </div>
         <div class="stat-card stat-faults">
           <div class="stat-icon">
-            <i class="el-icon-s-tools"></i>
+            <i class="el-icon-s-tools" />
           </div>
           <div class="stat-content">
             <div class="stat-num">{{ taskInfo.faults || 0 }}</div>
@@ -218,7 +218,7 @@
         </div>
         <div class="stat-card stat-replace">
           <div class="stat-icon">
-            <i class="el-icon-refresh"></i>
+            <i class="el-icon-refresh" />
           </div>
           <div class="stat-content">
             <div class="stat-num">{{ taskInfo.replace || 0 }}</div>
@@ -233,7 +233,7 @@
       <div class="card-header">
         <h3 class="card-title">检测详情</h3>
       </div>
-      
+
       <div class="detection-layout">
         <div class="detection-tree">
           <el-tree
@@ -249,15 +249,15 @@
                 <i v-if="data.icon" :class="data.icon" class="node-icon" />
                 <span class="node-label">{{ data.label }}</span>
                 <div class="node-actions">
-                  <i 
-                    v-if="data.hasResult" 
+                  <i
+                    v-if="data.hasResult"
                     class="el-icon-check checkmark-icon"
                     :class="getCheckmarkClass(data.result)"
-                  ></i>
-                  <el-link 
-                    v-if="data.detail" 
-                    type="primary" 
-                    class="detail-link" 
+                  />
+                  <el-link
+                    v-if="data.detail"
+                    type="primary"
+                    class="detail-link"
                     @click.stop="showFieldDetail(data)"
                   >
                     现场详情 <i class="el-icon-arrow-right" />
@@ -267,13 +267,13 @@
             </span>
           </el-tree>
         </div>
-        
+
         <div class="detection-table">
           <el-table
             :data="tableData"
             class="custom-table"
-            :header-cell-style="{ 
-              background: '#f8fafc', 
+            :header-cell-style="{
+              background: '#f8fafc',
               color: '#374151',
               fontWeight: '600',
               fontSize: '14px'
@@ -299,9 +299,9 @@
 </template>
 
 <script>
-import { 
-  getMaintainTask, 
-  updateTaskStatus, 
+import {
+  getMaintainTask,
+  updateTaskStatus,
   assignMaintainers,
   updateMaintainTask
 } from '@/api/maintainTask'
@@ -342,33 +342,33 @@ export default {
       taskData: null
     }
   },
-  
+
   computed: {
     // 是否可以编辑任务
     canEdit() {
       if (!this.taskInfo.status) return false
       return ['已派发', '已到达'].includes(this.taskInfo.status)
     },
-    
+
     // 是否可以接单
     canAccept() {
       if (!this.taskInfo.status) return false
       return this.taskInfo.status === '已派发'
     },
-    
+
     // 是否可以完成
     canComplete() {
       if (!this.taskInfo.status) return false
       return ['已到达', '处理中'].includes(this.taskInfo.status)
     },
-    
+
     // 是否可以评价
     canRate() {
       if (!this.taskInfo.status) return false
       return this.taskInfo.status === '已完成'
     }
   },
-  
+
   mounted() {
     this.taskId = this.$route.params.id
     this.loadData()
@@ -383,7 +383,7 @@ export default {
         { content: '正在加载检测数据...', result: '加载中' }
       ]
     },
-    
+
     // 加载数据
     async loadData() {
       console.log('TaskDetail loadData called, taskId:', this.taskId)
@@ -456,14 +456,14 @@ export default {
     buildTreeData(data) {
       console.log('buildTreeData called with data:', data)
       console.log('data.details:', data.details)
-      
+
       // 清空树形数据
       this.treeData = []
-      
+
       if (data.details && data.details.length > 0) {
         // 检查details是否包含完整数据还是只是ObjectId引用
         const firstDetail = data.details[0]
-        
+
         if (typeof firstDetail === 'object' && firstDetail._id) {
           // details包含完整数据
           const categories = {}
@@ -488,14 +488,14 @@ export default {
               })
             }
           })
-          
+
           // 只添加有子项目的分类
-          this.treeData = Object.values(categories).filter(category => 
+          this.treeData = Object.values(categories).filter(category =>
             category.children && category.children.length > 0
           )
         } else {
           // details只是ObjectId引用，需要根据统计信息判断
-          
+
           // 只有当有实际检测结果时才显示数据
           if (data.passedCount > 0 || data.abnormalCount > 0) {
             this.treeData = [{
@@ -516,10 +516,10 @@ export default {
             console.log('没有检测结果，清空树形数据')
           }
         }
-        
+
         console.log('构建的树形数据:', this.treeData)
       }
-      
+
       // 如果没有数据，显示提示信息
       if (this.treeData.length === 0) {
         this.tableData = [
@@ -527,7 +527,7 @@ export default {
         ]
         return
       }
-      
+
       // 设置默认选中第一个项目
       this.$nextTick(() => {
         if (this.treeData.length > 0 && this.treeData[0].children && this.treeData[0].children.length > 0) {
@@ -543,13 +543,13 @@ export default {
     },
     onTreeSelect(node) {
       console.log('onTreeSelect called with node:', node)
-      
+
       if (node && node.item) {
         // 根据选中的任务项显示检测内容
         this.tableData = [
-          { 
-            content: node.item.maintainContent || '检测内容', 
-            result: node.item.result || '未检' 
+          {
+            content: node.item.maintainContent || '检测内容',
+            result: node.item.result || '未检'
           }
         ]
       } else if (node) {
@@ -571,7 +571,7 @@ export default {
         ]
       }
     },
-    
+
     // 获取检测内容
     getDetectionContents(node) {
       if (!node) {
@@ -581,9 +581,9 @@ export default {
           { content: '试验主、备电切换功能', result: '未检' }
         ]
       }
-      
+
       const label = node.label || ''
-      
+
       // 根据设备类型返回相应的检测内容
       if (label.includes('消防电话主机')) {
         return [
@@ -721,17 +721,17 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    
+
     // 编辑任务
     editTask() {
       this.$message.info('编辑任务功能开发中...')
     },
-    
+
     // 接单操作
     async acceptTask() {
       this.actionLoading = true
       try {
-        const res = await updateTaskStatus(this.taskId, { 
+        const res = await updateTaskStatus(this.taskId, {
           status: '已到达',
           progressStep: '已到达'
         })
@@ -747,12 +747,12 @@ export default {
         this.actionLoading = false
       }
     },
-    
+
     // 完成任务
     async completeTask() {
       this.actionLoading = true
       try {
-        const res = await updateTaskStatus(this.taskId, { 
+        const res = await updateTaskStatus(this.taskId, {
           status: '已完成',
           progressStep: '已完成'
         })
@@ -768,7 +768,7 @@ export default {
         this.actionLoading = false
       }
     },
-    
+
     // 评价任务
     async rateTask() {
       this.$prompt('请为任务评分（1-5分）:', '评价任务', {
@@ -777,7 +777,7 @@ export default {
         inputType: 'number',
         inputPattern: /^[1-5]$/,
         inputErrorMessage: '请输入1-5之间的数字'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const comment = await new Promise((resolve) => {
           this.$prompt('请输入评价内容（可选）:', '评价任务', {
             confirmButtonText: '确定',
@@ -785,7 +785,7 @@ export default {
             inputType: 'textarea'
           }).then(({ value: commentValue }) => resolve(commentValue)).catch(() => resolve(''))
         })
-        
+
         this.actionLoading = true
         try {
           const res = await updateMaintainTask(this.taskId, {
@@ -817,7 +817,7 @@ export default {
         query: { taskId: this.taskId }
       })
     },
-    
+
     // 获取当前日期时间
     getCurrentDateTime() {
       return new Date().toLocaleString('zh-CN', {
@@ -829,7 +829,7 @@ export default {
         second: '2-digit'
       })
     },
-    
+
     // 获取状态样式类
     getStatusClass(status) {
       const statusMap = {
@@ -843,7 +843,7 @@ export default {
       }
       return statusMap[status] || 'status-pending'
     },
-    
+
     // 获取检测结果样式类
     getResultClass(result) {
       if (result === '未检' || result === '未检测') {
@@ -855,22 +855,22 @@ export default {
       }
       return 'result-undetected'
     },
-    
+
     // 获取任务显示名称
     getTaskDisplayName(data) {
       console.log('getTaskDisplayName called with data:', data)
-      
+
       // 强制生成新的任务名称，完全忽略后端返回的taskName
       const now = new Date()
       const year = now.getFullYear()
       const month = String(now.getMonth() + 1).padStart(2, '0')
-      
+
       // 生成中文任务名称
       const taskName = `${year}年${month}月维保任务`
       console.log('Generated task name:', taskName)
       return taskName
     },
-    
+
     // 获取勾选状态样式类
     getCheckmarkClass(result) {
       if (result === '正常') {
@@ -1529,7 +1529,7 @@ export default {
   .detection-layout {
     flex-direction: column;
   }
-  
+
   .detection-tree {
     flex: none;
   }
@@ -1540,16 +1540,16 @@ export default {
     flex-direction: column;
     gap: 24px;
   }
-  
+
   .header-stats {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .detection-layout {
     flex-direction: column;
   }
-  
+
   .detection-tree {
     flex: none;
   }
@@ -1559,36 +1559,36 @@ export default {
   .task-detail-page {
     padding: 16px 20px;
   }
-  
+
   .task-info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-section {
     flex-direction: column;
   }
-  
+
   .stat-card {
     min-width: auto;
   }
-  
+
   .info-card {
     padding: 20px;
   }
-  
+
   .progress-section {
     padding: 20px;
   }
-  
+
   .page-header {
     padding: 20px;
   }
-  
+
   .header-stats {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .stat-card {
     min-width: auto;
     padding: 12px 16px;

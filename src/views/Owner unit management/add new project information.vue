@@ -2,7 +2,7 @@
   <div class="project-info-root">
     <div class="form-card">
       <div class="section-title">合同关联项目信息</div>
-      <div class="tips" v-if="isOneTimeContract">
+      <div v-if="isOneTimeContract" class="tips">
         <div style="color: #409EFF;">
           <i class="el-icon-info" /> 一次性合同可以跳过项目信息，直接进入下一步
         </div>
@@ -153,7 +153,7 @@ export default {
       console.log('🔍 当前 projectList:', this.projectList)
       console.log('🔍 projectList 长度:', this.projectList.length)
       console.log('🔍 是否一次性合同:', this.isOneTimeContract)
-      
+
       // 如果是一次性合同且没有项目信息，创建一个默认项目
       let projectList = this.projectList
       if (this.isOneTimeContract && this.projectList.length === 0) {

@@ -88,24 +88,24 @@
           <div class="card-content">
             <h3 class="point-name">{{ point.pointName || '未命名点位' }}</h3>
             <p class="point-address">
-              <i class="el-icon-location-outline"></i>
+              <i class="el-icon-location-outline" />
               {{ point.address || '地址未设置' }}
             </p>
             <p class="point-type">
-              <i class="el-icon-s-grid"></i>
+              <i class="el-icon-s-grid" />
               类型：{{ point.pointType || '未设置' }}
             </p>
             <p class="project-info">
-              <i class="el-icon-office-building"></i>
+              <i class="el-icon-office-building" />
               项目：{{ point.projectName || '未知项目' }}
             </p>
             <p class="entrust-info">
-              <i class="el-icon-user"></i>
+              <i class="el-icon-user" />
               委托单位：{{ point.entrustName || '未知委托单位' }}
             </p>
             <p class="status-info">
-              <i class="el-icon-circle-check" v-if="point.status === 'enabled'"></i>
-              <i class="el-icon-circle-close" v-else></i>
+              <i v-if="point.status === 'enabled'" class="el-icon-circle-check" />
+              <i v-else class="el-icon-circle-close" />
               状态：{{ point.status === 'enabled' ? '启用' : '禁用' }}
             </p>
           </div>
@@ -116,22 +116,22 @@
             <span class="action-separator">|</span>
             <span class="action-link" @click="showMaintenanceContent(point)">维保内容</span>
             <span class="action-separator">|</span>
-            <span 
-              v-if="point.status === 'enabled'" 
-              class="action-link disable" 
+            <span
+              v-if="point.status === 'enabled'"
+              class="action-link disable"
               :class="{ 'loading': updatingStatus }"
               @click="disablePoint(point)"
             >
-              <i v-if="updatingStatus" class="el-icon-loading"></i>
+              <i v-if="updatingStatus" class="el-icon-loading" />
               {{ updatingStatus ? '处理中...' : '禁用' }}
             </span>
-            <span 
-              v-else 
-              class="action-link enable" 
+            <span
+              v-else
+              class="action-link enable"
               :class="{ 'loading': updatingStatus }"
               @click="enablePoint(point)"
             >
-              <i v-if="updatingStatus" class="el-icon-loading"></i>
+              <i v-if="updatingStatus" class="el-icon-loading" />
               {{ updatingStatus ? '处理中...' : '启用' }}
             </span>
           </div>
@@ -310,7 +310,7 @@ export default {
 
       this.pointList = filteredData
       console.log('过滤后的点位列表:', this.pointList)
-      
+
       // 显示搜索结果提示（只在手动搜索时显示，实时搜索不显示）
       if ((this.searchParams.pointName || this.searchParams.pointType) && !this.isRealTimeSearch) {
         if (this.pointList.length === 0) {
@@ -333,7 +333,7 @@ export default {
       if (this.searchTimer) {
         clearTimeout(this.searchTimer)
       }
-      
+
       // 设置新的定时器，500ms后执行搜索
       this.searchTimer = setTimeout(() => {
         this.isRealTimeSearch = true
@@ -349,7 +349,7 @@ export default {
         clearTimeout(this.searchTimer)
         this.searchTimer = null
       }
-      
+
       this.searchParams = {
         pointName: '',
         pointType: ''
@@ -394,19 +394,19 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(async () => {
+      }).then(async() => {
         try {
           this.updatingStatus = true
-          
+
           // 保存原始状态，用于回滚
           const originalStatus = point.status
-          
+
           // 先更新本地状态（乐观更新）
           point.status = 'disabled'
-          
+
           // 调用后端API
           const response = await this.updatePointStatus(point.id, 'disabled')
-          
+
           if (response.success) {
             this.$message.success('点位已禁用')
           } else {
@@ -433,19 +433,19 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'success'
-      }).then(async () => {
+      }).then(async() => {
         try {
           this.updatingStatus = true
-          
+
           // 保存原始状态，用于回滚
           const originalStatus = point.status
-          
+
           // 先更新本地状态（乐观更新）
           point.status = 'enabled'
-          
+
           // 调用后端API
           const response = await this.updatePointStatus(point.id, 'enabled')
-          
+
           if (response.success) {
             this.$message.success('点位已启用')
           } else {
@@ -470,13 +470,13 @@ export default {
     async updatePointStatus(pointId, status) {
       try {
         console.log(`调用API更新点位 ${pointId} 状态为: ${status}`)
-        
+
         const response = await request.put(`/point/maintainPoint/checkpoint/${pointId}/status`, {
           status: status
         })
-        
+
         console.log('点位状态更新API响应:', response)
-        
+
         if (response.success) {
           console.log('点位状态更新成功:', response.data)
           return response

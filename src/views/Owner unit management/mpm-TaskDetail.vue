@@ -11,12 +11,12 @@
         <span class="breadcrumb-item active">计划详情</span>
       </div>
     </div>
-    
+
     <!-- 返回按钮 -->
     <div class="page-header">
       <el-button class="return-btn" @click="goBack">返回</el-button>
     </div>
-    
+
     <el-row :gutter="14" style="margin-bottom:16px;">
       <el-col :span="6">
         <el-select v-model="filter.time" placeholder="计划时效" style="width: 100%;">
@@ -41,7 +41,7 @@
         <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
       </el-col>
     </el-row>
-    <el-table :data="tableData" border v-loading="loading" element-loading-text="加载中...">
+    <el-table v-loading="loading" :data="tableData" border element-loading-text="加载中...">
       <el-table-column prop="index" label="序号" width="60" align="center" />
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="planType" label="计划类型" align="center">
@@ -94,7 +94,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
   </div>
 </template>
 <script>
@@ -114,11 +114,11 @@ export default {
   },
   mounted() {
     this.onLoad()
-    
+
     // 监听计划数据更新事件（使用window事件代替$bus）
     window.addEventListener('planDataUpdated', this.handlePlanDataUpdated)
   },
-  
+
   beforeDestroy() {
     // 清理事件监听
     window.removeEventListener('planDataUpdated', this.handlePlanDataUpdated)
@@ -152,18 +152,18 @@ export default {
         }, 2000)
         return
       }
-      
+
       this.loading = true
       try {
         // 根据planId从后端获取具体的计划数据
         console.log('🔄 正在从后端获取计划数据，planId:', planId)
         const response = await getMaintenancePlan(planId)
         console.log('📋 后端返回的计划数据:', response)
-        
+
         if (response.success && response.data) {
           const planData = response.data
           console.log('✅ 成功获取计划数据:', planData)
-          
+
           // 使用后端返回的真实数据
           this.showPlanInfoFromBackend(planData)
           this.$message.success('计划数据加载成功')
@@ -181,16 +181,16 @@ export default {
           status: error.response?.status,
           data: error.response?.data
         })
-        
+
         if (error.response?.status === 404) {
           this.$message.error('项目或合同不存在，可能已被删除')
         } else {
           this.$message.error(`加载数据失败：${error.msg || error.message || '请重试'}`)
         }
-        
+
         this.allData = []
         this.tableData = []
-        
+
         // 如果是404错误，3秒后自动返回
         if (error.response?.status === 404) {
           setTimeout(() => {
@@ -201,22 +201,22 @@ export default {
         this.loading = false
       }
     },
-    
+
     // 处理计划数据更新事件
     async handlePlanDataUpdated(event) {
       try {
         const updatedPlanData = event.detail
         console.log('收到计划数据更新事件:', updatedPlanData)
-        
+
         // 重新加载计划数据
         await this.onLoad()
-        
+
         this.$message.success('计划数据已更新')
       } catch (error) {
         console.error('处理计划数据更新失败:', error)
       }
     },
-    
+
     // 显示计划信息（使用后端真实数据）
     showPlanInfoFromBackend(planData) {
       console.log('📋 处理后端计划数据:', planData)
@@ -225,7 +225,7 @@ export default {
       console.log('🔍 检查maintainers字段:', planData.maintainPersons?.maintainers)
       console.log('🔍 检查technicalLeader字段:', planData.maintainPersons?.technicalLeader)
       console.log('🔍 检查technical字段:', planData.maintainPersons?.technical)
-      
+
       // 处理维保人员信息
       const getPersonName = (person) => {
         console.log('🔍 处理人员信息:', person)
@@ -241,26 +241,26 @@ export default {
         console.log('✅ 提取到人员姓名:', name)
         return name
       }
-      
+
       // 处理维保人员列表
       const getMaintainersText = (maintainers) => {
         if (!maintainers || !Array.isArray(maintainers)) return '未分配'
         return maintainers.map(m => getPersonName(m)).join('、')
       }
-      
+
       // 处理计划状态
       const getPlanStatus = (status) => {
         if (!status) return '计划已制定'
         return status
       }
-      
+
       // 处理计划时效
       const getPlanOverdue = (planData) => {
         // 这里可以根据计划的创建时间或截止时间来判断是否逾期
         // 暂时返回正常，实际应该根据业务逻辑判断
         return '正常'
       }
-      
+
       // 创建表格数据
       this.allData = [{
         _id: planData._id,
@@ -269,20 +269,20 @@ export default {
         planType: planData.planType || '月',
         taskName: planData.planName || planData.name || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}计划`,
         projectManager: getPersonName(
-          planData.maintainPersons?.leader || 
-          planData.leader || 
-          planData.projectManager || 
+          planData.maintainPersons?.leader ||
+          planData.leader ||
+          planData.projectManager ||
           planData.manager
         ),
         maintainer: getMaintainersText(
-          planData.maintainPersons?.maintainers || 
-          planData.maintainers || 
+          planData.maintainPersons?.maintainers ||
+          planData.maintainers ||
           planData.maintenanceStaff
         ),
         technicalLeader: getPersonName(
-          planData.maintainPersons?.technical || 
-          planData.maintainPersons?.technicalLeader || 
-          planData.technicalLeader || 
+          planData.maintainPersons?.technical ||
+          planData.maintainPersons?.technicalLeader ||
+          planData.technicalLeader ||
           planData.techLeader
         ),
         status: getPlanStatus(planData.planStatus || planData.status),
@@ -291,27 +291,27 @@ export default {
         // 保存完整的计划数据，供改派人员使用
         fullPlanData: planData
       }]
-      
+
       this.tableData = [...this.allData]
-      
+
       this.planInfo = {
         projectName: planData.projectName || '未知项目',
         ownerName: planData.ownerName || '未知业主',
         planType: planData.planType || '月'
       }
-      
+
       console.log('✅ 计划数据已处理完成:', {
         allData: this.allData,
         planInfo: this.planInfo
       })
     },
-    
+
     // 显示计划信息（保留原有方法作为备用）
     showPlanInfo(projectName, projectId, planId) {
       // 创建计划数据显示
       const currentDate = new Date()
       const planMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
-      
+
       this.allData = [{
         _id: planId || 'plan_' + Date.now(),
         index: 1,
@@ -325,16 +325,16 @@ export default {
         isOverdue: '正常',
         isPlanData: true // 标记这是计划数据
       }]
-      
+
       this.tableData = [...this.allData]
-      
+
       this.planInfo = {
         projectName: projectName || '未知项目',
         ownerName: '未知业主',
         planType: '月'
       }
     },
-    
+
     getPersonName(person) {
       if (!person) return '未分配'
       return person.name || person.userName || '未知'
@@ -379,14 +379,14 @@ export default {
     },
     goDispatchStaff(row) {
       console.log('🚀 准备跳转到改派人员页面，行数据:', row)
-      
+
       // 使用路径参数而不是query参数，因为路由配置需要:id参数
       this.$router.push({
         name: 'DispatchStaff',
-        params: { 
+        params: {
           id: row._id || this.$route.query.planId
         },
-        query: { 
+        query: {
           taskId: row._id,
           taskName: row.taskName,
           projectId: this.$route.query.projectId,
@@ -399,7 +399,7 @@ export default {
     goDetail(row) {
       this.$router.push({
         name: 'MpmTDDetail',
-        query: { 
+        query: {
           id: row._id,
           projectId: this.$route.query.projectId,
           planId: this.$route.query.planId

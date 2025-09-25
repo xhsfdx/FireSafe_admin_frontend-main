@@ -5,7 +5,7 @@
       <div class="card-block card-title">
         <div class="card-title-txt">维保人员配置</div>
       </div>
-      
+
       <!-- 搜索与按钮区 -->
       <div class="toolbar">
         <el-input v-model="search" placeholder="输入项目名称搜索" class="input" clearable />
@@ -16,7 +16,7 @@
       </div>
 
       <!-- 表格区 -->
-      <el-table :data="filteredTableData" border v-loading="loading" element-loading-text="加载最新数据中...">
+      <el-table v-loading="loading" :data="filteredTableData" border element-loading-text="加载最新数据中...">
         <el-table-column type="selection" width="55" />
         <el-table-column label="序号" width="50" type="index" />
         <el-table-column label="业主单位名称" prop="ownerName" />
@@ -114,25 +114,25 @@ export default {
       try {
         console.log('🔄 加载最新的维保人员数据...')
         this.loading = true
-        
-        const response = await getMaintainPlans({ 
-          page: 1, 
+
+        const response = await getMaintainPlans({
+          page: 1,
           limit: 1000
         })
-        
+
         if (response.success && response.data) {
           console.log('✅ 获取到最新计划数据:', response.data)
-          
+
           // 更新表格数据，使用最新的维保人员信息
           const updatedTableData = this.tableData.map(tableRow => {
             // 查找对应的计划数据
-            const planData = response.data.find(plan => 
+            const planData = response.data.find(plan =>
               plan.projectName === tableRow.projectName
             )
-            
+
             if (planData && planData.maintainPersons) {
               console.log(`🔄 更新项目 ${tableRow.projectName} 的维保人员信息`)
-              
+
               return {
                 ...tableRow,
                 techLeader: planData.maintainPersons.technical?.name || '未分配',
@@ -141,10 +141,10 @@ export default {
                 maintainPersons: planData.maintainPersons
               }
             }
-            
+
             return tableRow
           })
-          
+
           this.tableData = updatedTableData
           console.log('✅ 维保人员数据更新完成')
         }
@@ -155,13 +155,13 @@ export default {
         this.loading = false
       }
     },
-    
+
     // 处理维保人员更新事件
     handlePersonnelUpdate(event) {
       console.log('📢 收到维保人员更新事件:', event.detail)
       this.loadLatestData()
     },
-    
+
     query() {
       // The computed property 'filteredTableData' handles the search
     },

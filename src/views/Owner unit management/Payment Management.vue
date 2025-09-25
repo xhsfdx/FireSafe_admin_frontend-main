@@ -218,7 +218,7 @@
           style="margin-bottom: 20px;"
         />
       </div>
-      
+
       <el-form ref="batchUpdateForm" :model="batchUpdateForm" :rules="batchUpdateRules" label-width="100px">
         <el-form-item label="本次结款金额" prop="paidAmount">
           <el-input v-model="batchUpdateForm.paidAmount" placeholder="请输入本次结款金额" type="number">
@@ -226,12 +226,12 @@
           </el-input>
           <div class="form-tip">输入本次要结款的金额</div>
         </el-form-item>
-        
+
         <el-form-item label="结款日期" prop="paymentDate">
           <el-date-picker v-model="batchUpdateForm.paymentDate" type="date" placeholder="选择结款日期" style="width:100%" />
           <div class="form-tip">留空表示不更新日期</div>
         </el-form-item>
-        
+
         <el-form-item label="结款方式" prop="paymentMethod">
           <el-select v-model="batchUpdateForm.paymentMethod" placeholder="选择结款方式" style="width:100%">
             <el-option label="现金" value="现金" />
@@ -241,13 +241,13 @@
           </el-select>
           <div class="form-tip">留空表示不更新结款方式</div>
         </el-form-item>
-        
+
         <el-form-item label="备注" prop="paymentNote">
           <el-input v-model="batchUpdateForm.paymentNote" type="textarea" placeholder="请输入备注信息" :rows="3" />
           <div class="form-tip">留空表示不更新备注</div>
         </el-form-item>
       </el-form>
-      
+
       <!-- 预览选中的项目 -->
       <div class="selected-items-preview">
         <h4>将要更新的项目：</h4>
@@ -264,10 +264,10 @@
           </el-table-column>
         </el-table>
       </div>
-      
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="batchUpdateDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitBatchUpdate" :loading="batchUpdateLoading">确定结款</el-button>
+        <el-button type="primary" :loading="batchUpdateLoading" @click="submitBatchUpdate">确定结款</el-button>
       </div>
     </el-dialog>
 
@@ -396,7 +396,7 @@ export default {
             const paidAmount = item.paidAmount || 0
             const totalAmount = item.amount || 0
             const unpaidAmount = totalAmount - paidAmount
-            
+
             console.log('处理项目:', item.ownerName || item.clientCompany, '已结金额:', paidAmount, '总金额:', totalAmount)
 
             // 根据已结金额自动计算结款状态
@@ -674,7 +674,7 @@ export default {
         const thisPaymentAmount = parseFloat(this.paymentForm.paidAmount) || 0
         const totalAmount = this.currentContract.amount || 0
         const currentPaidAmount = this.currentContract.paidAmount || 0
-        
+
         if (thisPaymentAmount <= 0) {
           this.$message.warning('本次结款金额必须大于0')
           return
@@ -682,7 +682,7 @@ export default {
 
         // 计算新的总结款金额
         const newTotalPaidAmount = currentPaidAmount + thisPaymentAmount
-        
+
         // 检查是否超过合同总金额
         if (newTotalPaidAmount > totalAmount) {
           this.$message.warning(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount.toLocaleString()} 元`)
@@ -825,7 +825,7 @@ export default {
         this.$message.warning('请先选择要更新的项目')
         return
       }
-      
+
       // 重置表单
       this.batchUpdateForm = {
         paidAmount: '',
@@ -834,7 +834,7 @@ export default {
         paymentMethod: '',
         paymentNote: ''
       }
-      
+
       this.batchUpdateDialogVisible = true
     },
 
@@ -847,33 +847,33 @@ export default {
       try {
         // 验证表单
         await this.$refs.batchUpdateForm.validate()
-        
+
         // 检查是否有要更新的内容
-        const hasUpdateContent = this.batchUpdateForm.paidAmount || 
-                                this.batchUpdateForm.paymentDate || 
-                                this.batchUpdateForm.paymentMethod || 
+        const hasUpdateContent = this.batchUpdateForm.paidAmount ||
+                                this.batchUpdateForm.paymentDate ||
+                                this.batchUpdateForm.paymentMethod ||
                                 this.batchUpdateForm.paymentNote
-        
+
         if (!hasUpdateContent) {
           this.$message.warning('请至少填写一项要更新的内容')
           return
         }
 
         this.batchUpdateLoading = true
-        
+
         // 准备批量更新的数据
-        const updatePromises = this.selectedRows.map(async (row) => {
+        const updatePromises = this.selectedRows.map(async(row) => {
           const totalAmount = row.amount || 0
           const currentPaidAmount = row.paidAmount || 0
           const thisPaymentAmount = parseFloat(this.batchUpdateForm.paidAmount) || 0
-          
+
           if (thisPaymentAmount <= 0) {
             throw new Error('本次结款金额必须大于0')
           }
 
           // 计算新的总结款金额
           const newTotalPaidAmount = currentPaidAmount + thisPaymentAmount
-          
+
           // 检查是否超过合同总金额
           if (newTotalPaidAmount > totalAmount) {
             throw new Error(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount.toLocaleString()} 元`)
@@ -898,7 +898,7 @@ export default {
             paymentMethod: this.batchUpdateForm.paymentMethod,
             paymentNote: this.batchUpdateForm.paymentNote || `批量结款 - ${row.ownerName}`
           }
-          
+
           // 调用更新结款状态API
           return updatePaymentStatus(row.id, {
             paymentStatus: newPaymentStatus,
@@ -908,47 +908,46 @@ export default {
             paymentNote: this.batchUpdateForm.paymentNote
           })
         })
-        
+
         // 执行批量更新
         const results = await Promise.allSettled(updatePromises)
-        
+
         // 统计结果
         let successCount = 0
         let failCount = 0
         const errors = []
-        
+
         results.forEach((result, index) => {
           if (result.status === 'fulfilled' && result.value.success) {
             successCount++
           } else {
             failCount++
-            const errorMsg = result.status === 'rejected' 
+            const errorMsg = result.status === 'rejected'
               ? result.reason.message || '更新失败'
               : result.value.message || '更新失败'
             errors.push(`${this.selectedRows[index].ownerName}: ${errorMsg}`)
           }
         })
-        
+
         // 显示结果
         if (successCount > 0) {
           this.$message.success(`批量结款完成！成功添加 ${successCount} 条结款记录`)
         }
-        
+
         if (failCount > 0) {
           this.$message.error(`有 ${failCount} 个项目结款失败`)
           console.error('批量结款失败详情:', errors)
         }
-        
+
         // 关闭对话框并刷新数据
         this.batchUpdateDialogVisible = false
-        
+
         // 刷新数据以确保表格显示最新状态
         await this.loadData()
-        
+
         // 清空选择
         this.$refs.paymentTable.clearSelection()
         this.selectedRows = []
-        
       } catch (error) {
         console.error('批量结款失败:', error)
         this.$message.error('批量结款失败')

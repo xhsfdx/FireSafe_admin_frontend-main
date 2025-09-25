@@ -201,14 +201,14 @@ export default {
     handleConfig(row) {
       console.log('=== handleConfig 被调用 ===')
       console.log('传入的row数据:', row)
-      
+
       // 确保传递必要的ID信息
-      this.currentRow = { 
+      this.currentRow = {
         ...row,
         taskId: row._id || row.taskId,
         planId: row.planId || this.$route.query.planId
       }
-      
+
       console.log('设置后的currentRow:', this.currentRow)
       this.showDialog = true
     },

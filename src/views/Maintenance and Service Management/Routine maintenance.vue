@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-s-tools"></i>
+            <i class="el-icon-s-tools" />
           </div>
           <div class="title-info">
             <h1 class="page-title">例行维保</h1>
@@ -15,7 +15,7 @@
         <div class="header-stats">
           <div class="stat-card stat-total">
             <div class="stat-icon">
-              <i class="el-icon-s-data"></i>
+              <i class="el-icon-s-data" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ filteredData.length }}</div>
@@ -24,7 +24,7 @@
           </div>
           <div class="stat-card stat-completed">
             <div class="stat-icon">
-              <i class="el-icon-circle-check"></i>
+              <i class="el-icon-circle-check" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getCompletedCount() }}</div>
@@ -33,7 +33,7 @@
           </div>
           <div class="stat-card stat-pending">
             <div class="stat-icon">
-              <i class="el-icon-loading"></i>
+              <i class="el-icon-loading" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getPendingCount() }}</div>
@@ -42,7 +42,7 @@
           </div>
           <div class="stat-card stat-overdue">
             <div class="stat-icon">
-              <i class="el-icon-warning"></i>
+              <i class="el-icon-warning" />
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ getOverdueCount() }}</div>
@@ -52,38 +52,38 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 查询筛选区域 -->
     <div class="search-section">
       <div class="search-header">
-        <h3><i class="el-icon-search"></i> 筛选条件</h3>
-        <el-button 
-          type="text" 
-          @click="toggleSearchBar"
+        <h3><i class="el-icon-search" /> 筛选条件</h3>
+        <el-button
+          type="text"
           class="toggle-btn"
+          @click="toggleSearchBar"
         >
           {{ searchBarVisible ? '收起' : '展开' }}
-          <i :class="searchBarVisible ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+          <i :class="searchBarVisible ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" />
         </el-button>
       </div>
-      
+
       <el-collapse-transition>
         <div v-show="searchBarVisible" class="search-bar">
           <div class="search-row">
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-office-building"></i> 项目名称
+                <i class="el-icon-office-building" /> 项目名称
               </label>
-              <el-input 
-                v-model="filters.projectName" 
-                placeholder="请输入项目名称进行搜索" 
+              <el-input
+                v-model="filters.projectName"
+                placeholder="请输入项目名称进行搜索"
                 prefix-icon="el-icon-search"
-                clearable 
+                clearable
               />
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-calendar"></i> 计划类型
+                <i class="el-icon-calendar" /> 计划类型
               </label>
               <el-select v-model="filters.planType" placeholder="请选择计划类型" clearable>
                 <el-option label="月度计划" value="月" />
@@ -94,7 +94,7 @@
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-time"></i> 任务状态
+                <i class="el-icon-time" /> 任务状态
               </label>
               <el-select v-model="filters.taskStatus" placeholder="请选择任务状态" clearable>
                 <el-option label="已派发" value="已派发" />
@@ -106,11 +106,11 @@
               </el-select>
             </div>
           </div>
-          
+
           <div class="search-row">
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-warning-outline"></i> 任务时效
+                <i class="el-icon-warning-outline" /> 任务时效
               </label>
               <el-select v-model="filters.taskTimeliness" placeholder="请选择任务时效" clearable>
                 <el-option label="正常" value="正常" />
@@ -119,7 +119,7 @@
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-date"></i> 任务日期
+                <i class="el-icon-date" /> 任务日期
               </label>
               <el-date-picker
                 v-model="filters.taskDate"
@@ -132,10 +132,10 @@
               />
             </div>
             <div class="search-item search-actions">
-              <el-button type="primary" icon="el-icon-search" @click="onSearch" class="search-btn">
+              <el-button type="primary" icon="el-icon-search" class="search-btn" @click="onSearch">
                 查询
               </el-button>
-              <el-button icon="el-icon-refresh" @click="onReset" class="reset-btn">
+              <el-button icon="el-icon-refresh" class="reset-btn" @click="onReset">
                 重置
               </el-button>
             </div>
@@ -147,26 +147,26 @@
     <!-- 数据表格区域 -->
     <div class="table-section">
       <div class="table-header">
-        <h3><i class="el-icon-s-grid"></i> 任务列表</h3>
+        <h3><i class="el-icon-s-grid" /> 任务列表</h3>
         <div class="table-actions">
           <el-button type="info" icon="el-icon-download" @click="exportData">
             导出数据
           </el-button>
         </div>
       </div>
-      
+
       <div class="table-container">
         <el-table
+          :key="tableKey"
+          v-loading="loading"
           :data="pagedData"
           stripe
-          v-loading="loading"
           element-loading-text="数据加载中..."
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           class="maintenance-table"
-          :key="tableKey"
-          :header-cell-style="{ 
-            background: '#f5f7fa', 
+          :header-cell-style="{
+            background: '#f5f7fa',
             color: '#606266',
             fontWeight: 'bold',
             fontSize: '14px'
@@ -178,11 +178,11 @@
               <span class="row-number">{{ (currentPage - 1) * pageSize + scope.$index + 1 }}</span>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="projectName" label="项目信息" min-width="320" show-overflow-tooltip>
             <template slot-scope="{ row }">
               <div class="project-cell">
-                <i class="el-icon-office-building project-icon"></i>
+                <i class="el-icon-office-building project-icon" />
                 <div class="project-info">
                   <div class="project-name" :title="row.projectName">{{ getShortProjectName(row.projectName) }}</div>
                   <div class="task-name">{{ getTaskDisplayName({ taskMonth: row.taskMonth, projectName: row.projectName }) }}</div>
@@ -190,87 +190,87 @@
               </div>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="planType" label="计划类型" width="100" align="center">
             <template slot-scope="{ row }">
               <div class="plan-type-badge" :class="getPlanTypeBadgeClass(row.planType)">
-                <i :class="getPlanTypeIcon(row.planType)"></i>
+                <i :class="getPlanTypeIcon(row.planType)" />
                 <span>{{ row.planType || '未设置' }}</span>
               </div>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="人员信息" width="140" align="center">
             <template slot-scope="{ row }">
               <div class="person-info">
                 <div class="person-item">
-                  <i class="el-icon-user"></i>
+                  <i class="el-icon-user" />
                   <span>{{ row.principal || '未分配' }}</span>
                 </div>
                 <div class="person-item">
-                  <i class="el-icon-user-solid"></i>
+                  <i class="el-icon-user-solid" />
                   <span>{{ row.worker || '未分配' }}</span>
                 </div>
               </div>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="状态信息" width="140" align="center">
             <template slot-scope="{ row }">
               <div class="status-info">
                 <div class="status-item">
-                  <div class="status-indicator" :class="getStatusIndicatorClass(row.taskStatus)"></div>
+                  <div class="status-indicator" :class="getStatusIndicatorClass(row.taskStatus)" />
                   <span class="status-text">{{ row.taskStatus || '已派发' }}</span>
                 </div>
                 <div class="timeliness-item">
-                  <div class="timeliness-indicator" :class="getTimelinessIndicatorClass(row.timeliness)"></div>
+                  <div class="timeliness-indicator" :class="getTimelinessIndicatorClass(row.timeliness)" />
                   <span class="timeliness-text">{{ row.timeliness || '正常' }}</span>
                 </div>
               </div>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="操作" width="220" align="center" fixed="right">
             <template slot-scope="{ row }">
               <div class="action-buttons">
-                <el-button 
-                  size="mini" 
-                  type="primary" 
+                <el-button
+                  size="mini"
+                  type="primary"
                   icon="el-icon-view"
-                  @click="viewTaskDetail(row)"
                   class="action-btn"
+                  @click="viewTaskDetail(row)"
                 >
                   详情
                 </el-button>
-                
-                <el-button 
+
+                <el-button
                   v-if="row.taskStatus === '已派发' || row.taskStatus === '处理中'"
-                  size="mini" 
-                  type="warning" 
+                  size="mini"
+                  type="warning"
                   icon="el-icon-s-custom"
-                  @click="dispatchWorker(row)"
                   class="action-btn"
+                  @click="dispatchWorker(row)"
                 >
                   改派
                 </el-button>
-                
-                <el-button 
+
+                <el-button
                   v-if="row.taskStatus === '已完成' || row.taskStatus === '已评价'"
-                  size="mini" 
-                  type="success" 
+                  size="mini"
+                  type="success"
                   icon="el-icon-document"
-                  @click="viewReport(row)"
                   class="action-btn"
+                  @click="viewReport(row)"
                 >
                   报告
                 </el-button>
-                
-                <el-button 
-                  size="mini" 
-                  type="danger" 
+
+                <el-button
+                  size="mini"
+                  type="danger"
                   icon="el-icon-delete"
-                  @click="deleteTask(row)"
                   class="action-btn"
+                  @click="deleteTask(row)"
                 >
                   删除
                 </el-button>
@@ -285,9 +285,9 @@
     <div class="pagination-section">
       <div class="pagination-info">
         <span class="info-text">
-          <i class="el-icon-info"></i>
+          <i class="el-icon-info" />
           共查询到 <strong>{{ filteredData.length }}</strong> 条记录，
-          当前显示第 <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
+          当前显示第 <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
           <strong>{{ Math.min(currentPage * pageSize, filteredData.length) }}</strong> 条
         </span>
       </div>
@@ -299,8 +299,6 @@
           :page-size="pageSize"
           :current-page.sync="currentPage"
           :total="filteredData.length"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
           class="custom-pagination"
           :page-size-text="'条/页'"
           :total-text="'共'"
@@ -308,6 +306,8 @@
           :prev-text="'上一页'"
           :next-text="'下一页'"
           :jumper-text="'跳至'"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </div>
@@ -377,26 +377,26 @@ export default {
         const res = await getMaintainTasks(params)
         console.log('例行维保API响应:', res)
         console.log('API响应数据详情:', JSON.stringify(res, null, 2))
-        
+
         if (res.success) {
           const rawData = res.data || []
-          
+
           // 处理数据，确保所有字段正确显示
           this.tableData = rawData.map(item => {
             console.log('Processing item:', item)
             console.log('Item taskMonth:', item.taskMonth, typeof item.taskMonth)
-            
+
             // 处理人员信息
             const leader = item.maintainPersons?.leader
             const maintainers = item.maintainPersons?.maintainers || []
-            
+
             // 先处理任务月份 - 确保taskMonth是有效的字符串
             let taskMonth = item.taskMonth
             if (!taskMonth || typeof taskMonth !== 'string' || taskMonth.includes('function')) {
               taskMonth = this.getCurrentMonth()
               console.log('Fixed taskMonth to:', taskMonth)
             }
-            
+
             const processedItem = {
               ...item,
               // 处理任务月份显示
@@ -411,14 +411,14 @@ export default {
               // 计算时效状态
               timeliness: this.calculateTimeliness(item)
             }
-            
+
             console.log('Processed item:', processedItem)
             return processedItem
           })
-          
+
           this.filteredData = this.tableData
           console.log('处理后的表格数据:', this.tableData)
-          
+
           if (res.pagination) {
             this.pagination.total = res.pagination.total
             this.pagination.page = res.pagination.page
@@ -439,7 +439,7 @@ export default {
       }
       this.loading = false
       this.updatePagedData()
-      
+
       // 强制重新渲染表格
       this.tableKey += 1
       this.$forceUpdate()
@@ -453,7 +453,7 @@ export default {
     viewTaskDetail(row) {
       console.log('viewTaskDetail called with row:', row)
       console.log('Task ID:', row._id)
-      
+
       // 跳转到任务详情页面
       this.$router.push({
         name: 'MaintenanceTaskDetail',
@@ -464,7 +464,7 @@ export default {
         this.showTaskDetailDialog(row)
       })
     },
-    
+
     // 显示任务详情对话框
     showTaskDetailDialog(row) {
       this.$alert(`
@@ -488,7 +488,7 @@ export default {
       this.$router.push({
         name: 'DispatchStaff',
         params: { id: row._id },
-        query: { 
+        query: {
           taskId: row._id,
           taskName: row.taskName || row.name,
           // 如果有计划ID，也传递过去
@@ -500,7 +500,7 @@ export default {
         this.showDispatchDialog(row)
       })
     },
-    
+
     // 显示改派对话框
     showDispatchDialog(row) {
       this.$prompt('请输入新的维保人员姓名：', '改派维保人员', {
@@ -554,14 +554,14 @@ export default {
             <br>
             <p style="color: #e6a23c;">⚠️ 删除后将无法恢复，请谨慎操作！</p>
           </div>
-        `, '确认删除任务', { 
+        `, '确认删除任务', {
           dangerouslyUseHTMLString: true,
           confirmButtonText: '确定删除',
           cancelButtonText: '取消',
           type: 'warning',
           confirmButtonClass: 'el-button--danger'
         })
-        
+
         const res = await deleteMaintainTask(row._id)
         if (res.success) {
           this.$message.success('删除成功')
@@ -594,18 +594,17 @@ export default {
       this.currentPage = page
       this.updatePagedData()
     },
-    
+
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1
       this.updatePagedData()
     },
-    
+
     toggleSearchBar() {
       this.searchBarVisible = !this.searchBarVisible
     },
-    
-    
+
     // 导出数据功能
     exportData() {
       try {
@@ -621,10 +620,10 @@ export default {
           任务时效: item.timeliness || '正常',
           任务月份: item.taskMonth || '未设置'
         }))
-        
+
         // 转换为CSV格式
         const csvContent = this.convertToCSV(exportData)
-        
+
         // 创建下载链接
         const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
         const link = document.createElement('a')
@@ -635,24 +634,24 @@ export default {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
+
         this.$message.success(`成功导出 ${exportData.length} 条记录`)
       } catch (error) {
         console.error('导出失败:', error)
         this.$message.error('导出失败，请重试')
       }
     },
-    
+
     // 转换为CSV格式
     convertToCSV(data) {
       if (!data || data.length === 0) return ''
-      
+
       const headers = Object.keys(data[0])
       const csvRows = []
-      
+
       // 添加表头
       csvRows.push(headers.join(','))
-      
+
       // 添加数据行
       data.forEach(row => {
         const values = headers.map(header => {
@@ -665,10 +664,10 @@ export default {
         })
         csvRows.push(values.join(','))
       })
-      
+
       return csvRows.join('\n')
     },
-    
+
     // 处理下拉菜单操作
     handleAction(command) {
       const { action, row } = command
@@ -687,37 +686,37 @@ export default {
           break
       }
     },
-    
+
     // 统计方法
     getCompletedCount() {
-      return this.filteredData.filter(item => 
+      return this.filteredData.filter(item =>
         item.taskStatus === '已完成' || item.taskStatus === '已评价'
       ).length
     },
-    
+
     getPendingCount() {
-      return this.filteredData.filter(item => 
+      return this.filteredData.filter(item =>
         item.taskStatus === '已派发' || item.taskStatus === '处理中'
       ).length
     },
-    
+
     getOverdueCount() {
-      return this.filteredData.filter(item => 
+      return this.filteredData.filter(item =>
         item.timeliness === '已逾期'
       ).length
     },
-    
+
     // 图标和标签类型方法
     getPlanTypeTagType(planType) {
       const typeMap = {
         '月': 'primary',
-        '季': 'success', 
+        '季': 'success',
         '半年': 'warning',
         '年': 'danger'
       }
       return typeMap[planType] || 'info'
     },
-    
+
     getPlanTypeIcon(planType) {
       const iconMap = {
         '月': 'el-icon-date',
@@ -727,7 +726,7 @@ export default {
       }
       return iconMap[planType] || 'el-icon-calendar'
     },
-    
+
     getPlanTypeBadgeClass(planType) {
       const classMap = {
         '月': 'plan-monthly',
@@ -737,7 +736,7 @@ export default {
       }
       return classMap[planType] || 'plan-default'
     },
-    
+
     getStatusIcon(status) {
       const iconMap = {
         '已派发': 'el-icon-s-promotion',
@@ -749,21 +748,21 @@ export default {
       }
       return iconMap[status] || 'el-icon-info'
     },
-    
+
     getTimelinessIcon(timeliness) {
       return timeliness === '已逾期' ? 'el-icon-warning' : 'el-icon-success'
     },
-    
+
     // 获取任务显示名称
     getTaskDisplayName(row) {
       console.log('getTaskDisplayName called with:', row) // 调试日志
-      
+
       // 确保row是对象且包含必要属性
       if (!row || typeof row !== 'object') {
         console.log('Invalid row object, returning default')
         return '维保任务'
       }
-      
+
       // 检查taskMonth是否包含JavaScript函数代码
       if (row.taskMonth && typeof row.taskMonth === 'string') {
         if (row.taskMonth.includes('function') || row.taskMonth.includes('[native code]')) {
@@ -775,7 +774,7 @@ export default {
           console.log('Generated task name from current date:', taskName)
           return taskName
         }
-        
+
         // 处理正常的任务月份格式
         if (row.taskMonth.includes('-')) {
           const [yearPart, monthPart] = row.taskMonth.split('-')
@@ -785,7 +784,7 @@ export default {
             return taskName
           }
         }
-        
+
         // 如果taskMonth格式不正确，使用当前月份
         console.log('Invalid taskMonth format, using current month')
         const now = new Date()
@@ -795,7 +794,7 @@ export default {
         console.log('Generated task name:', taskName)
         return taskName
       }
-      
+
       // 如果没有任务月份，生成当前月份
       const now = new Date()
       const year = now.getFullYear()
@@ -804,16 +803,16 @@ export default {
       console.log('No taskMonth, generated task name:', taskName)
       return taskName
     },
-    
+
     // 计算时效状态
     calculateTimeliness(item) {
       // 根据任务创建时间和计划类型计算是否逾期
       if (!item.createdAt) return '正常'
-      
+
       const now = new Date()
       const createdDate = new Date(item.createdAt)
       let deadline
-      
+
       // 根据计划类型计算截止时间
       switch (item.planType) {
         case '月':
@@ -828,10 +827,10 @@ export default {
         default:
           deadline = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000) // 默认30天
       }
-      
+
       return now > deadline ? '已逾期' : '正常'
     },
-    
+
     // 获取当前月份
     getCurrentMonth() {
       const now = new Date()
@@ -839,19 +838,19 @@ export default {
       const month = String(now.getMonth() + 1).padStart(2, '0')
       return `${year}-${month}`
     },
-    
+
     // 获取简短的项目名称
     getShortProjectName(projectName) {
       if (!projectName) return '未设置'
-      
+
       // 如果项目名称过长，截取并添加省略号
       if (projectName.length > 25) {
         return projectName.substring(0, 25) + '...'
       }
-      
+
       return projectName
     },
-    
+
     // 获取任务状态类型
     getTaskStatusType(status) {
       switch (status) {
@@ -871,7 +870,7 @@ export default {
           return 'info'
       }
     },
-    
+
     // 获取时效类型
     getTimelinessType(timeliness) {
       switch (timeliness) {
@@ -883,7 +882,7 @@ export default {
           return 'success'
       }
     },
-    
+
     // 获取状态指示器样式类
     getStatusIndicatorClass(status) {
       switch (status) {
@@ -903,7 +902,7 @@ export default {
           return 'status-dispatched'
       }
     },
-    
+
     // 获取时效指示器样式类
     getTimelinessIndicatorClass(timeliness) {
       switch (timeliness) {
@@ -914,8 +913,8 @@ export default {
         default:
           return 'timeliness-normal'
       }
-    },
-    
+    }
+
   }
 }
 </script>
@@ -1526,25 +1525,25 @@ export default {
   .routine-maintenance-page {
     padding: 20px 24px;
   }
-  
+
   .search-row {
     flex-direction: column;
   }
-  
+
   .search-item {
     min-width: 100%;
   }
-  
+
   .header-stats {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .header-content {
     flex-direction: column;
     gap: 24px;
   }
-  
+
   .page-header {
     padding: 24px;
   }
@@ -1554,36 +1553,36 @@ export default {
   .routine-maintenance-page {
     padding: 16px 20px;
   }
-  
+
   .page-header {
     padding: 20px;
     margin-bottom: 24px;
   }
-  
+
   .search-section, .table-section {
     margin-bottom: 24px;
   }
-  
+
   .pagination-section {
     flex-direction: column;
     gap: 16px;
     margin-top: 24px;
   }
-  
+
   .table-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .table-actions {
     justify-content: center;
   }
-  
+
   .search-bar {
     padding: 20px;
   }
-  
+
   .search-row {
     gap: 16px;
     margin-bottom: 16px;

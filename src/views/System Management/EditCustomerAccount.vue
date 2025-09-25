@@ -124,7 +124,7 @@ export default {
         console.log('获取用户详情，ID:', id)
         const res = await getcustomerDetail(id)
         console.log('用户详情响应:', res)
-        
+
         if (res.code === 200 && res.data) {
           const data = res.data
 
@@ -162,7 +162,7 @@ export default {
             this.$message.error('缺少用户ID')
             return
           }
-          
+
           // 生成变更字段对象
           const updateData = {}
 
@@ -192,7 +192,7 @@ export default {
             console.log('更新数据:', updateData)
             const res = await Updatecustomer(id, updateData)
             console.log('更新响应:', res)
-            
+
             if (res.code === 200) {
               this.$message.success('保存成功！')
               this.$router.back()

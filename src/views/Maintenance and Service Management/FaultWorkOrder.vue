@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-warning-outline"></i>
+            <i class="el-icon-warning-outline" />
           </div>
           <div class="title-info">
             <h1 class="page-title">故障工单</h1>
@@ -18,7 +18,7 @@
     <!-- 筛选条件 -->
     <div class="filter-section">
       <div class="filter-header">
-        <h3><i class="el-icon-search"></i> 筛选条件</h3>
+        <h3><i class="el-icon-search" /> 筛选条件</h3>
       </div>
       <div class="filter-content">
         <el-row :gutter="20">
@@ -99,23 +99,23 @@
     <!-- 数据表格 -->
     <div class="table-section">
       <div class="table-header">
-        <h3><i class="el-icon-s-grid"></i> 工单列表</h3>
+        <h3><i class="el-icon-s-grid" /> 工单列表</h3>
         <div class="table-stats">
           <span>共 {{ pagination.total }} 条记录</span>
         </div>
       </div>
-      
+
       <div class="table-container">
         <el-table
+          v-loading="loading"
           :data="tableData"
           stripe
-          v-loading="loading"
           element-loading-text="数据加载中..."
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           class="work-order-table"
-          :header-cell-style="{ 
-            background: '#f5f7fa', 
+          :header-cell-style="{
+            background: '#f5f7fa',
             color: '#606266',
             fontWeight: 'bold',
             fontSize: '14px'
@@ -127,22 +127,22 @@
               <span class="row-number">{{ (pagination.page - 1) * pagination.limit + scope.$index + 1 }}</span>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="projectName" label="项目名称" min-width="200" show-overflow-tooltip>
             <template slot-scope="{ row }">
               <div class="project-cell">
-                <i class="el-icon-office-building project-icon"></i>
+                <i class="el-icon-office-building project-icon" />
                 <span class="project-name">{{ row.projectName || '未设置' }}</span>
               </div>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="reportTime" label="上报时间" width="160" align="center">
             <template slot-scope="{ row }">
               <span class="time-text">{{ formatDateTime(row.reportTime) }}</span>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="source" label="工单来源" width="120" align="center">
             <template slot-scope="{ row }">
               <el-tag :type="getSourceType(row.source)" size="small">
@@ -150,13 +150,13 @@
               </el-tag>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="reporter" label="上报人员" width="100" align="center">
             <template slot-scope="{ row }">
               <span class="person-text">{{ row.reporter || '未设置' }}</span>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="工单时效" width="100" align="center">
             <template slot-scope="{ row }">
               <el-tag
@@ -168,7 +168,7 @@
               </el-tag>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="工单状态" width="100" align="center">
             <template slot-scope="{ row }">
               <el-tag
@@ -180,13 +180,13 @@
               </el-tag>
             </template>
           </el-table-column>
-          
+
           <el-table-column prop="owner" label="当前所属人" width="120" align="center">
             <template slot-scope="{ row }">
               <span class="person-text">{{ getCurrentOwner(row) }}</span>
             </template>
           </el-table-column>
-          
+
           <el-table-column label="操作" width="280" align="center" fixed="right">
             <template slot-scope="{ row }">
               <div class="action-buttons">
@@ -196,14 +196,14 @@
                 <el-button type="info" size="mini" @click="viewReport(row)">
                   报告预览
                 </el-button>
-                <el-dropdown v-if="getAvailableActions(row).length > 0" @command="(command) => handleAction(command, row)" trigger="click">
+                <el-dropdown v-if="getAvailableActions(row).length > 0" trigger="click" @command="(command) => handleAction(command, row)">
                   <el-button type="warning" size="mini">
-                    操作<i class="el-icon-arrow-down el-icon--right"></i>
+                    操作<i class="el-icon-arrow-down el-icon--right" />
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item 
-                      v-for="action in getAvailableActions(row)" 
-                      :key="action.command" 
+                    <el-dropdown-item
+                      v-for="action in getAvailableActions(row)"
+                      :key="action.command"
                       :command="action.command"
                       :disabled="action.disabled"
                     >
@@ -219,12 +219,10 @@
           </el-table-column>
         </el-table>
       </div>
-      
+
       <!-- 分页 -->
       <div class="pagination-container">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="pagination.page"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pagination.limit"
@@ -234,7 +232,9 @@
           :total-text="'共'"
           :page-text="'页'"
           :prev-text="'上一页'"
+          @size-change="handleSizeChange"
           :next-text="'下一页'"
+          @current-change="handleCurrentChange"
           :jumper-text="'跳至'"
         />
       </div>
@@ -265,7 +265,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="工单来源" prop="source">
@@ -287,7 +287,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="上报人员" prop="reporter">
@@ -300,7 +300,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="消防系统" prop="fireSystem">
@@ -313,7 +313,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-form-item label="检测内容" prop="inspectionContent">
           <el-input
             v-model="createForm.inspectionContent"
@@ -322,7 +322,7 @@
             placeholder="请输入检测内容"
           />
         </el-form-item>
-        
+
         <el-form-item label="故障描述" prop="faultDescription">
           <el-input
             v-model="createForm.faultDescription"
@@ -332,10 +332,10 @@
           />
         </el-form-item>
       </el-form>
-      
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCreate" :loading="createLoading">
+        <el-button type="primary" :loading="createLoading" @click="submitCreate">
           确定
         </el-button>
       </div>
@@ -344,10 +344,10 @@
 </template>
 
 <script>
-import { 
-  getFaultOrders, 
-  deleteFaultOrder, 
-  acceptFaultOrder, 
+import {
+  getFaultOrders,
+  deleteFaultOrder,
+  acceptFaultOrder,
   assignFaultOrder,
   markAsResolved,
   rateFaultOrder,
@@ -368,18 +368,18 @@ export default {
         timeliness: '',
         dateRange: []
       },
-      
+
       // 表格数据
       tableData: [],
       loading: false,
-      
+
       // 分页
       pagination: {
         page: 1,
         limit: 10,
         total: 0
       },
-      
+
       // 新建工单
       createDialogVisible: false,
       createLoading: false,
@@ -426,11 +426,11 @@ export default {
       }
     }
   },
-  
+
   mounted() {
     this.loadData()
   },
-  
+
   methods: {
     // 加载数据
     async loadData() {
@@ -440,7 +440,7 @@ export default {
           page: this.pagination.page,
           limit: this.pagination.limit
         }
-        
+
         // 添加筛选条件
         if (this.filters.projectName) params.projectName = this.filters.projectName
         if (this.filters.owner) params.owner = this.filters.owner
@@ -470,13 +470,13 @@ export default {
         this.loading = false
       }
     },
-    
+
     // 搜索
     onSearch() {
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     // 重置
     onReset() {
       this.filters = {
@@ -491,20 +491,19 @@ export default {
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     // 分页处理
     handleSizeChange(val) {
       this.pagination.limit = val
       this.pagination.page = 1
       this.loadData()
     },
-    
+
     handleCurrentChange(val) {
       this.pagination.page = val
       this.loadData()
     },
-    
-    
+
     resetCreateForm() {
       this.createForm = {
         ownerUnit: '',
@@ -522,18 +521,18 @@ export default {
         this.$refs.createForm && this.$refs.createForm.clearValidate()
       })
     },
-    
+
     async submitCreate() {
       try {
         await this.$refs.createForm.validate()
         this.createLoading = true
-        
+
         const formData = {
           ...this.createForm,
-          expectedCompletionTime: this.createForm.expectedCompletionTime ? 
-            new Date(this.createForm.expectedCompletionTime).toISOString() : null
+          expectedCompletionTime: this.createForm.expectedCompletionTime
+            ? new Date(this.createForm.expectedCompletionTime).toISOString() : null
         }
-        
+
         const res = await createFaultOrder(formData)
         if (res.success) {
           this.$message.success('工单创建成功')
@@ -549,7 +548,7 @@ export default {
         this.createLoading = false
       }
     },
-    
+
     // 查看详情
     viewDetail(row) {
       this.$router.push({
@@ -557,12 +556,12 @@ export default {
         params: { id: row._id }
       })
     },
-    
+
     // 查看报告
     viewReport(row) {
       this.$message.info('报告预览功能开发中...')
     },
-    
+
     // 删除
     async onDelete(row) {
       try {
@@ -571,7 +570,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         })
-        
+
         const res = await deleteFaultOrder(row._id)
         if (res.success) {
           this.$message.success('删除成功')
@@ -586,12 +585,12 @@ export default {
         }
       }
     },
-    
+
     // 获取可用操作
     getAvailableActions(row) {
       const actions = []
       const status = row.status || '待处理'
-      
+
       switch (status) {
         case '待处理':
           actions.push({ command: 'accept', label: '接单' })
@@ -614,10 +613,10 @@ export default {
           actions.push({ command: 'rate', label: '评价' })
           break
       }
-      
+
       return actions
     },
-    
+
     // 处理操作
     async handleAction(command, row) {
       try {
@@ -649,7 +648,7 @@ export default {
         this.$message.error('操作失败')
       }
     },
-    
+
     // 接单
     async acceptOrder(row) {
       const res = await acceptFaultOrder(row._id)
@@ -660,7 +659,7 @@ export default {
         this.$message.error(res.message || '接单失败')
       }
     },
-    
+
     // 分配工单
     async assignOrder(row) {
       this.$prompt('请输入工作人员ID（多个用逗号分隔）', '分配工单', {
@@ -668,7 +667,7 @@ export default {
         cancelButtonText: '取消',
         inputPattern: /^[a-f\d,]+$/,
         inputErrorMessage: '请输入有效的ID'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const staffIds = value.split(',').map(id => id.trim())
         const res = await assignFaultOrder(row._id, { staffIds })
         if (res.success) {
@@ -679,13 +678,13 @@ export default {
         }
       }).catch(() => {})
     },
-    
+
     // 添加沟通记录
     async addCommunication(row) {
       this.$prompt('请输入沟通内容', '添加沟通记录', {
         confirmButtonText: '确定',
         cancelButtonText: '取消'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const res = await addCommunicationLog(row._id, {
           staffId: 'current_user_id', // 这里应该获取当前用户ID
           content: value
@@ -698,11 +697,11 @@ export default {
         }
       }).catch(() => {})
     },
-    
+
     // 添加签到记录
     async addSignIn(row) {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
+        navigator.geolocation.getCurrentPosition(async(position) => {
           const res = await addSignInLog(row._id, {
             staffId: 'current_user_id', // 这里应该获取当前用户ID
             longitude: position.coords.longitude,
@@ -721,14 +720,14 @@ export default {
         this.$message.error('浏览器不支持定位功能')
       }
     },
-    
+
     // 开始处理
     async startProcessing(row) {
       // 这里需要调用相应的API来开始处理
       this.$message.success('开始处理')
       this.loadData()
     },
-    
+
     // 标记解决
     async resolveOrder(row) {
       const res = await markAsResolved(row._id)
@@ -739,7 +738,7 @@ export default {
         this.$message.error(res.message || '操作失败')
       }
     },
-    
+
     // 评价工单
     async rateOrder(row) {
       this.$prompt('请输入评分（1-5分）', '评价工单', {
@@ -747,7 +746,7 @@ export default {
         cancelButtonText: '取消',
         inputPattern: /^[1-5]$/,
         inputErrorMessage: '请输入1-5之间的数字'
-      }).then(async ({ value }) => {
+      }).then(async({ value }) => {
         const res = await rateFaultOrder(row._id, { rating: parseInt(value) })
         if (res.success) {
           this.$message.success('评价成功')
@@ -757,14 +756,13 @@ export default {
         }
       }).catch(() => {})
     },
-    
-    
+
     // 格式化日期时间
     formatDateTime(date) {
       if (!date) return '未设置'
       return new Date(date).toLocaleString('zh-CN')
     },
-    
+
     // 获取工单来源类型
     getSourceType(source) {
       const typeMap = {
@@ -774,7 +772,7 @@ export default {
       }
       return typeMap[source] || 'info'
     },
-    
+
     // 获取工单状态类型
     getStatusType(status) {
       const typeMap = {
@@ -790,7 +788,7 @@ export default {
       }
       return typeMap[status] || 'info'
     },
-    
+
     // 获取时效类型
     getTimelinessType(row) {
       if (!row.expectedCompletionTime) return 'success'
@@ -798,7 +796,7 @@ export default {
       const expected = new Date(row.expectedCompletionTime)
       return now > expected ? 'danger' : 'success'
     },
-    
+
     // 获取时效文本
     getTimeliness(row) {
       if (!row.expectedCompletionTime) return '正常'
@@ -806,7 +804,7 @@ export default {
       const expected = new Date(row.expectedCompletionTime)
       return now > expected ? '已逾期' : '正常'
     },
-    
+
     // 获取当前所属人
     getCurrentOwner(row) {
       if (row.assignedTo && row.assignedTo.length > 0) {
@@ -997,16 +995,16 @@ export default {
   .fault-work-order-page {
     padding: 10px;
   }
-  
+
   .header-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .title-section {
     margin-bottom: 20px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }

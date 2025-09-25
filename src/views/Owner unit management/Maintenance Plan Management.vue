@@ -144,12 +144,12 @@ export default {
     this.onLoad()
     // 监听计划状态更新事件
     this.$bus && this.$bus.$on('plan-status-updated', this.handlePlanStatusUpdate)
-    
+
     // 启动定时器检查状态更新
     this.statusCheckTimer = setInterval(() => {
       this.checkForStatusUpdate()
     }, 2000) // 每2秒检查一次
-    
+
     // 检查批量制定进度
     this.checkBatchCreateProgress()
   },
@@ -207,31 +207,31 @@ export default {
     async onLoad() {
       try {
         // 传递参数获取所有数据，设置一个足够大的limit
-        const res = await getMaintainPlans({ 
-          page: 1, 
-          limit: 1000  // 设置足够大的limit来获取所有数据
+        const res = await getMaintainPlans({
+          page: 1,
+          limit: 1000 // 设置足够大的limit来获取所有数据
         })
         console.log('API响应:', res)
-        
+
         // 检查数据重复问题
         const rawData = res.data || []
         console.log('原始数据:', rawData)
-        
+
         // 去重处理 - 根据_id去重，如果_id相同则根据项目名称和业主单位名称去重
         const uniqueData = rawData.filter((item, index, self) => {
           // 首先根据_id去重
           const idIndex = self.findIndex(t => t._id === item._id)
           if (idIndex !== index) return false
-          
+
           // 如果_id相同，则根据项目名称和业主单位名称组合去重
           const businessKey = `${item.projectName || ''}_${item.ownerName || ''}`
-          const businessIndex = self.findIndex(t => 
+          const businessIndex = self.findIndex(t =>
             `${t.projectName || ''}_${t.ownerName || ''}` === businessKey
           )
-          
+
           return businessIndex === index
         })
-        
+
         // 确保每个项目都有唯一的ID
         const processedData = uniqueData.map((item, index) => {
           if (!item._id) {
@@ -241,27 +241,27 @@ export default {
           }
           return item
         })
-        
+
         console.log('去重前数据量:', rawData.length)
         console.log('去重后数据量:', uniqueData.length)
         console.log('处理后的数据:', processedData)
         console.log('API返回的total字段:', res.total)
-        
+
         if (rawData.length !== uniqueData.length) {
           console.warn('发现重复数据，已自动去重')
         }
-        
+
         // 如果API返回的total和实际数据量不匹配，给出警告
         if (res.total && res.total !== rawData.length) {
           console.warn(`API返回total: ${res.total}, 实际数据量: ${rawData.length}`)
         }
-        
+
         this.allData = processedData
         this.tableData = [...this.allData]
-        
+
         // 显示更详细的信息
         this.$message.success(`数据加载成功，共 ${processedData.length} 条记录`)
-        
+
         // 如果数据量很少，给出提示
         if (processedData.length < 5) {
           console.warn('数据量较少，可能存在问题')
@@ -309,13 +309,13 @@ export default {
     getMaintenanceMethodType(method) {
       switch (method) {
         case '点位维保':
-          return 'success'  // 绿色
+          return 'success' // 绿色
         case '系统维保':
-          return 'primary'  // 蓝色
+          return 'primary' // 蓝色
         case '第三方维保':
-          return 'warning'  // 橙色
+          return 'warning' // 橙色
         default:
-          return 'info'     // 灰色
+          return 'info' // 灰色
       }
     },
     showPlan(row) {
@@ -323,7 +323,7 @@ export default {
       console.log('🔍 准备跳转到任务列表页面，数据:', row)
       this.$router.push({
         name: 'OwnerTaskDetail', // 跳转到任务列表页面
-        query: { 
+        query: {
           planId: row._id, // 传递计划ID
           projectId: row.projectId || row._id, // 传递项目ID
           projectName: row.projectName // 传递项目名称
@@ -337,21 +337,21 @@ export default {
         projectId: row.projectId,
         contractId: row.contractId
       })
-      
+
       // 优先使用contractId，如果没有则使用projectId
       const targetId = row.contractId || row.projectId
-      
+
       if (!targetId) {
         console.error('❌ 没有可用的项目ID或合同ID')
         this.$message.error('无法获取项目详情：缺少项目ID或合同ID')
         return
       }
-      
+
       console.log('🎯 最终使用的目标ID:', targetId)
-      
+
       this.$router.push({
         name: 'UnitDetail',
-        query: { 
+        query: {
           id: targetId,
           contractId: row.contractId,
           projectId: row.projectId
@@ -443,7 +443,7 @@ export default {
       console.log('开始更新计划状态:', { planId, definedStatus, planStatus })
       console.log('当前allData:', this.allData)
       console.log('当前tableData:', this.tableData)
-      
+
       // 在allData和tableData中查找并更新对应的计划
       let found = false
       const updateItem = (item) => {
@@ -458,22 +458,22 @@ export default {
         }
         return false
       }
-      
+
       // 更新allData
       this.allData.forEach(updateItem)
       // 更新tableData
       this.tableData.forEach(updateItem)
-      
+
       console.log('更新后allData:', this.allData)
       console.log('更新后tableData:', this.tableData)
       console.log('是否找到匹配项:', found)
-      
+
       // 强制更新视图
       this.$forceUpdate()
-      
+
       if (found) {
         this.$message.success('计划状态已更新')
-        
+
         // 检查是否在批量制定过程中，如果是则清除标记
         this.clearBatchCreateIfCompleted()
       } else {
@@ -485,7 +485,7 @@ export default {
       console.log('通过行索引更新状态:', { rowIndex, definedStatus, planStatus })
       console.log('当前tableData长度:', this.tableData.length)
       console.log('当前allData长度:', this.allData.length)
-      
+
       // 如果数据还没有加载完成，延迟执行
       if (this.tableData.length === 0 || this.allData.length === 0) {
         console.log('数据未加载完成，延迟执行状态更新')
@@ -494,7 +494,7 @@ export default {
         }, 1000)
         return
       }
-      
+
       if (rowIndex >= 0 && rowIndex < this.tableData.length) {
         // 更新tableData中的对应项
         const tableItem = this.tableData[rowIndex]
@@ -502,21 +502,21 @@ export default {
         // 使用Vue.set确保响应式更新
         this.$set(tableItem, 'planDefinedStatus', definedStatus)
         this.$set(tableItem, 'planStatus', planStatus)
-        
+
         // 在allData中找到对应的项并更新
-        const allDataIndex = this.allData.findIndex(item => 
-          item._id === tableItem._id || 
+        const allDataIndex = this.allData.findIndex(item =>
+          item._id === tableItem._id ||
           item.projectId === tableItem.projectId ||
           item.projectName === tableItem.projectName
         )
-        
+
         if (allDataIndex >= 0) {
           console.log('找到allData对应项:', this.allData[allDataIndex])
           // 使用Vue.set确保响应式更新
           this.$set(this.allData[allDataIndex], 'planDefinedStatus', definedStatus)
           this.$set(this.allData[allDataIndex], 'planStatus', planStatus)
         }
-        
+
         // 强制更新视图
         this.$forceUpdate()
         this.$message.success('计划状态已更新')
@@ -537,15 +537,15 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(async () => {
+      }).then(async() => {
         try {
           // 调用后端API删除
           await deleteMaintenancePlan(row._id)
-          
+
           // 从本地数据中移除
           this.tableData = this.tableData.filter(item => item._id !== row._id)
           this.allData = this.allData.filter(item => item._id !== row._id)
-          
+
           this.$message.success('删除成功')
         } catch (error) {
           console.error('删除失败:', error)
@@ -593,7 +593,7 @@ export default {
 
       // 按维保方式分组
       const groupedPlans = this.groupPlansByMaintenanceMethod(plans)
-      
+
       // 显示分组信息
       this.showBatchCreateDialog(groupedPlans)
     },
@@ -626,7 +626,7 @@ export default {
 
     // 显示批量制定对话框
     showBatchCreateDialog(groupedPlans) {
-      const groupCounts = Object.keys(groupedPlans).map(method => 
+      const groupCounts = Object.keys(groupedPlans).map(method =>
         `${method}: ${groupedPlans[method].length}条`
       ).join('，')
 
@@ -683,7 +683,7 @@ export default {
       ).then(() => {
         // 跳转到制定页面
         this.navigateToPlanPage(currentPlan)
-        
+
         // 设置一个标记，表示正在批量制定中
         localStorage.setItem('batchCreateInProgress', JSON.stringify({
           plans: plans,

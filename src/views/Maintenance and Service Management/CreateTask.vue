@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-plus"></i>
+            <i class="el-icon-plus" />
           </div>
           <div class="title-info">
             <h1 class="page-title">新建维保任务</h1>
@@ -13,7 +13,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <el-button @click="goBack" icon="el-icon-arrow-left">
+          <el-button icon="el-icon-arrow-left" @click="goBack">
             返回列表
           </el-button>
         </div>
@@ -31,10 +31,10 @@
       >
         <el-card class="form-card" shadow="never">
           <div slot="header" class="card-header">
-            <i class="el-icon-s-order"></i>
+            <i class="el-icon-s-order" />
             <span>基本信息</span>
           </div>
-          
+
           <el-row :gutter="20">
             <el-col :span="12">
               <el-form-item label="项目名称" prop="projectName">
@@ -148,17 +148,17 @@
 
         <el-card class="form-card" shadow="never">
           <div slot="header" class="card-header">
-            <i class="el-icon-s-check"></i>
+            <i class="el-icon-s-check" />
             <span>维保内容</span>
           </div>
-          
+
           <div class="maintenance-content">
             <div class="content-header">
               <el-button type="primary" icon="el-icon-plus" @click="addMaintenanceItem">
                 添加维保项目
               </el-button>
             </div>
-            
+
             <div class="content-list">
               <div
                 v-for="(item, index) in taskForm.maintenanceItems"
@@ -202,10 +202,10 @@
 
     <!-- 操作按钮 -->
     <div class="action-section">
-      <el-button @click="goBack" size="large">
+      <el-button size="large" @click="goBack">
         取消
       </el-button>
-      <el-button type="primary" @click="saveTask" size="large" :loading="saving">
+      <el-button type="primary" size="large" :loading="saving" @click="saveTask">
         保存任务
       </el-button>
     </div>
@@ -314,10 +314,10 @@ export default {
       if (query !== '') {
         try {
           this.projectLoading = true
-          const response = await getProjects({ 
-            page: 1, 
-            limit: 20, 
-            name: query 
+          const response = await getProjects({
+            page: 1,
+            limit: 20,
+            name: query
           })
           this.projectOptions = response.data.list || []
         } catch (error) {
@@ -333,10 +333,10 @@ export default {
       if (query !== '') {
         try {
           this.staffLoading = true
-          const response = await getStaff({ 
-            page: 1, 
-            limit: 20, 
-            name: query 
+          const response = await getStaff({
+            page: 1,
+            limit: 20,
+            name: query
           })
           this.staffOptions = response.data.list || []
         } catch (error) {
@@ -353,7 +353,7 @@ export default {
         const currentDate = new Date()
         const year = currentDate.getFullYear()
         const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-        
+
         let planTypeText = ''
         switch (this.taskForm.planType) {
           case '月':
@@ -371,7 +371,7 @@ export default {
             planTypeText = `${year}年维保任务`
             break
         }
-        
+
         this.taskForm.taskName = planTypeText
       }
     },
@@ -395,21 +395,21 @@ export default {
       try {
         // 表单验证
         await this.$refs.taskForm.validate()
-        
+
         this.saving = true
-        
+
         // 准备提交数据
         const submitData = {
           ...this.taskForm,
           status: '已派发',
-          maintenanceItems: this.taskForm.maintenanceItems.filter(item => 
+          maintenanceItems: this.taskForm.maintenanceItems.filter(item =>
             item.category && item.device && item.content
           )
         }
-        
+
         // 调用API创建任务
         const response = await createMaintainTask(submitData)
-        
+
         if (response.success) {
           this.$message.success('任务创建成功')
           this.goBack()
@@ -565,16 +565,16 @@ export default {
   .create-task-page {
     padding: 10px;
   }
-  
+
   .header-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .title-section {
     margin-bottom: 20px;
   }
-  
+
   .action-section .el-button {
     display: block;
     width: 100%;
