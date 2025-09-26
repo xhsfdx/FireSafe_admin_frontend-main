@@ -14,9 +14,9 @@ export function getAllStaff() {
   })
 }
 
-export function getStaffById() {
+export function getStaffById(id) {
   return request({
-    url: '/staff/:id',
+    url: `/staff/${id}`,
     method: 'get'
   })
 }
@@ -39,7 +39,7 @@ export function getStaff(params) {
 
 export function updateRole(id, data) {
   return request({
-    url: `/vue-element-admin/staff/${id}`,
+    url: `/staff/${id}`,
     method: 'put',
     data
   })
@@ -47,7 +47,15 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return request({
-    url: `/vue-element-admin/staff/${id}`,
+    url: `/staff/${id}`,
     method: 'delete'
+  })
+}
+
+export function createUser(id, data) {
+  return request({
+    url: `/staff/usercreate/${id}`,
+    method: 'post',
+    data
   })
 }

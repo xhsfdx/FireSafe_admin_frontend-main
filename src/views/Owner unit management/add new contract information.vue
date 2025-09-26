@@ -12,34 +12,26 @@
               <el-input v-model="form.entrustName" placeholder="请输入委托单位名称" />
             </el-form-item>
             <el-form-item label="合同种类" prop="contractType" required>
-              <el-select v-model="form.contractType" placeholder="请选择合同种类" style="width: 100%" @change="handleContractTypeChange">
+              <el-select v-model="form.contractType" placeholder="请选择合同种类" style="width: 100%"
+                @change="handleContractTypeChange">
                 <el-option label="施工" value="施工" />
                 <el-option label="评估" value="评估" />
                 <el-option label="检测" value="检测" />
                 <el-option label="项目维保" value="项目维保" />
               </el-select>
-              <div v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
+              <div v-if="['施工', '评估', '检测'].includes(form.contractType)"
+                style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
                 <i class="el-icon-info" /> 一次性合同仅需填写基本信息，维保相关内容将自动清空
               </div>
             </el-form-item>
             <el-form-item label="合同时间" required>
               <div style="display: flex; align-items: center;">
                 <el-form-item prop="dateStart" style="margin-bottom: 0;">
-                  <el-date-picker
-                    v-model="form.dateStart"
-                    type="date"
-                    placeholder="开始日期"
-                    style="width: 160px"
-                  />
+                  <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 160px" />
                 </el-form-item>
                 <span style="margin: 0 12px;">-</span>
                 <el-form-item prop="dateEnd" style="margin-bottom: 0;">
-                  <el-date-picker
-                    v-model="form.dateEnd"
-                    type="date"
-                    placeholder="结束日期"
-                    style="width: 160px"
-                  />
+                  <el-date-picker v-model="form.dateEnd" type="date" placeholder="结束日期" style="width: 160px" />
                 </el-form-item>
               </div>
             </el-form-item>
@@ -50,7 +42,8 @@
               <el-input v-model="form.contractNo" placeholder="请输入合同编号" />
             </el-form-item>
             <el-form-item label="付款周期">
-              <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
+              <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%"
+                :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="月" value="月" />
                 <el-option label="季" value="季" />
                 <el-option label="半年" value="半年" />
@@ -59,7 +52,8 @@
               </el-select>
             </el-form-item>
             <el-form-item label="维保建筑类型">
-              <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
+              <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%"
+                :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="高层" value="高层" />
                 <el-option label="地下" value="地下" />
                 <el-option label="人员密集场所" value="人员密集场所" />
@@ -82,12 +76,8 @@
               <el-input v-model="form.designOrg" placeholder="请输入设计单位" />
             </el-form-item>
             <el-form-item label="备注说明">
-              <el-input
-                v-model="form.remark"
-                type="textarea"
-                :autosize="{ minRows: 2, maxRows: 3 }"
-                placeholder="请输入备注说明"
-              />
+              <el-input v-model="form.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }"
+                placeholder="请输入备注说明" />
             </el-form-item>
           </el-col>
           <!-- 右栏 -->
@@ -96,13 +86,15 @@
               <el-input v-model="form.creditCode" placeholder="请输入统一社会信用代码" />
             </el-form-item>
             <el-form-item label="维保方式" prop="maintType" required>
-              <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%" :disabled="['施工', '评估', '检测'].includes(form.contractType)">
+              <el-select v-model="form.maintType" placeholder="请选择维保方式" style="width: 100%"
+                :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="系统维保" value="系统维保" />
                 <el-option label="点位维保" value="点位维保" />
               </el-select>
             </el-form-item>
             <el-form-item label="维保面积">
-              <el-input-number v-model="form.maintArea" :min="0" style="width: 130px" :disabled="['施工', '评估', '检测'].includes(form.contractType)" />
+              <el-input-number v-model="form.maintArea" :min="0" style="width: 130px"
+                :disabled="['施工', '评估', '检测'].includes(form.contractType)" />
               <span class="unit-text">㎡</span>
             </el-form-item>
             <el-form-item label="合同金额">
@@ -123,7 +115,9 @@
               <el-input v-model="form.recordOrg" placeholder="请输入验收备案单位全称" />
             </el-form-item>
             <el-form-item label="合同文件">
-              <el-upload action="#" :show-file-list="false" style="display:inline-block">
+              <el-upload action="#" :file-list="fileList" :http-request="handleUpload" list-type="text"
+                :before-upload="beforeUpload" :on-remove="handleRemove" :on-preview="handlePreview"
+                style="display:inline-block">
                 <el-button size="mini">+ 上传合同文件</el-button>
               </el-upload>
               <span class="upload-tips">上传支持: DOCX、PDF、PNG、JPG等格式文件</span>
@@ -136,9 +130,11 @@
       <div class="section-title" style="margin-top:32px;">
         <span style="color:#f56c6c;">*</span> 建筑信息
         <span class="tip">(注：建筑物面积请填写纯数字，例如:0.00)</span>
-        <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
+        <span v-if="['施工', '评估', '检测'].includes(form.contractType)"
+          style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
-      <el-table v-if="!['施工', '评估', '检测'].includes(form.contractType)" :data="buildingList" border style="width: 100%; margin-bottom: 12px;" class="building-table">
+      <el-table v-if="!['施工', '评估', '检测'].includes(form.contractType)" :data="buildingList" border
+        style="width: 100%; margin-bottom: 12px;" class="building-table">
         <el-table-column prop="name" label="* 建筑信息" align="center">
           <template slot-scope="scope">
             <el-input v-model="scope.row.name" placeholder="请输入建筑名称" />
@@ -146,7 +142,8 @@
         </el-table-column>
         <el-table-column prop="area" label="* 建筑面积(m²)" align="center">
           <template slot-scope="scope">
-            <el-input-number v-model="scope.row.area" :min="0" :step="0.01" style="width: 160px" placeholder="请输入建筑面积" />
+            <el-input-number v-model="scope.row.area" :min="0" :step="0.01" style="width: 160px"
+              placeholder="请输入建筑面积" />
           </template>
         </el-table-column>
         <el-table-column prop="floor" label="* 建筑层数" align="center">
@@ -156,7 +153,8 @@
         </el-table-column>
         <el-table-column prop="height" label="* 建筑高度(m)" align="center">
           <template slot-scope="scope">
-            <el-input-number v-model="scope.row.height" :min="0" :step="0.01" style="width: 160px" placeholder="请输入建筑高度" />
+            <el-input-number v-model="scope.row.height" :min="0" :step="0.01" style="width: 160px"
+              placeholder="请输入建筑高度" />
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" align="center">
@@ -166,12 +164,8 @@
         </el-table-column>
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
-            <el-button
-              v-if="buildingList.length > 1"
-              type="text"
-              style="color:#f56c6c"
-              @click="removeRow(scope.$index)"
-            >删除</el-button>
+            <el-button v-if="buildingList.length > 1" type="text" style="color:#f56c6c"
+              @click="removeRow(scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -184,7 +178,8 @@
       <!-- 合同维保内容 -->
       <div class="section-title" style="margin-top:28px;">
         合同维保内容
-        <span v-if="['施工', '评估', '检测'].includes(form.contractType)" style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
+        <span v-if="['施工', '评估', '检测'].includes(form.contractType)"
+          style="color:#f56c6c;margin-left:10px;">一次性合同无需填写</span>
       </div>
       <el-row v-if="!['施工', '评估', '检测'].includes(form.contractType)" :gutter="14">
         <!-- 左侧树形列表 + 全选 -->
@@ -194,15 +189,8 @@
           </div>
           <el-tabs v-model="activeTab" class="tab-tree">
             <el-tab-pane label="平台标准系统" name="standard">
-              <el-tree
-                ref="maintTree"
-                :data="maintTree"
-                show-checkbox
-                node-key="id"
-                :default-checked-keys="checkedKeys"
-                :expand-on-click-node="false"
-                @check="handleTreeCheck"
-              />
+              <el-tree ref="maintTree" :data="maintTree" show-checkbox node-key="id" :default-checked-keys="checkedKeys"
+                :expand-on-click-node="false" @check="handleTreeCheck" />
             </el-tab-pane>
             <el-tab-pane label="自建标准系统" name="custom">
               <div class="tab-empty">暂无内容</div>
@@ -237,6 +225,8 @@
 import { mapActions } from 'vuex'
 // import { createContract } from '@/api/contract'
 import { getMaintainStandardItems } from '@/api/contract'
+import { uploadDoc } from '@/api/upload'
+import { BASE_URL } from '@/utils/request'
 
 export default {
   name: 'AddNewContractInfo',
@@ -246,7 +236,7 @@ export default {
       form: {
         entrustName: '', dateStart: '', dateEnd: '', contractName: '', contractNo: '',
         contractType: '', payCycle: '', buildType: '', creditCode: '', maintType: '', maintArea: '',
-        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: ''
+        amount: '', remind: 0, designOrg: '', remark: '', debugOrg: '', recordOrg: '', fileUrls: ''
       },
       rules: {
         entrustName: [{ required: true, message: '请输入委托单位名称', trigger: 'blur' }],
@@ -262,6 +252,8 @@ export default {
       maintTree: [],
       checkedKeys: [],
       checkedMaintList: [],
+      fileUrls: '',
+      fileList: [], // 显示的文件列表
       treeCheckAll: false
     }
   },
@@ -283,6 +275,56 @@ export default {
         })
       }
       return attachParent(rawData)
+    },
+    beforeUpload(file) {
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ]
+      const maxSize = 10 * 1024 * 1024 // 10MB
+
+      if (!allowedTypes.includes(file.type)) {
+        this.$message.error('只支持上传 JPG, PNG, PDF, DOC, DOCX 格式文件')
+        return false
+      }
+
+      if (file.size > maxSize) {
+        this.$message.error('文件大小不能超过 10MB')
+        return false
+      }
+
+      return true
+    },
+    // 自定义上传逻辑
+    async handleUpload({ file, onSuccess, onError }) {
+      try {
+        const res = await uploadDoc(file)
+        this.$message.success('上传成功')
+        // 假设上传返回的是 { url: 'xxx' }
+        this.fileUrls = BASE_URL + '/uploads' + res.filePath || ''
+        this.fileList.push({
+          name: file.name,
+          url: this.fileUrls || '',
+          raw: file
+        })
+        onSuccess(res.filePath)
+      } catch (err) {
+        this.$message.error('上传失败')
+        onError(err)
+      }
+    },
+    handleRemove(file, fileList) {
+      this.fileList = fileList
+    },
+    handlePreview(file) {
+      if (file.url) {
+        window.open(file.url, '_blank')
+      } else {
+        this.$message.warning('暂无预览地址')
+      }
     },
     transformToTree(data) {
       const getPeriodLabel = (p) => {
@@ -440,6 +482,7 @@ export default {
         debugOrg: this.form.debugOrg,
         recordOrg: this.form.recordOrg,
         remark: this.form.remark,
+        fileUrls: [this.fileUrls],
         buildingList: this.buildingList,
         checkedMaintList: this.checkedMaintList
       }
@@ -563,4 +606,3 @@ export default {
   margin-top: 38px;
 }
 </style>
-

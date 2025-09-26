@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import { file } from 'jszip/lib/object'
 import LookContractInfoView from './look_ContractInfo_View.vue'
 import LookProjectInfoView from './look_ProjectInfo_View.vue'
 import LookNewDispatchStaff from './look_newdispatchStaff.vue'
@@ -115,6 +116,7 @@ export default {
             checkCompany: item.checkCompany || '',
             note: item.note || '',
             creditCode: item.creditCode || '',
+            fileUrls: item.fileUrls || [],
             // 建筑信息
             buildingList: (item.buildings || []).map(b => ({
               name: b.name,

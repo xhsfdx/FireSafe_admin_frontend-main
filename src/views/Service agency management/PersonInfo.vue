@@ -14,8 +14,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="居住地址" prop="residentialAddress">
-              <el-input v-model="formData.residentialAddress" placeholder="请输入居住地址" />
+            <el-form-item label="居住地址" prop="residenceAddress">
+              <el-input v-model="formData.residenceAddress" placeholder="请输入居住地址" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -115,18 +115,20 @@
 
 <script>
 import axios from 'axios'
-import { createStaff } from '@/api/staff'
+import { createStaff, getStaffById, updateRole } from '@/api/staff'
 import { uploadImage } from '@/api/upload'
+import { BASE_URL } from '@/utils/request'
 export default {
   data() {
     return {
       person: {},
       formData: {
+        _id: '',
         name: '', // 绑定姓名数据
         gender: '', // 绑定性别数据
         phone: '', // 绑定电话数据
         idCard: '', // 绑定身份证号数据
-        residentialAddress: '', // 绑定居住地址数据
+        residenceAddress: '', // 绑定居住地址数据
         age: 0, // 绑定年龄数据
         employmentDate: null, // 绑定从业日期数据
         qualificationLevel: '', // 绑定资质级别数据
@@ -168,12 +170,6 @@ export default {
       }
     }
   },
-  created() {
-    const id = this.$route.params.id
-    const people = JSON.parse(localStorage.getItem('people')) || []
-    this.person = people.find(p => p.id === id) || {}
-    this.formData = { ...this.person }
-  },
   mounted() {
     // 组件挂载后获取初始数据
     this.fetchPersonInfo()
@@ -185,30 +181,36 @@ export default {
           this.$message.warning('请填写完整信息')
           return
         }
-        // const formData = {
-        //   name: this.formData.name,
-        //   gender: this.formData.gender,
-        //   phone: this.formData.phone,
-        //   idCard: this.formData.idCard,
-        //   residentialAddress: this.formData.residentialAddress,
-        //   age: this.formData.age,
-        //   employmentDate: this.formData.employmentDate,
-        //   qualificationLevel: this.formData.qualificationLevel,
-        //   certificateImageUrl: this.formData.certificateImageUrl,
-        //   personPhotoUrl: this.formData.personPhotoUrl
-        // };
-
-        // Call addStaff to send the form data to the backend
-        createStaff(this.formData)
+        const id = this.$route.params.id;
+        if (id) {
+          updateRole(id, this.formData)
+            .then(response => {
+              if (response.success === true) {
+                this.$message.success('更新成功')
+                this.$router.push({ name: 'PersonList' })
+              } else {
+                this.$message.error('更新失败: ' + response.message)
+              }
+            })
+            .catch(error => {
+              this.$message.error('更新失败: ' + error.message)
+            })
+        }
+        else {
+           createStaff(this.formData)
           .then(response => {
             // Handle successful response (e.g., navigate to the staff list)
-            this.$router.push({ name: 'personList' })
-            this.$message.success('Staff saved successfully!')
+            console.log(response)
+            this.$router.push({ name: 'PersonList' })
+            this.$message.success('员工保存成功!')
           })
           .catch(error => {
             // Handle error
-            this.$message.error('Error saving staff: ' + error.message)
+            this.$message.error('员工保存失败!' + error.message)
           })
+        }
+
+        // Call addStaff to send the form data to the backend
       })
     },
     // 资质证书上传成功处理
@@ -217,8 +219,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.qualificationCertificate = response.filePath // Set preview image URL
-            this.formData.qualificationCertificate = response.filePath
+            this.qualificationCertificate = BASE_URL + '/uploads' + response.filePath // Set preview image URL
+            this.formData.qualificationCertificate = BASE_URL + '/uploads' + response.filePath
             this.$message.success('资质证书上传成功')
           } else {
             this.$message.error('资质证书上传失败: ' + response.message)
@@ -252,8 +254,8 @@ export default {
         .then(response => {
           console.log('人员照片上传成功:', response)
           if (response.code === 200) {
-            this.avatar = response.filePath // Set preview image URL
-            this.formData.avatar = response.filePath
+            this.avatar = BASE_URL + '/uploads' + response.filePath // Set preview image URL
+            this.formData.avatar = BASE_URL + '/uploads' + response.filePath
             this.$message.success('人员照片上传成功')
           } else {
             this.$message.error('人员照片上传失败: ' + response.message)
@@ -285,22 +287,11 @@ export default {
     fetchPersonInfo() {
       // 这里模拟从后端获取人员信息
       const personId = this.$route.params.id // 假设从路由参数获取人员ID
+      console.log('获取人员信息:', personId)
       if (personId) {
-        axios.get('/api/getPersonInfo/' + personId)
-          .then(response => {
-            if (response.data.code === 200) {
-              this.formData = response.data.data
-              // 初始化图片URL
-              this.certificateImageUrl = this.formData.certificateImageUrl
-              this.personPhotoUrl = this.formData.personPhotoUrl
-            } else {
-              this.$message.error('获取人员信息失败: ' + response.data.message)
-            }
-          })
-          .catch(error => {
-            this.$message.error('获取人员信息失败')
-            console.error('获取错误:', error)
-          })
+        getStaffById(personId).then(response => {
+          this.formData = response.data
+        })
       }
     }
 

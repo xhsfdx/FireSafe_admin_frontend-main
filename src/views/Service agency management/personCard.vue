@@ -10,11 +10,11 @@
     </div>
     <div class="divider" />
     <div class="action-links">
-      <span @click="goTo('PersonInfo')">人员信息</span>
-      <span @click="goTo('ServiceUnit')">服务单位</span>
-      <span @click="goTo('MaintenanceTasks')">维保任务</span>
-      <span @click="goTo('CreateAccount')">创建账号</span>
-      <span class="delete" @click="deletePerson">删除</span>
+      <span @click="PersonInfo(person._id)">人员信息</span>
+      <!-- <span @click="goTo('ServiceUnit')">服务单位</span>
+      <span @click="goTo('MaintenanceTasks')">维保任务</span> -->
+      <span @click="AccountCreate(person._id)">创建账号</span>
+      <span class="delete" @click="deletePerson(person._id)">删除</span>
     </div>
   </div>
   <!-- 在父组件的模板中 -->
@@ -24,7 +24,8 @@
 <script>
 // import { title } from '@/settings'
 // import axios from 'axios'
-
+import {deleteRole} from '@/api/staff'
+import PersonInfo from './PersonInfo.vue'
 export default {
   // components: {
   //   CreateAccount,
@@ -57,11 +58,24 @@ export default {
       this.$router.push({ name: routeName })
       console.log('跳转到：')
     },
-    deletePerson() {
+
+    AccountCreate(id) {
+      this.$router.push({ name: 'CreateAccount', params: { id: id }})
+    },
+
+    PersonInfo(id) {
+      this.$router.push({ name: 'PersonInfo', params: { id: id }})
+    },
+    async deletePerson(id) {
       this.$confirm('确认删除该人员信息吗？', '提示', {
         type: 'warning'
       }).then(() => {
+        deleteRole(id).then(res => {
+          console.log(res)
+        })
         this.$message.success('删除成功')
+        // refresh page
+
         // TODO: 调用删除接口
       }).catch(() => {
         this.$message.info('已取消删除')
