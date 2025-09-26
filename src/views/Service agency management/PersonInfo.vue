@@ -181,7 +181,7 @@ export default {
           this.$message.warning('请填写完整信息')
           return
         }
-        const id = this.$route.params.id;
+        const id = this.$route.params.id
         if (id) {
           updateRole(id, this.formData)
             .then(response => {
@@ -195,19 +195,18 @@ export default {
             .catch(error => {
               this.$message.error('更新失败: ' + error.message)
             })
-        }
-        else {
-           createStaff(this.formData)
-          .then(response => {
+        } else {
+          createStaff(this.formData)
+            .then(response => {
             // Handle successful response (e.g., navigate to the staff list)
-            console.log(response)
-            this.$router.push({ name: 'PersonList' })
-            this.$message.success('员工保存成功!')
-          })
-          .catch(error => {
+              console.log(response)
+              this.$router.push({ name: 'PersonList' })
+              this.$message.success('员工保存成功!')
+            })
+            .catch(error => {
             // Handle error
-            this.$message.error('员工保存失败!' + error.message)
-          })
+              this.$message.error('员工保存失败!' + error.message)
+            })
         }
 
         // Call addStaff to send the form data to the backend

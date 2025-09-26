@@ -15,7 +15,6 @@ export function uploadImage(file) {
   })
 }
 
-
 export function uploadDoc(file) {
   const formData = new FormData()
   formData.append('doc', file)

@@ -79,7 +79,7 @@
         <div class="item">
           <span class="label">营业执照:</span>
           <img :src="organization.businessLicense" alt="" class="photo">
-      </div>
+        </div>
       </div>
     </div>
   </div>

@@ -24,7 +24,7 @@
 <script>
 // import { title } from '@/settings'
 // import axios from 'axios'
-import {deleteRole} from '@/api/staff'
+import { deleteRole } from '@/api/staff'
 import PersonInfo from './PersonInfo.vue'
 export default {
   // components: {

@@ -84,7 +84,7 @@
               <el-input :value="formData.checkCompany" disabled />
             </el-form-item>
             <el-form-item label="合同文件">
-              <el-button v-on:click="handlePreview(formData.fileUrls)" size="mini" disabled>查看合同文件</el-button>
+              <el-button size="mini" disabled @click="handlePreview(formData.fileUrls)">查看合同文件</el-button>
             </el-form-item>
           </el-col>
         </el-row>

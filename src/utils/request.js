@@ -2,8 +2,8 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
-export const BASE_URL = "https://scbfxf.cn"; 
-// export const BASE_URL = "http://192.168.1.24:5000"; 
+export const BASE_URL = 'https://scbfxf.cn'
+// export const BASE_URL = "http://192.168.1.24:5000";
 // create an axios instance
 const service = axios.create({
   baseURL: BASE_URL + '/api', // url = base url + request url

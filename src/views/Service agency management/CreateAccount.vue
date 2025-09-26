@@ -101,12 +101,12 @@ export default {
       }
       // get the id from the route params
       const id = this.$route.params.id
-      createStaff(id, this.account).then(res => { 
+      createStaff(id, this.account).then(res => {
         console.log(res)
         this.$router.push({ name: 'PersonList' })
       })
       console.log('提交创建账号:', this.account)
-      
+
       // 模拟创建成功的提示
       this.handleClose() // 模拟关闭对话框
     },
