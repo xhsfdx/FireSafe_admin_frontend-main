@@ -7,40 +7,6 @@ Vue.use(Router)
 /* Layout */
 import Layout from '@/layout'
 
-/* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
-
-// import { title } from '@/settings'
-
-/**
- * Note: sub-menu only appear when route children.length >= 1
- * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
- *
- * hidden: true                   if set true, item will not show in the sidebar(default is false)
- * alwaysShow: true               if set true, will always show the root menu
- *                                if not set alwaysShow, when item has more than one children route,
- *                                it will becomes nested mode, otherwise not show the root menu
- * redirect: noRedirect           if set noRedirect will no redirect in the breadcrumb
- * name:'router-name'             the name is used by <keep-alive> (must set!!!)
- * meta : {
-    roles: ['admin','editor']    control the page roles (you can set multiple roles)
-    title: 'title'               the name show in sidebar and breadcrumb (recommend set)
-    icon: 'svg-name'/'el-icon-x' the icon show in the sidebar
-    noCache: true                if set true, the page will no be cached(default is false)
-    affix: true                  if set true, the tag will affix in the tags-view
-    breadcrumb: false            if set false, the item will hidden in breadcrumb(default is true)
-    activeMenu: '/example/list'  if set path, the sidebar will highlight the path you set
-  }
- */
-
-/**
- * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
- */
 Vue.use(Vuex)
 export const constantRoutes = [
 
@@ -86,20 +52,6 @@ export const constantRoutes = [
         name: 'DigitalScreen',
         hidden: true,
         meta: { title: '数字可视化大屏' }
-      }
-    ]
-  },
-  {
-    path: '/guide',
-    hidden: true,
-    component: Layout,
-    redirect: '/guide/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/guide/index'),
-        name: 'Guide',
-        meta: { title: 'Guide', icon: 'guide', noCache: true }
       }
     ]
   },
@@ -270,7 +222,7 @@ export const asyncRoutes = [
       {
         path: 'basic',
         name: 'AgencyBasicInfo',
-        component: () => import('@/views/Service agency management/Institution Basic Information.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/InstitutionBasic.vue'),
         meta: {
           title: '机构基础信息'
         }
@@ -279,14 +231,14 @@ export const asyncRoutes = [
         path: 'basic/edit/:id',
         name: 'EditAgencyBasic',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/EditInstitutionBasic.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/EditInstitutionBasic.vue'),
         meta: { title: '编辑机构信息' }
       },
       {
         path: 'staff',
         name: 'AgencyStaffInfo',
         hidden: true,
-        component: () => import('@/views/Service agency management/personCard.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/personCard.vue'),
         meta: {
           title: '机构人员信息'
         }
@@ -295,56 +247,56 @@ export const asyncRoutes = [
         path: 'person-info',
         name: 'PersonInfo',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/PersonInfo.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/PersonInfo.vue'),
         meta: { title: '个人信息' }
       },
       {
         path: 'service-unit',
         name: 'ServiceUnit',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/ServiceUnit.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/ServiceUnit.vue'),
         meta: { title: '服务单位' }
       },
       {
         path: 'maintenance-tasks',
         name: 'MaintenanceTasks',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/MaintenanceTasks.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/MaintenanceTasks.vue'),
         meta: { title: '维保任务' }
       },
       {
         path: 'create-account',
         name: 'CreateAccount',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/CreateAccount.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/CreateAccount.vue'),
         meta: { title: '创建账号' }
       },
       {
         path: 'person-list',
         name: 'PersonList',
         // hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/personList.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/personList.vue'),
         meta: { title: '人员列表' }
       },
       {
         path: 'FaultWorkOrder',
         name: 'Faultworkorder',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/Faultworkorder.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/Faultworkorder.vue'),
         meta: { title: '故障工单' }
       },
       // {
       //   path: 'Additionalmaintenance',
       //   name: 'AdditionalMaintenance',
       //   hidden: true, // 不显示在侧边栏
-      //   component: () => import('@/views/Service agency management/Additionalmaintenance.vue'),
+      //   component: () => import('@/views/ServiceAgencyManagement/Additionalmaintenance.vue'),
       //   meta: { title: '附加维保' }
       // },
       {
         path: 'Workreport',
         name: 'WorkReport',
         hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/Service agency management/WorkReport.vue'),
+        component: () => import('@/views/ServiceAgencyManagement/WorkReport.vue'),
         meta: { title: '工作上报' }
       }
     ]
@@ -361,7 +313,7 @@ export const asyncRoutes = [
       {
         path: 'project',
         name: 'UnitProject',
-        component: () => import('@/views/Owner unit management/Unit Project Management.vue'),
+        component: () => import('@/views/OwnerUnitManagement/UnitProjectManagement.vue'),
         meta: {
           title: '单位项目管理',
           roles: ['superadmin', 'admin', 'editor']
@@ -370,7 +322,7 @@ export const asyncRoutes = [
       {
         path: 'payment',
         name: 'PaymentManagement',
-        component: () => import('@/views/Owner unit management/Payment Management.vue'),
+        component: () => import('@/views/OwnerUnitManagement/PaymentManagement.vue'),
         meta: {
           title: '结款管理',
           roles: ['superadmin', 'admin', 'editor']
@@ -379,13 +331,13 @@ export const asyncRoutes = [
       {
         path: 'plan',
         name: 'MaintenancePlan',
-        component: () => import('@/views/Owner unit management/Maintenance Plan Management.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MaintenancePlan.vue'),
         meta: { title: '维保计划管理' }
       },
       // {
       //   path: 'point',
       //   name: 'MaintenancePoint',
-      //   component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
+      //   component: () => import('@/views/OwnerUnitManagement/MaintenancePoint.vue'),
       //   meta: { title: '维保点位管理' }
       // },
 
@@ -394,56 +346,56 @@ export const asyncRoutes = [
         path: 'new-contract-info',
         name: 'AddNewContractInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/add new contract information.vue'),
+        component: () => import('@/views/OwnerUnitManagement/add_new_contract.vue'),
         meta: { title: '新增合同信息' }
       },
       {
         path: 'new-project-info',
         name: 'AddNewProjectInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/add new project information.vue'),
+        component: () => import('@/views/OwnerUnitManagement/add_new_project.vue'),
         meta: { title: '新增项目信息' }
       },
       {
         path: 'contract-detail',
         name: 'ContractDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/ContractDetail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/ContractDetail.vue'),
         meta: { title: '合同详情' }
       },
       {
         path: 'contract-info',
         name: 'ContractInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/ContractInfo.vue'),
+        component: () => import('@/views/OwnerUnitManagement/ContractInfo.vue'),
         meta: { title: '合同信息' }
       },
       {
         path: 'project-info',
         name: 'ProjectInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/ProjectInfo.vue'),
+        component: () => import('@/views/OwnerUnitManagement/ProjectInfo.vue'),
         meta: { title: '项目信息详情' }
       },
       {
         path: 'renewal-contract-info',
         name: 'RenewalContractInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/Renewal contract information.vue'),
+        component: () => import('@/views/OwnerUnitManagement/RenewalContract.vue'),
         meta: { title: '续签合同信息' }
       },
       {
         path: 'renewal-project-info',
         name: 'RenewalProjectInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/Renewal Project information.vue'),
+        component: () => import('@/views/OwnerUnitManagement/RenewalProject.vue'),
         meta: { title: '续签项目信息' }
       },
       {
         path: 'renewal-configure-personnel',
         name: 'RenewalConfigurePersonnel',
         hidden: true,
-        component: () => import('@/views/Owner unit management/Renewwal Configure maintenance personnel.vue'),
+        component: () => import('@/views/OwnerUnitManagement/RenewwalConfigure.vue'),
         meta: { title: '续签人员配置' }
       },
 
@@ -452,7 +404,7 @@ export const asyncRoutes = [
         path: 'UnitDetail',
         name: 'UnitDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/UnitDetail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/UnitDetail.vue'),
         meta: {
           title: '项目详情',
           roles: ['superadmin', 'admin', 'editor']
@@ -462,7 +414,7 @@ export const asyncRoutes = [
         path: 'look_ContractDetail_View',
         name: 'ContractDetailView',
         hidden: true,
-        component: () => import('@/views/Owner unit management/look_ContractDetail_View.vue'),
+        component: () => import('@/views/OwnerUnitManagement/look_ContractDetail_View.vue'),
         meta: {
           title: '合同完整详情',
           roles: ['superadmin', 'admin', 'editor']
@@ -473,7 +425,7 @@ export const asyncRoutes = [
         path: 'contract/add',
         name: 'AddContractPage',
         hidden: true,
-        component: () => import('@/views/Owner unit management/add.vue'),
+        component: () => import('@/views/OwnerUnitManagement/add.vue'),
         // 第一个contract试试写接口
         meta: { title: '新增项目管理页面' }
       },
@@ -481,7 +433,7 @@ export const asyncRoutes = [
         path: 'contract/addnewdispatchStaff',
         name: 'addnewDispatchStaff',
         hidden: true,
-        component: () => import('@/views/Owner unit management/addnewdispatchStaff.vue'),
+        component: () => import('@/views/OwnerUnitManagement/addnewdispatchStaff.vue'),
         meta: { title: '新增配置维保人员' }
       },
 
@@ -490,28 +442,28 @@ export const asyncRoutes = [
         path: 'plan-detail',
         name: 'PlanDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/mpm-PlanDetail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/mpm-PlanDetail.vue'),
         meta: { title: '计划详情' }
       },
       {
         path: 'task-detail',
         name: 'TaskDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/mpm-TaskDetail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/mpm-TaskDetail.vue'),
         meta: { title: '任务详情' }
       },
       {
         path: 'mpmTD-detail',
         name: 'MpmTDDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/mpmTD-detail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/mpmTD-detail.vue'),
         meta: { title: '维保任务详情' }
       },
       {
         path: 'renewal',
         name: 'RenewalPage',
         hidden: true,
-        component: () => import('@/views/Owner unit management/Renewal.vue'),
+        component: () => import('@/views/OwnerUnitManagement/Renewal.vue'),
         meta: { title: '续签合同' }
       }
     ]
@@ -530,53 +482,53 @@ export const asyncRoutes = [
       {
         path: 'routine',
         name: 'RoutineMaintenance',
-        component: () => import('@/views/Maintenance and Service Management/Routine maintenance.vue'),
+        component: () => import('@/views/MaintenanceManagement/RoutineMaintenance.vue'),
         meta: { title: '例行维护', icon: 'el-icon-date' }
       },
       {
         path: 'fault',
         name: 'FaultWorkOrder',
-        component: () => import('@/views/Maintenance and Service Management/Fault Work Order.vue'),
+        component: () => import('@/views/MaintenanceManagement/FaultWork.vue'),
         meta: { title: '故障工单', icon: 'el-icon-warning-outline' }
       },
       // {
       //   path: 'support',
       //   name: 'AdditionalSupport',
-      //   component: () => import('@/views/Maintenance and Service Management/Additional maintenance and support.vue'),
+      //   component: () => import('@/views/MaintenanceManagement/Additional maintenance and support.vue'),
       //   meta: { title: '附加维护', icon: 'el-icon-s-cooperation' }
       // },
       {
         path: 'report',
         name: 'WorkReport',
-        component: () => import('@/views/Maintenance and Service Management/Work report.vue'),
+        component: () => import('@/views/MaintenanceManagement/Workreport.vue'),
         meta: { title: '工作上报', icon: 'el-icon-upload2' }
       },
       {
         path: '/maintenance/task-detail/:id?',
         name: 'TaskDetail',
         hidden: true,
-        component: () => import('@/views/Maintenance and Service Management/TaskDetail.vue'),
+        component: () => import('@/views/MaintenanceManagement/TaskDetail.vue'),
         meta: { title: '维保任务详情' }
       },
       {
         path: '/fault-list-detail',
         name: 'FaultListDetail',
         hidden: true,
-        component: () => import('@/views/Maintenance and Service Management/FaultListDetail.vue'),
+        component: () => import('@/views/MaintenanceManagement/FaultListDetail.vue'),
         meta: { title: '故障列表' }
       },
       {
         path: '/maintenance/dispatch/:id',
         name: 'DispatchStaff',
         hidden: true,
-        component: () => import('@/views/Maintenance and Service Management/DispatchStaff.vue'),
+        component: () => import('@/views/MaintenanceManagement/DispatchStaff.vue'),
         meta: { title: '改派人员' }
       },
       {
         path: '/fault-order/detail/:id',
         name: 'FaultOrderDetail',
         hidden: true,
-        component: () => import('@/views/Maintenance and Service Management/FaultOrderDetail.vue'),
+        component: () => import('@/views/MaintenanceManagement/FaultOrderDetail.vue'),
         meta: { title: '故障工单详情' }
       }
     ]
@@ -595,114 +547,47 @@ export const asyncRoutes = [
       {
         path: 'checkin',
         name: 'CheckinArea',
-        component: () => import('@/views/System Management/Check-in area settings.vue'),
+        component: () => import('@/views/SystemManagement/Check-in area settings.vue'),
         meta: { title: '打卡区域设置', icon: 'el-icon-location-outline' }
       },
       {
         path: 'self-project',
         name: 'SelfBuiltProject',
-        component: () => import('@/views/System Management/Self-built maintenance project.vue'),
+        component: () => import('@/views/SystemManagement/Self-builtMaintenance.vue'),
         meta: { title: '自建维保项目', icon: 'el-icon-folder' }
       },
       {
         path: 'manual',
         name: 'OperationManual',
-        component: () => import('@/views/System Management/Operation Manual.vue'),
+        component: () => import('@/views/SystemManagement/OperationManual.vue'),
         meta: { title: '操作手册', icon: 'el-icon-notebook-2' }
       },
       {
         path: 'owner-account',
         name: 'OwnerAccount',
-        component: () => import('@/views/System Management/Owner unit account.vue'),
+        component: () => import('@/views/SystemManagement/OwnerUnitAccount.vue'),
         meta: { title: '业主单位账号', icon: 'el-icon-user' }
       },
       {
         path: '/system-management/add-self-built-maintenance-project',
         name: 'AddSelfBuiltMaintenanceProject',
         hidden: true,
-        component: () => import('@/views/System Management/AddSelf-builtMaintenanceProject.vue'),
+        component: () => import('@/views/SystemManagement/AddSelf-builtMaintenanceProject.vue'),
         meta: { title: '新增自建维保项目' }
       },
       {
         path: '/system/account-add',
         name: 'AddCustomerAccount',
         hidden: true,
-        component: () => import('@/views/System Management/AddCustomerAccount.vue'),
+        component: () => import('@/views/SystemManagement/AddCustomerAccount.vue'),
         meta: { title: '新增客户单位账号' }
       },
       {
         path: '/system/edit-customer-account',
         name: 'EditCustomerAccount',
         hidden: true,
-        component: () => import('@/views/System Management/EditCustomerAccount.vue'),
+        component: () => import('@/views/SystemManagement/EditCustomerAccount.vue'),
         meta: { title: '编辑客户单位账号' }
-      }
-    ]
-  },
-  {
-    path: '/icon',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/icons/index'),
-        name: 'Icons',
-        hidden: true,
-        meta: { title: 'Icons', icon: 'icon', noCache: true }
-      }
-    ]
-  },
-
-  /** when your routing map is too long, you can split it into small modules **/
-  componentsRouter,
-  chartsRouter,
-  nestedRouter,
-  tableRouter,
-
-  {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/list',
-    name: 'Example',
-    hidden: true,
-    meta: {
-      title: 'Example',
-      icon: 'el-icon-s-help'
-    },
-    children: [
-      {
-        path: 'create',
-        component: () => import('@/views/example/create'),
-        name: 'CreateArticle',
-        meta: { title: 'Create Article', icon: 'edit' }
-      },
-      {
-        path: 'edit/:id(\\d+)',
-        component: () => import('@/views/example/edit'),
-        name: 'EditArticle',
-        meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
-        hidden: true
-      },
-      {
-        path: 'list',
-        component: () => import('@/views/example/list'),
-        name: 'ArticleList',
-        meta: { title: 'Article List', icon: 'list' }
-      }
-    ]
-  },
-
-  {
-    path: '/tab',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/tab/index'),
-        name: 'Tab',
-        hidden: true,
-        meta: { title: 'Tab', icon: 'tab' }
       }
     ]
   },
@@ -743,122 +628,6 @@ export const asyncRoutes = [
         component: () => import('@/views/error-log/index'),
         name: 'ErrorLog',
         meta: { title: 'Error Log', icon: 'bug' }
-      }
-    ]
-  },
-
-  {
-    path: '/excel',
-    component: Layout,
-    redirect: '/excel/export-excel',
-    name: 'Excel',
-    hidden: true,
-    meta: {
-      title: 'Excel',
-      icon: 'excel'
-    },
-    children: [
-      {
-        path: 'export-excel',
-        component: () => import('@/views/excel/export-excel'),
-        name: 'ExportExcel',
-        meta: { title: 'Export Excel' }
-      },
-      {
-        path: 'export-selected-excel',
-        component: () => import('@/views/excel/select-excel'),
-        name: 'SelectExcel',
-        meta: { title: 'Export Selected' }
-      },
-      {
-        path: 'export-merge-header',
-        component: () => import('@/views/excel/merge-header'),
-        name: 'MergeHeader',
-        meta: { title: 'Merge Header' }
-      },
-      {
-        path: 'upload-excel',
-        component: () => import('@/views/excel/upload-excel'),
-        name: 'UploadExcel',
-        meta: { title: 'Upload Excel' }
-      }
-    ]
-  },
-
-  {
-    path: '/zip',
-    component: Layout,
-    redirect: '/zip/download',
-    alwaysShow: true,
-    name: 'Zip',
-    hidden: true,
-    meta: { title: 'Zip', icon: 'zip' },
-    children: [
-      {
-        path: 'download',
-        component: () => import('@/views/zip/index'),
-        name: 'ExportZip',
-        meta: { title: 'Export Zip' }
-      }
-    ]
-  },
-
-  {
-    path: '/pdf',
-    component: Layout,
-    redirect: '/pdf/index',
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/pdf/index'),
-        name: 'PDF',
-        meta: { title: 'PDF', icon: 'pdf' }
-      }
-    ]
-  },
-  {
-    path: '/pdf/download',
-    component: () => import('@/views/pdf/download'),
-    hidden: true
-  },
-
-  {
-    path: '/theme',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/theme/index'),
-        name: 'Theme',
-        hidden: true,
-        meta: { title: 'Theme', icon: 'theme' }
-      }
-    ]
-  },
-
-  {
-    path: '/clipboard',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/clipboard/index'),
-        name: 'ClipboardDemo',
-        meta: { title: 'Clipboard', icon: 'clipboard' }
-      }
-    ]
-  },
-
-  {
-    path: 'external-link',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'https://github.com/PanJiaChen/vue-element-admin',
-        meta: { title: 'External Link', icon: 'link' }
       }
     ]
   },
