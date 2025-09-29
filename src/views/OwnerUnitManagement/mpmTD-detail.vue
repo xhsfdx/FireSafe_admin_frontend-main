@@ -1,609 +1,1222 @@
 <template>
-  <div class="mpm-td-detail-page">
-    <!-- 步骤条+基础信息 -->
-    <div class="task-steps-section">
-      <!-- 步骤条 -->
-      <!-- 步骤条 完全还原图片风格 -->
-      <template>
-        <div class="step-bar-perfect">
-          <div v-for="(step, i) in steps" :key="i" class="step-item-perfect">
-            <!-- 时间戳 -->
-            <div class="step-time-perfect">{{ step.timestamp }}</div>
+  <div class="task-detail-page">
+    <!-- 页面标题卡片 -->
+    <div class="card-block card-title">
+      <div class="card-title-txt">维保任务详情</div>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">业主单位管理</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item">维保计划管理</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item">任务详情</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item active">详情</span>
+      </div>
+      <!-- 时间戳 -->
+      <div class="timestamp">
+        {{ currentTime }}
+      </div>
+    </div>
 
-            <div class="step-center-block">
-              <!-- 圆圈 + 勾 -->
-              <div class="circle-outer" :class="{ active: step.status === 'done' }">
-                <div class="circle-inner" :class="{ active: step.status === 'done' }">
-                  <i v-if="step.status === 'done'" class="el-icon-check" />
-                </div>
-              </div>
+    <!-- 任务状态时间线 -->
+    <div class="status-timeline">
+      <div class="timeline-container">
+        <div
+          v-for="(step, index) in timelineSteps"
+          :key="index"
+          class="timeline-step"
+          :class="{ 'active': step.active, 'completed': step.completed }"
+        >
+          <div class="step-circle">
+            <i v-if="step.completed" class="el-icon-check" />
+          </div>
+          <div class="step-label">{{ step.label }}</div>
+        </div>
+      </div>
+    </div>
 
-              <!-- 横线 -->
-              <div v-if="i < steps.length - 1" class="step-line-perfect"
-                :class="{ active: steps[i].status === 'done' }" />
-            </div>
-
-            <!-- 标签 -->
-            <div class="step-label-perfect">{{ step.name }}</div>
+    <!-- 维保任务详情 -->
+    <div class="task-detail-section">
+      <div class="section-title">维保任务详情</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">项目名称</div>
+          <div class="detail-value">{{ taskDetail.projectName || '汽车站' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">计划类型</div>
+          <div class="detail-value">
+            <el-tag type="primary" size="small">{{ taskDetail.planType || '月' }}</el-tag>
           </div>
         </div>
+        <div class="detail-item">
+          <div class="detail-label">任务名称</div>
+          <div class="detail-value">{{ taskDetail.taskName || '2025年9月任务' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">业主单位名称</div>
+          <div class="detail-value">{{ taskDetail.ownerName || '高坪汽车站2' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">任务状态</div>
+          <div class="detail-value">
+            <el-tag :type="getTaskStatusType(taskDetail.status)" size="small">
+              {{ taskDetail.status || '待处理' }}
+            </el-tag>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">维保技术负责人</div>
+          <div class="detail-value">{{ taskDetail.technicalLeader || '未分配' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">维保项目负责人</div>
+          <div class="detail-value">{{ taskDetail.projectManager || 'ljh' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">现场维保人员</div>
+          <div class="detail-value">{{ taskDetail.maintainer || '陈xx' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">维保方式</div>
+          <div class="detail-value">{{ taskDetail.maintenanceMethod || '系统维保' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">服务评分</div>
+          <div class="detail-value">
+            <div class="rating-stars">
+              <i
+                v-for="n in 5"
+                :key="n"
+                class="el-icon-star-off"
+                :class="{ 'rated': n <= (taskDetail.rating || 0) }"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">评价描述</div>
+          <div class="detail-value">{{ taskDetail.evaluation || '暂无' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">故障列表</div>
+          <div class="detail-value">
+            <el-link type="primary" @click="viewFaultList">详情></el-link>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">维护保养情况</div>
+          <div class="detail-value">{{ taskDetail.maintenanceStatus || '暂无' }}</div>
+        </div>
+      </div>
+    </div>
 
-      </template>
-
-      <!-- 任务基础信息 -->
-      <div class="task-base-info">
-        <div class="section-title">维保任务详情</div>
-        <el-row :gutter="16" style="margin-bottom: 8px;">
-          <el-col :span="6">
-            <div class="row-txt"><span class="label">项目名称：</span>{{ task.projectName }}</div>
-            <div class="row-txt">
-              <span class="label">任务状态：</span>
-              <span :class="task.status === '已完成' ? 'stat-finish' : 'stat-process'">{{ task.status }}</span>
-            </div>
-            <div class="row-txt">
-              <span class="label">服务评分：</span>
-              <el-rate v-model="task.score" disabled :max="5" show-score style="vertical-align: middle;" />
-            </div>
-            <div class="row-txt"><span class="label">维护保养情况：</span>{{ task.maintDesc }}</div>
-          </el-col>
-          <el-col :span="6">
-            <div class="row-txt"><span class="label">计划类型：</span><span class="stat-plan">{{ task.planType }}</span>
-            </div>
-            <div class="row-txt"><span class="label">现场维保人员：</span>{{ task.maintainPersons.maintainers[0].name }}</div>
-            <div class="row-txt"><span class="label">评价描述：</span>{{ task.comment }}</div>
-          </el-col>
-          <el-col :span="6">
-            <div class="row-txt"><span class="label">任务名称：</span>{{ task.taskMonth }}</div>
-            <div class="row-txt"><span class="label">项目负责人：</span>{{ task.maintainPersons.technical.name }}</div>
-            <div class="row-txt">
-              <span class="label">故障列表：</span>
-              <el-link type="primary" style="padding: 0 4px;" @click="showFaultList">详情<i
-                  class="el-icon-arrow-right" /></el-link>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="row-txt"><span class="label">业主单位名称：</span>{{ task.ownerName }}</div>
-            <div class="row-txt"><span class="label">维保方式：</span><span class="stat-maint">{{
-              task.contract.warrantyMethod
-                }}</span></div>
-          </el-col>
-        </el-row>
-        <el-row class="stat-bar" :gutter="24">
-          <el-col :span="4">
-            <div class="stat-item">
-              <img src="https://img.shields.io/badge/检测总数-1bace0?style=for-the-badge&logo=datadog&logoColor=white"
-                style="height:48px;">
-              <div class="stat-num">{{ task.totalCheckCount }}</div>
-              <div class="stat-label">检测总数</div>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <img src="https://img.shields.io/badge/未检数-8d9aac?style=for-the-badge&logo=search&logoColor=white"
-                style="height:48px;">
-              <div class="stat-num">{{ task.totalCheckCount - task.passedCount }}</div>
-              <div class="stat-label">未检数</div>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <img src="https://img.shields.io/badge/已检数-1cb659?style=for-the-badge&logo=vercel&logoColor=white"
-                style="height:48px;">
-              <div class="stat-num">{{ task.passedCount }}</div>
-              <div class="stat-label">已检数</div>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <img src="https://img.shields.io/badge/故障记录-fa7952?style=for-the-badge&logo=wrench&logoColor=white"
-                style="height:48px;">
-              <div class="stat-num">{{ task.abnormalCount	}}</div>
-              <div class="stat-label">故障记录</div>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <img src="https://img.shields.io/badge/更换设备-845ce3?style=for-the-badge&logo=handshake&logoColor=white"
-                style="height:48px;">
-              <div class="stat-num">{{ task.replacedCount }}</div>
-              <div class="stat-label">更换设备</div>
-            </div>
-          </el-col>
-        </el-row>
+    <!-- 任务统计信息 -->
+    <div class="task-statistics">
+      <div class="stat-item">
+        <div class="stat-icon detection-total">
+          <i class="el-icon-pie-chart" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistics.totalInspections || 1 }}</div>
+          <div class="stat-label">检测总数</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon uninspected">
+          <i class="el-icon-view" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistics.uninspected || 1 }}</div>
+          <div class="stat-label">未检数</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon inspected">
+          <i class="el-icon-success" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistics.inspected || 0 }}</div>
+          <div class="stat-label">已检数</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon fault-records">
+          <i class="el-icon-warning" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistics.faultRecords || 0 }}</div>
+          <div class="stat-label">故障记录</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon replaced-equipment">
+          <i class="el-icon-setting" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistics.replacedEquipment || 0 }}</div>
+          <div class="stat-label">更换设备</div>
+        </div>
       </div>
     </div>
 
     <!-- 检测详情 -->
-    <div class="check-detail-section">
+    <div class="inspection-detail-section">
       <div class="section-title">检测详情</div>
-      <el-row :gutter="0">
-        <!-- 左侧树 -->
-        <!-- <el-col :span="6">
-          <el-tree
-            :data="treeData"
-            node-key="id"
-            :default-expand-all="true"
-            highlight-current
-            :expand-on-click-node="false"
-            :render-content="renderTreeNode"
-            class="check-tree"
-            @current-change="handleTreeChange"
-          />
-        </el-col> -->
-        <!-- 右侧表格 -->
-        <el-col :span="24">
-          <el-table :data="tableData" border>
-            <el-table-column prop="device" label="检测项" min-width="340" />
-            <el-table-column prop="maintainContent" label="检测内容" min-width="340" />
-            <el-table-column prop="result" label="检测结果" min-width="110">
-              <template slot-scope="{ row }">
-                <span v-if="row.result === '异常'" class="result-warn">{{ row.result }}</span>
-                <span v-else class="result-ok">{{ row.result }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-col>
-      </el-row>
+      <el-table :data="maintenanceContentList" border style="width: 100%;">
+        <el-table-column type="index" label="序号" width="80" align="center" />
+        <el-table-column prop="systemCategory" label="消防系统/设施" align="center" />
+        <el-table-column prop="deviceName" label="维保项目" align="center" />
+        <el-table-column prop="maintainSlim" label="检测内容" align="center" />
+        <el-table-column prop="frequency" label="维保周期" align="center" />
+        <el-table-column prop="inspectionResult" label="检测结果" align="center">
+          <template #default="scope">
+            <el-tag
+              :type="getInspectionResultType(scope.row.inspectionResult)"
+              size="small"
+            >
+              {{ scope.row.inspectionResult }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="maintainContent" label="规范" align="center" />
+      </el-table>
+      <div v-if="!maintenanceContentList || maintenanceContentList.length === 0" class="empty-box">
+        暂无检测内容
+      </div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <div class="page-header">
+      <el-button class="return-btn" @click="goBack">返回</el-button>
     </div>
   </div>
 </template>
 
 <script>
 import { getMaintainTask } from '@/api/maintainTask'
+
 export default {
   name: 'MpmTDDetail',
   data() {
     return {
-      // 步骤条数据
-      steps: [
-        { label: '已派发', time: '2025-04-09 08:36:08' },
-        { label: '已到达', time: '2025-04-16 15:11:43' },
-        { label: '开始处置', time: '2025-04-16 15:12:34' },
-        { label: '处置完成提交审批', time: '2025-04-20 14:51:12' },
-        { label: '完成维保', time: '2025-04-22 01:30:58' },
-        { label: '已评价', time: '' }
+      loading: false,
+      currentTime: '',
+      // 任务状态时间线
+      timelineSteps: [
+        { label: '已派发', active: false, completed: false },
+        { label: '已到达', active: false, completed: false },
+        { label: '开始处置', active: false, completed: false },
+        { label: '处置完成提交审批', active: false, completed: false },
+        { label: '完成维保', active: false, completed: false },
+        { label: '已评价', active: false, completed: false }
       ],
-      activeStep: 2, // 当前进度
-      // 基本信息
-      task: {
-        projectName: '高坪汽车站消防维保服务',
-        planType: '月',
-        taskName: '2025年4月任务',
-        owner: '高坪汽车站',
-        maintType: '系统维保',
-        manager: '王蕾',
-        worker: '黎建军',
-        taskStatus: '已完成',
-        score: 0,
-        maintDesc: '完成维保',
-        comment: '暂无'
+      // 任务详情数据
+      taskDetail: {
+        projectName: '',
+        planType: '',
+        taskName: '',
+        ownerName: '',
+        status: '',
+        maintainer: '',
+        projectManager: '',
+        maintenanceMethod: '',
+        rating: 0,
+        evaluation: '',
+        maintenanceStatus: ''
       },
-      stat: {
-        total: 9,
-        notChecked: 0,
-        checked: 9,
-        fault: 1,
-        replace: 0
+      // 统计信息
+      statistics: {
+        totalInspections: 0,
+        uninspected: 0,
+        inspected: 0,
+        faultRecords: 0,
+        replacedEquipment: 0
       },
-      // 检测树数据
-      treeData: [
-        {
-          id: 1, label: '消防供配电设施', children: [
-            { id: 11, label: '消防配电柜', checked: true },
-            { id: 12, label: '自备发电机组' },
-            { id: 13, label: '储油设施' },
-            { id: 14, label: '消防设备应急电源' }
-          ]
-        },
-        { id: 2, label: '火灾自动报警系统', children: [] },
-        { id: 3, label: '电气火灾监控系统', children: [] },
-        { id: 4, label: '消防给水及消火栓系统', children: [] },
-        { id: 5, label: '应急照明', children: [] }
-      ],
-      // 检测表格数据
-      tableData: [
-        { content: '消防电源主电源、备用电源工作状态', result: '异常' },
-        { content: '消防设备未端配电切换装置工作状态', result: '正常' },
-        { content: '试验主、备电切换功能', result: '正常' }
-      ]
+      // 系统组件
+      selectedSystem: '',
+      selectedComponent: '',
+      systemComponents: [],
+      // 检测项目
+      inspectionItems: [],
+      // 故障列表
+      faultList: [],
+      // 维保内容列表
+      maintenanceContentList: []
+    }
+  },
+
+  // 监听路由变化，重新加载数据
+  watch: {
+    '$route'(to, from) {
+      console.log('🔄 路由变化，重新加载数据')
+      console.log('从:', from.path, from.query)
+      console.log('到:', to.path, to.query)
+
+      // 只有当路由变化到详情页面且新路由有参数时才重新加载数据
+      if (to.path === '/owner/mpmTD-detail' &&
+          Object.keys(to.query).length > 0 &&
+          (to.query.id || to.query.planId || to.query.taskId)) {
+        console.log('✅ 路由变化有效，重新加载数据')
+        this.loadTaskDetail()
+      } else {
+        console.log('⚠️ 路由变化无效，跳过数据加载')
+      }
     }
   },
   mounted() {
-    this.onLoad()
+    this.updateCurrentTime()
+    this.loadTaskDetail()
+
+    // 定时更新时间
+    this.timeInterval = setInterval(this.updateCurrentTime, 1000)
   },
-  methods: {
-    async onLoad() {
-      const id = this.$route.query.id
-      try {
-        const res = await getMaintainTask(id);
-        console.log(res)
-        this.task = res.data;
-        this.tableData = res.data.details;
-        this.steps = res.data.progress;
-      } catch (error) {
-        this.$message.error(`出现错误${error.msg}`)
-      }
-    },
-    renderTreeNode(h, { node, data }) {
-      return (
-        <span>
-          <i class='el-icon-folder' style='margin-right:5px;color:#599af5;font-size:18px;'></i>
-          <span>{data.label}</span>
-          {data.children && data.children.length === 0 && node.level === 2 ? (
-            <el-link
-              style='float:right;color:#2574d8;font-size:15px'
-              onClick={() => this.$message('现场详情')}
-            >现场详情<i class='el-icon-arrow-right'></i></el-link>
-          ) : null}
-          {data.checked ? (
-            <i class='el-icon-check' style='float:right;color:#2b92f9;margin-right:12px;font-size:22px;font-weight:bold'></i>
-          ) : null}
-        </span>
-      )
-    },
-    handleTreeChange(data) {
-      // 简单模拟切换
-      if (data.id === 11) {
-        this.tableData = [
-          { content: '消防电源主电源、备用电源工作状态', result: '异常' },
-          { content: '消防设备未端配电切换装置工作状态', result: '正常' },
-          { content: '试验主、备电切换功能', result: '正常' }
-        ]
-      } else {
-        this.tableData = []
-      }
-    },
-    showFaultList() {
-      this.$message.info('跳转到故障列表')
+
+  beforeDestroy() {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval)
     }
+  },
+
+  methods: {
+    // 更新当前时间
+    updateCurrentTime() {
+      const now = new Date()
+      this.currentTime = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+    },
+
+    // 加载任务详情
+    async loadTaskDetail() {
+      const taskId = this.$route.query.id || this.$route.query.taskId
+      const projectId = this.$route.query.projectId
+      const planId = this.$route.query.planId
+
+      console.log('任务详情页面接收到的参数:', this.$route.query)
+      console.log('使用的taskId:', taskId)
+      console.log('使用的projectId:', projectId)
+      console.log('使用的planId:', planId)
+      console.log('完整URL参数:', JSON.stringify(this.$route.query))
+
+      // 检查是否有有效的ID参数（taskId或planId）
+      if (!taskId && !planId) {
+        this.$message.error('缺少任务ID或计划ID参数')
+        return
+      }
+
+      this.loading = true
+      try {
+        // 优先使用planId，如果没有则使用taskId
+        const targetPlanId = planId || taskId
+        console.log('🔍 最终使用的计划ID:', targetPlanId)
+        await this.loadPlanDetail(targetPlanId)
+
+        // 使用默认的系统组件数据
+        this.systemComponents = this.getDefaultSystemComponents()
+        this.selectedSystem = 'sprinkler'
+        this.selectedComponent = 'sprinkler-head'
+        this.loadInspectionItems(this.selectedSystem, this.selectedComponent)
+
+        // 强制更新视图
+        this.$nextTick(() => {
+          this.$forceUpdate()
+        })
+      } catch (error) {
+        console.log('使用默认数据')
+        // 使用默认数据
+        this.processTaskDetail(this.getDefaultTaskData())
+        this.systemComponents = this.getDefaultSystemComponents()
+        this.selectedSystem = 'sprinkler'
+        this.selectedComponent = 'sprinkler-head'
+        this.loadInspectionItems(this.selectedSystem, this.selectedComponent)
+
+        // 生成默认维保内容数据
+        this.generateDefaultMaintenanceContent()
+        console.log('📋 使用默认维保内容数据:', this.maintenanceContentList)
+
+        // 强制更新视图
+        this.$nextTick(() => {
+          this.$forceUpdate()
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 加载计划详情
+    async loadPlanDetail(planId) {
+      if (!planId) {
+        throw new Error('缺少计划ID参数')
+      }
+
+      console.log('🔄 正在从后端获取计划数据，planId:', planId)
+      try {
+        const { getMaintenancePlan } = await import('@/api/maintainPlan')
+        const planRes = await getMaintenancePlan(planId)
+        console.log('📋 后端返回的计划数据:', planRes)
+
+        if (!planRes.success) {
+          throw new Error('获取计划数据失败')
+        }
+
+        if (planRes.data) {
+          const planData = planRes.data
+          console.log('✅ 成功获取计划数据:', planData)
+
+          // 先初始化系统组件数据
+          this.systemComponents = this.getDefaultSystemComponents()
+
+          // 将计划数据转换为任务数据格式
+          this.processPlanAsTask(planData)
+
+          this.selectedSystem = 'sprinkler'
+          this.selectedComponent = 'sprinkler-head'
+          this.loadInspectionItems(this.selectedSystem, this.selectedComponent)
+
+          // 从计划数据中提取维保内容
+          this.extractMaintenanceContentFromPlan(planData)
+          console.log('📋 从计划数据提取的维保内容数据:', this.maintenanceContentList)
+
+          // 强制更新视图
+          this.$nextTick(() => {
+            this.$forceUpdate()
+          })
+        } else {
+          throw new Error('计划数据为空')
+        }
+      } catch (apiError) {
+        console.log('⚠️ API调用失败，使用默认数据:', apiError.message)
+        // 使用默认数据
+        this.processTaskDetail(this.getDefaultTaskData())
+        this.systemComponents = this.getDefaultSystemComponents()
+        this.selectedSystem = 'sprinkler'
+        this.selectedComponent = 'sprinkler-head'
+        this.loadInspectionItems(this.selectedSystem, this.selectedComponent)
+
+        // 生成默认维保内容数据
+        this.generateDefaultMaintenanceContent()
+
+        // 强制更新视图
+        this.$nextTick(() => {
+          this.$forceUpdate()
+        })
+      }
+    },
+
+    // 将计划数据转换为任务数据格式
+    processPlanAsTask(planData) {
+      // 处理维保人员信息
+      const getPersonName = (person) => {
+        if (!person) return '未分配'
+        if (typeof person === 'string') return person
+        return person.name || person.userName || '未知'
+      }
+
+      // 处理维保人员列表
+      const getMaintainersText = (maintainers) => {
+        if (!maintainers || !Array.isArray(maintainers)) return '未分配'
+        return maintainers.map(m => getPersonName(m)).join('、')
+      }
+
+      console.log('🔍 处理计划数据，计划ID:', planData._id)
+      console.log('🔍 原始项目名称:', planData.projectName)
+      console.log('🔍 原始业主名称:', planData.ownerName)
+
+      this.taskDetail = {
+        projectName: planData.projectName || planData.project?.name || '未知项目',
+        planType: planData.planType || '月',
+        taskName: planData.planName || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}计划`,
+        ownerName: planData.ownerName || planData.owner?.name || '未知业主',
+        status: planData.planStatus || '计划已制定',
+        maintainer: getMaintainersText(planData.maintainPersons?.maintainers) || '未分配',
+        projectManager: getPersonName(planData.maintainPersons?.leader) || '未分配',
+        maintenanceMethod: planData.maintenanceMethod || planData.contract?.warrantyMethod || '系统维保',
+        rating: planData.rating || planData.score || 0,
+        evaluation: planData.evaluation || planData.comment || '暂无',
+        maintenanceStatus: planData.maintenanceStatus || planData.maintDesc || '暂无'
+      }
+
+      console.log('✅ 处理后的任务详情:', this.taskDetail)
+
+      // 更新时间线状态
+      this.updateTimelineStatus(planData.planStatus || '计划已制定')
+
+      // 更新统计信息 - 从计划数据中提取
+      this.statistics = {
+        totalInspections: planData.totalCheckCount || 0,
+        uninspected: (planData.totalCheckCount || 0) - (planData.passedCount || 0),
+        inspected: planData.passedCount || 0,
+        faultRecords: planData.abnormalCount || 0,
+        replacedEquipment: planData.replacedCount || 0
+      }
+
+      // 处理故障列表
+      if (planData.faultList && Array.isArray(planData.faultList)) {
+        this.faultList = planData.faultList
+      } else {
+        this.faultList = []
+      }
+
+      // 处理检测项目 - 从计划详情中提取
+      if (planData.details && Array.isArray(planData.details)) {
+        this.inspectionItems = planData.details.map(item => ({
+          content: item.maintainContent || item.category || '检测项目',
+          result: item.result || '未检测'
+        }))
+
+        // 根据检测项目确定已勾选的系统组件
+        this.processCheckedComponents(planData.details)
+      } else {
+        this.inspectionItems = [
+          { content: '外观,清除异物及周边障碍物', result: '未检测' }
+        ]
+      }
+    },
+
+    // 处理任务详情数据
+    processTaskDetail(data) {
+      if (data) {
+        // 处理维保人员信息
+        const getPersonName = (person) => {
+          if (!person) return '未分配'
+          if (typeof person === 'string') return person
+          return person.name || person.userName || '未知'
+        }
+
+        // 处理维保人员列表
+        const getMaintainersText = (maintainers) => {
+          if (!maintainers || !Array.isArray(maintainers)) return '未分配'
+          return maintainers.map(m => getPersonName(m)).join('、')
+        }
+
+        this.taskDetail = {
+          projectName: data.projectName || data.project?.name || '未知项目',
+          planType: data.planType || '月',
+          taskName: data.taskName || data.name || `${data.taskMonth || '未知'}任务`,
+          ownerName: data.ownerName || data.owner?.name || '未知业主',
+          status: data.status || '待处理',
+          maintainer: getMaintainersText(data.maintainPersons?.maintainers) || '未分配',
+          projectManager: getPersonName(data.maintainPersons?.leader) || '未分配',
+          maintenanceMethod: data.maintenanceMethod || data.contract?.warrantyMethod || '系统维保',
+          rating: data.rating || data.score || 0,
+          evaluation: data.evaluation || data.comment || '暂无',
+          maintenanceStatus: data.maintenanceStatus || data.maintDesc || '暂无'
+        }
+
+        // 更新时间线状态
+        this.updateTimelineStatus(data.status)
+
+        // 更新统计信息 - 从任务数据中提取
+        this.statistics = {
+          totalInspections: data.totalCheckCount || 0,
+          uninspected: (data.totalCheckCount || 0) - (data.passedCount || 0),
+          inspected: data.passedCount || 0,
+          faultRecords: data.abnormalCount || 0,
+          replacedEquipment: data.replacedCount || 0
+        }
+
+        // 处理故障列表
+        if (data.faultList && Array.isArray(data.faultList)) {
+          this.faultList = data.faultList
+        } else {
+          this.faultList = []
+        }
+
+        // 处理检测项目 - 从任务详情中提取
+        if (data.details && Array.isArray(data.details)) {
+          this.inspectionItems = data.details.map(item => ({
+            content: item.maintainContent || item.category || '检测项目',
+            result: item.result || '未检测'
+          }))
+
+          // 根据检测项目确定已勾选的系统组件
+          this.processCheckedComponents(data.details)
+        } else {
+          this.inspectionItems = [
+            { content: '外观,清除异物及周边障碍物', result: '未检测' }
+          ]
+        }
+      }
+    },
+
+    // 处理已勾选的组件
+    processCheckedComponents(details) {
+      if (!details || !Array.isArray(details)) {
+        console.log('❌ processCheckedComponents: 没有检测项目数据')
+        return
+      }
+
+      console.log('🔄 processCheckedComponents: 开始处理检测项目', details)
+
+      // 从检测项目中提取系统信息
+      const systemMap = {}
+      const componentMap = {}
+
+      details.forEach(item => {
+        const systemName = item.system || item.category || '自动喷水灭火系统'
+        const componentName = item.device || item.item || '喷头'
+
+        console.log(`📋 处理检测项目: 系统=${systemName}, 组件=${componentName}`)
+
+        if (!systemMap[systemName]) {
+          systemMap[systemName] = new Set()
+        }
+        systemMap[systemName].add(componentName)
+
+        componentMap[componentName] = {
+          system: systemName,
+          component: componentName
+        }
+      })
+
+      console.log('📊 系统映射:', systemMap)
+      console.log('🔧 组件映射:', componentMap)
+
+      // 更新系统组件数据，标记已勾选的项
+      this.systemComponents = this.systemComponents.map(system => {
+        const isSystemChecked = systemMap[system.name] && systemMap[system.name].size > 0
+
+        console.log(`🔍 检查系统 ${system.name}: 已勾选=${isSystemChecked}`)
+
+        return {
+          ...system,
+          checked: isSystemChecked,
+          components: system.components.map(component => {
+            const isComponentChecked = systemMap[system.name] && systemMap[system.name].has(component.name)
+            console.log(`  🔍 检查组件 ${component.name}: 已勾选=${isComponentChecked}`)
+            return {
+              ...component,
+              checked: isComponentChecked
+            }
+          })
+        }
+      })
+
+      console.log('✅ 更新后的系统组件数据:', this.systemComponents)
+
+      // 设置默认选中的系统和组件
+      const firstCheckedSystem = this.systemComponents.find(s => s.checked)
+      if (firstCheckedSystem) {
+        this.selectedSystem = firstCheckedSystem.id
+        const firstCheckedComponent = firstCheckedSystem.components.find(c => c.checked)
+        if (firstCheckedComponent) {
+          this.selectedComponent = firstCheckedComponent.id
+        }
+        console.log(`🎯 设置默认选中: 系统=${this.selectedSystem}, 组件=${this.selectedComponent}`)
+      }
+    },
+
+    // 更新时间线状态
+    updateTimelineStatus(status) {
+      const statusMap = {
+        '已派发': 0,
+        '已到达': 1,
+        '开始处置': 2,
+        '处置完成提交审批': 3,
+        '完成维保': 4,
+        '已评价': 5,
+        '待处理': 0,
+        '处理中': 2,
+        '已完成': 4,
+        '已评价': 5
+      }
+
+      const currentStep = statusMap[status] || 0
+
+      this.timelineSteps.forEach((step, index) => {
+        step.completed = index <= currentStep
+        step.active = index === currentStep
+      })
+    },
+
+    // 获取默认任务数据
+    getDefaultTaskData() {
+      return {
+        projectName: '汽车站',
+        planType: '月',
+        taskName: '2025年9月任务',
+        ownerName: '高坪汽车站2',
+        status: '待处理',
+        maintainer: '陈xx',
+        projectManager: 'ljh',
+        maintenanceMethod: '系统维保',
+        rating: 0,
+        evaluation: '暂无',
+        maintenanceStatus: '暂无'
+      }
+    },
+
+    // 获取默认系统组件数据
+    getDefaultSystemComponents() {
+      return [
+        {
+          id: 'sprinkler',
+          name: '自动喷水灭火系统',
+          components: [
+            { id: 'sprinkler-head', name: '喷头' },
+            { id: 'wet-alarm-valve', name: '湿式报警阀组' },
+            { id: 'dry-alarm-valve', name: '干式报警阀组' },
+            { id: 'preaction-alarm-valve', name: '预作用报警阀组' },
+            { id: 'deluge-alarm-valve', name: '雨淋报警阀组' },
+            { id: 'water-flow-indicator', name: '水流指示器' },
+            { id: 'end-test-device', name: '末端试水装置' },
+            { id: 'system-control-valves', name: '系统所有控制阀门' },
+            { id: 'outdoor-valve-well', name: '室外阀门井中控制阀门' }
+          ]
+        }
+      ]
+    },
+
+    // 获取任务状态类型
+    getTaskStatusType(status) {
+      switch (status) {
+        case '待处理':
+          return 'info'
+        case '处理中':
+          return 'warning'
+        case '已完成':
+          return 'success'
+        case '已评价':
+          return 'success'
+        case '已派发':
+          return 'primary'
+        case '已到达':
+          return 'primary'
+        case '开始处置':
+          return 'warning'
+        case '处置完成提交审批':
+          return 'warning'
+        case '完成维保':
+          return 'success'
+        default:
+          return 'info'
+      }
+    },
+
+    // 获取检测结果类型
+    getInspectionResultType(result) {
+      switch (result) {
+        case '未检测':
+          return 'info'
+        case '正常':
+          return 'success'
+        case '异常':
+          return 'danger'
+        case '待处理':
+          return 'warning'
+        default:
+          return 'info'
+      }
+    },
+
+    // 选择系统
+    selectSystem(systemId) {
+      this.selectedSystem = systemId
+      const system = this.systemComponents.find(s => s.id === systemId)
+      if (system && system.components && system.components.length > 0) {
+        this.selectedComponent = system.components[0].id
+        this.loadInspectionItems(systemId, this.selectedComponent)
+      }
+    },
+
+    // 选择组件
+    selectComponent(componentId) {
+      this.selectedComponent = componentId
+      this.loadInspectionItems(this.selectedSystem, componentId)
+    },
+
+    // 加载检测项目
+    loadInspectionItems(systemId, componentId) {
+      if (!systemId || !componentId) {
+        this.inspectionItems = []
+        return
+      }
+
+      // 从任务详情中筛选出当前组件对应的检测项目
+      const currentComponent = this.systemComponents
+        .find(s => s.id === systemId)
+        ?.components?.find(c => c.id === componentId)
+
+      if (currentComponent) {
+        // 从任务详情中筛选出当前组件的检测项目
+        const componentInspectionItems = this.inspectionItems.filter(item => {
+          // 根据组件名称匹配检测项目
+          const componentName = currentComponent.name
+          return item.content.includes(componentName) ||
+                 item.content.includes('外观') ||
+                 item.content.includes('检查') ||
+                 item.content.includes('测试')
+        })
+
+        if (componentInspectionItems.length > 0) {
+          this.inspectionItems = componentInspectionItems
+        } else {
+          // 如果没有匹配的项目，使用默认检测项目
+          this.inspectionItems = [
+            { content: '外观,清除异物及周边障碍物', result: '未检测' }
+          ]
+        }
+      } else {
+        this.inspectionItems = [
+          { content: '外观,清除异物及周边障碍物', result: '未检测' }
+        ]
+      }
+    },
+
+    // 查看故障列表
+    viewFaultList() {
+      if (this.faultList.length === 0) {
+        this.$message.info('暂无故障记录')
+        return
+      }
+
+      // 这里可以跳转到故障列表页面或显示故障详情弹窗
+      this.$message.info(`共有 ${this.faultList.length} 条故障记录`)
+    },
+
+    // 查看系统详情
+    viewSystemDetail() {
+      this.$message.info('查看系统详情功能待实现')
+    },
+
+    // 返回
+    goBack() {
+      this.$router.go(-1)
+    },
+
+    // 从计划数据中提取维保内容
+    extractMaintenanceContentFromPlan(planData) {
+      console.log('🔄 开始从计划数据提取维保内容...')
+      console.log('📋 计划数据详情:', planData)
+      console.log('📋 计划ID:', planData._id)
+      console.log('📋 项目名称:', planData.projectName)
+
+      if (!planData) {
+        console.log('❌ 计划数据为空，显示空状态')
+        this.maintenanceContentList = []
+        return
+      }
+
+      // 尝试从计划数据中提取维保内容
+      let maintenanceContent = []
+
+      // 检查是否有维保详情数据
+      if (planData.details && Array.isArray(planData.details)) {
+        console.log('📋 找到计划详情数据，共', planData.details.length, '条')
+        console.log('📋 详情数据样本:', planData.details.slice(0, 3)) // 只显示前3条
+        maintenanceContent = planData.details.map((item, index) => ({
+          systemCategory: item.system || item.category || '消防系统',
+          deviceName: item.device || item.item || '维保项目',
+          maintainSlim: item.maintainContent || item.content || '检测内容',
+          frequency: item.frequency || item.period || '月检',
+          inspectionResult: item.result || item.status || '未检测',
+          maintainContent: item.standard || item.requirement || '符合相关规范要求'
+        }))
+      } else if (planData.maintenanceItems && Array.isArray(planData.maintenanceItems)) {
+        console.log('📋 找到维保项目数据，共', planData.maintenanceItems.length, '条')
+        console.log('📋 维保项目数据样本:', planData.maintenanceItems.slice(0, 3)) // 只显示前3条
+        maintenanceContent = planData.maintenanceItems.map((item, index) => ({
+          systemCategory: item.systemCategory || item.system || '消防系统',
+          deviceName: item.deviceName || item.device || '维保项目',
+          maintainSlim: item.maintainSlim || item.content || '检测内容',
+          frequency: item.frequency || item.period || '月检',
+          inspectionResult: item.inspectionResult || item.result || '未检测',
+          maintainContent: item.maintainContent || item.standard || '符合相关规范要求'
+        }))
+      } else if (planData.checkedMaintList && Array.isArray(planData.checkedMaintList)) {
+        console.log('📋 找到已选维保列表数据，共', planData.checkedMaintList.length, '条')
+        console.log('📋 已选维保列表数据样本:', planData.checkedMaintList.slice(0, 3)) // 只显示前3条
+        maintenanceContent = planData.checkedMaintList.map((item, index) => ({
+          systemCategory: item.systemCategory || '消防系统',
+          deviceName: item.deviceName || '维保项目',
+          maintainSlim: item.maintainSlim || '检测内容',
+          frequency: item.frequency || '月检',
+          inspectionResult: '未检测', // 默认状态
+          maintainContent: item.maintainContent || '符合相关规范要求'
+        }))
+      } else {
+        console.log('❌ 未找到维保内容数据，检查其他可能的字段...')
+        console.log('📋 计划数据的所有字段:', Object.keys(planData))
+
+        // 检查是否有其他可能的维保相关字段
+        const possibleFields = ['maintenanceItems', 'maintainContent', 'maintenanceContent', 'checkItems', 'inspectionItems', 'taskItems', 'items', 'content']
+        let foundField = null
+
+        for (const field of possibleFields) {
+          if (planData[field]) {
+            console.log(`✅ 找到可能的维保字段: ${field}`, planData[field])
+            foundField = field
+            break
+          }
+        }
+
+        if (foundField) {
+          // 尝试处理找到的字段
+          const fieldData = planData[foundField]
+          if (Array.isArray(fieldData)) {
+            console.log(`📋 处理字段 ${foundField}，共`, fieldData.length, '条数据')
+            console.log(`📋 字段数据样本:`, fieldData.slice(0, 3)) // 只显示前3条
+            maintenanceContent = fieldData.map((item, index) => ({
+              systemCategory: item.systemCategory || item.category || item.system || '消防系统',
+              deviceName: item.deviceName || item.device || item.name || '维保项目',
+              maintainSlim: item.maintainSlim || item.content || item.description || '检测内容',
+              frequency: item.frequency || item.period || '月检',
+              inspectionResult: item.inspectionResult || item.result || item.status || '未检测',
+              maintainContent: item.maintainContent || item.standard || item.requirement || '符合相关规范要求'
+            }))
+          }
+        }
+
+        if (maintenanceContent.length === 0) {
+          console.log('❌ 没有找到任何维保内容数据，显示空状态')
+          // 如果都没有找到，显示空状态而不是默认数据
+          this.maintenanceContentList = []
+          return
+        }
+      }
+
+      this.maintenanceContentList = maintenanceContent
+      console.log('✅ 成功提取维保内容数据，共', maintenanceContent.length, '条')
+      console.log('📋 提取的数据样本:', maintenanceContent.slice(0, 3)) // 只显示前3条
+    },
+
+    // 生成默认维保内容数据（当无法从计划数据中提取时使用）
+    generateDefaultMaintenanceContent() {
+      console.log('🔄 生成默认维保内容数据...')
+      this.maintenanceContentList = [
+        {
+          systemCategory: '疏散指示标志',
+          deviceName: '疏散指示标志',
+          maintainSlim: '外观和工作状态',
+          frequency: '月检',
+          inspectionResult: '正常',
+          maintainContent: '牢固、无遮挡,疏散方向的指示正确清晰。'
+        },
+        {
+          systemCategory: '自动喷水灭火系统',
+          deviceName: '喷头',
+          maintainSlim: '外观,清除异物及周边障碍物',
+          frequency: '月检',
+          inspectionResult: '未检测',
+          maintainContent: '喷头外观完好,无变形、损坏,喷头周围无障碍物。'
+        }
+      ]
+    }
+
   }
 }
 </script>
 
 <style scoped>
-.mpm-td-detail-page {
-  padding: 0 0 34px 0;
-  background: #f8fbfd;
+.task-detail-page {
+  background: #fff;
+  padding: 18px 18px 32px 18px;
+  border-radius: 8px;
   min-height: 100vh;
 }
 
-.task-steps-section {
-  background: #fff;
-  border-radius: 14px;
-  margin: 0 0 18px 0;
-  padding: 16px 24px 26px 24px;
-  box-shadow: 0 4px 12px #e7f4ff18;
+.card-block {
+  background: #f8f9fb;
+  border-radius: 8px;
+  padding: 18px 16px 10px 16px;
+  margin-bottom: 18px;
+  margin-top: 10px;
 }
 
-.step-bar-custom {
+.card-title {
+  padding: 12px 18px 12px 18px;
+  margin-bottom: 18px;
+}
+
+.card-title-txt {
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+/* 面包屑导航 */
+.breadcrumb {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.breadcrumb-item {
+  color: #666;
+}
+
+.breadcrumb-item.active {
+  color: #409EFF;
+  font-weight: bold;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: #999;
+}
+
+/* 时间戳 */
+.timestamp {
+  font-size: 14px;
+  color: #666;
+  text-align: right;
+}
+
+/* 任务状态时间线 */
+.status-timeline {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.timeline-container {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  margin-bottom: 0;
-  margin-top: 12px;
-  padding-left: 8px;
-  min-width: 1200px;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
 }
 
-.step-item-custom {
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.timeline-step {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  min-width: 200px;
+  z-index: 2;
 }
 
-.circle-wrap {
-  display: flex;
-  align-items: center;
-  position: relative;
-  margin-bottom: 7px;
-}
-
-.circle-inner {
-  width: 90px;
-  height: 90px;
+.step-circle {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 4px solid #eaf1f7;
-  background: #f2f7fa;
+  background: #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 44px;
-  color: #fff;
-  background: #edf4fa;
-  transition: 0.3s;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
 }
 
-.circle-wrap.active .circle-inner {
-  background: #2cb4fa;
-  border-color: #2cb4fa;
+.timeline-step.active .step-circle {
+  background: #409EFF;
+  color: white;
 }
 
-.circle-wrap:not(.active) .circle-inner {
-  background: #edf4fa;
-  border-color: #eaf1f7;
+.timeline-step.completed .step-circle {
+  background: #409EFF;
+  color: white;
 }
 
-.circle-inner i {
-  font-size: 42px;
+.step-label {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  max-width: 80px;
+  line-height: 1.2;
+}
+
+.timeline-step.active .step-label {
+  color: #409EFF;
   font-weight: bold;
-  color: #fff;
 }
 
-.step-line-custom {
-  width: 82px;
-  height: 7px;
-  background: #eaf1f7;
-  margin-left: 0;
-  margin-right: -2px;
-  transition: 0.3s;
-}
-
-.step-line-custom.active {
-  background: #cce9fa;
-}
-
-.step-label-custom {
-  font-size: 25px;
-  color: #222;
-  font-weight: 400;
-  margin-top: 0;
-  margin-bottom: 2px;
-  letter-spacing: 1px;
-  min-height: 34px;
-}
-
-.step-time-custom {
-  font-size: 17px;
-  color: #8a8a8a;
-  font-weight: 400;
-  margin-top: 0;
-  min-height: 24px;
-}
-
-@media (max-width: 1300px) {
-  .step-bar-custom {
-    min-width: 900px;
-  }
-
-  .circle-inner {
-    width: 60px;
-    height: 60px;
-    font-size: 30px;
-  }
-
-  .step-label-custom {
-    font-size: 16px;
-  }
-
-  .step-time-custom {
-    font-size: 13px;
-  }
-}
-
-.task-base-info {
-  margin-top: 12px;
-  background: #f3f7fb;
-  border-radius: 8px;
-  padding: 18px 22px 2px 22px;
+/* 维保任务详情 */
+.task-detail-section {
+  margin-bottom: 30px;
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
-  color: #113;
-  letter-spacing: 1px;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #409EFF;
 }
 
-.row-txt {
-  font-size: 15px;
-  margin-bottom: 5px;
-  color: #222;
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-.label {
-  color: #888;
-  min-width: 88px;
-  display: inline-block;
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
-.stat-finish {
-  color: #1db217;
-  font-weight: 600;
+.detail-label {
+  font-weight: bold;
+  color: #666;
+  min-width: 120px;
+  margin-right: 12px;
 }
 
-.stat-process {
-  color: #1976d2;
-  font-weight: 600;
+.detail-value {
+  flex: 1;
+  color: #333;
 }
 
-.stat-plan {
-  color: #18bb4a;
-  font-weight: 600;
+.rating-stars {
+  display: flex;
+  gap: 2px;
 }
 
-.stat-maint {
-  color: #741cd4;
-  font-weight: 600;
+.rating-stars i {
+  color: #ddd;
+    font-size: 16px;
+  }
+
+.rating-stars i.rated {
+  color: #f39c12;
 }
 
-.stat-bar {
-  margin: 14px 0 0 0;
-  border-top: 1.5px solid #e6eaf0;
-  padding-top: 18px;
+/* 任务统计信息 */
+.task-statistics {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .stat-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0;
+  flex: 1;
+  padding: 16px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.stat-num {
-  font-size: 29px;
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: white;
+  font-size: 20px;
+}
+
+.stat-icon.detection-total {
+  background: linear-gradient(135deg, #409EFF, #66b3ff);
+}
+
+.stat-icon.uninspected {
+  background: linear-gradient(135deg, #909399, #b3b6bc);
+}
+
+.stat-icon.inspected {
+  background: linear-gradient(135deg, #67C23A, #85ce61);
+}
+
+.stat-icon.fault-records {
+  background: linear-gradient(135deg, #E6A23C, #ebb563);
+}
+
+.stat-icon.replaced-equipment {
+  background: linear-gradient(135deg, #409EFF, #66b3ff);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 24px;
   font-weight: bold;
-  margin: 2px 0 2px 0;
-  color: #393;
+  color: #333;
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #757b8a;
-  margin-top: 2px;
-  font-weight: 500;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }
 
-.check-detail-section {
-  background: #fff;
-  border-radius: 14px;
-  padding: 24px 22px 36px 22px;
-  margin-top: 12px;
-  box-shadow: 0 4px 12px #e7f4ff18;
+/* 检测详情 */
+.inspection-detail-section {
+  margin-bottom: 30px;
 }
 
-.check-tree {
-  background: #f4f7fb;
-  padding: 6px 6px 8px 6px;
-  border-radius: 10px;
-  min-height: 420px;
-}
-
-.result-warn {
-  color: #fe571e;
-  font-weight: 600;
-}
-
-.result-ok {
-  color: #1888fe;
-  font-weight: 600;
-}
-
-/* 表格微调 */
-::v-deep .el-table thead th {
-  background: #f6fafd;
-  font-size: 16px;
-  color: #223;
-  font-weight: bold;
-}
-
-::v-deep .el-table td,
-::v-deep .el-table th {
-  padding: 14px 0 !important;
-}
-
-.step-bar-perfect {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: #fff;
-  padding: 30px 0 20px 0;
-  margin-bottom: 0;
-  position: relative;
-  border-radius: 12px;
-  box-sizing: border-box;
-}
-
-.step-item-perfect {
-  flex: 1;
-  min-width: 170px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.step-time-perfect {
-  font-size: 18px;
-  color: #7d8ca3;
-  font-weight: 400;
-  min-height: 28px;
-  margin-bottom: 0;
-  margin-top: 0;
+.empty-box {
   text-align: center;
+  padding: 20px;
+  color: #888;
+  background: #f8f9fa;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
-.step-center-block {
+/* 返回按钮 */
+.page-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  position: relative;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
 
-.circle-outer {
-  width: 74px;
-  height: 74px;
-  border-radius: 50%;
-  background: #eaf4fe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 0 #eaf4fe;
-  position: relative;
-  z-index: 2;
-  transition: 0.2s;
-}
-
-.circle-outer.active {
-  background: #eaf4fe;
-  box-shadow: 0 0 0 12px #eaf4fe;
-}
-
-.circle-inner {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: #d4eafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  color: #fff;
-  transition: background 0.2s;
-}
-
-.circle-inner.active {
-  background: #169fff;
-}
-
-.circle-inner i {
-  font-size: 34px;
-  color: #fff;
-  font-weight: bold;
-}
-
-.step-line-perfect {
-  height: 6px;
-  background: #eaf4fe;
-  margin-left: 0;
-  margin-right: 0;
-  flex: 1 1 0;
-  min-width: 68px;
-  position: absolute;
-  left: 74px;
-  right: -60px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
+.return-btn {
+  background: #409EFF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
   border-radius: 4px;
-  transition: background 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.step-line-perfect.active {
-  background: #c1e1fd;
+.return-btn:hover {
+  background: #66b3ff;
 }
 
-.step-label-perfect {
-  font-size: 22px;
-  color: #222;
-  font-weight: 400;
-  margin-top: 12px;
-  margin-bottom: 0;
-  text-align: center;
-  min-height: 28px;
-  letter-spacing: 1px;
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-statistics {
+    flex-direction: column;
+  }
+
+  .timeline-container {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .timeline-step {
+    flex: 1;
+    min-width: 80px;
+  }
 }
 </style>

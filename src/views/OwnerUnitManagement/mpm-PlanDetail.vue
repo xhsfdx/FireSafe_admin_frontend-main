@@ -1,10 +1,13 @@
 <template>
   <div class="plan-detail-root">
+    <!-- 页面标题卡片 -->
+    <div class="card-block card-title">
+      <div class="card-title-txt">维保计划详情</div>
+      <div class="plan-tip">提示：本计划制定后，系统会自动生成<span class="emph">{{ plan.startTime }}</span> - <span class="emph">{{ plan.endTime }}</span>中的（月计划）的所有任务。</div>
+    </div>
+
     <!-- 头部详情 -->
     <div class="detail-header">
-      <div class="plan-title">计划详情
-        <span class="plan-tip">提示：本计划制定后，系统会自动生成<span class="emph">{{ plan.startTime }}</span> - <span class="emph">{{ plan.endTime }}</span>中的（月计划）的所有任务。</span>
-      </div>
       <el-row :gutter="30" class="plan-info-row">
         <el-col :span="6"><div><span>项目名称：</span>{{ plan.projectName }}</div></el-col>
         <el-col :span="6"><div><span>业主单位名称：</span>{{ plan.ownerName }}</div></el-col>
@@ -12,8 +15,9 @@
         <el-col :span="6"><div><span>计划状态：</span><span class="plan-status">{{ plan.planDefinedStatus }}</span></div></el-col>
       </el-row>
       <el-row :gutter="30" class="plan-info-row">
-        <el-col :span="6"><div><span>项目负责人：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
-        <el-col :span="6"><div><span>现场维保人员：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
+        <el-col :span="6"><div><span>维保技术负责人：</span>{{ (plan.maintainPersons.technical && plan.maintainPersons.technical.name) || '未分配' }}</div></el-col>
+        <el-col :span="6"><div><span>维保项目负责人：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
+        <el-col :span="6"><div><span>现场维保人员：</span>{{ plan.maintainPersons.maintainers && plan.maintainPersons.maintainers.length > 0 ? plan.maintainPersons.maintainers.map(m => m.name).join('、') : '未分配' }}</div></el-col>
       </el-row>
     </div>
     <!-- 维保内容 -->
@@ -88,10 +92,10 @@ export default {
     async onLoad() {
       const id = this.$route.query.id
       try {
-        const res = await getMaintainbyId(id);
+        const res = await getMaintainbyId(id)
         console.log(res)
-        this.plan = res.data;
-        this.maintItems = res.data.maintenanceItems;
+        this.plan = res.data
+        this.maintItems = res.data.maintenanceItems
       } catch (error) {
         this.$message.error(`出现错误${error.msg}`)
       }
@@ -100,14 +104,73 @@ export default {
 }
 </script>
 <style scoped>
-.plan-detail-root { padding: 20px; }
-.detail-header { background: #eaf3fd; padding: 20px; border-radius: 6px; margin-bottom: 18px; }
-.plan-title { font-size: 20px; font-weight: bold; color: #111; margin-bottom: 6px; }
-.plan-tip { font-size: 13px; color: #ea4335; font-weight: normal; margin-left: 20px; }
-.plan-info-row { margin-top: 12px; }
-.section-title { font-size: 18px; font-weight: bold; color: #183f8c; margin: 18px 0 12px 0; }
-.content-area { background: #fff; border-radius: 6px; padding: 14px; }
-.plan-type { color: #00bb00; font-weight: bold; }
-.plan-status { color: #296cfc; font-weight: bold; }
-.emph { color: #ea4335; }
+.plan-detail-root {
+  background: #fff;
+  padding: 18px 18px 32px 18px;
+  border-radius: 8px;
+}
+
+.card-block {
+  background: #f8f9fb;
+  border-radius: 8px;
+  padding: 18px 16px 10px 16px;
+  margin-bottom: 18px;
+  margin-top: 10px;
+}
+
+.card-title {
+  padding: 12px 18px 12px 18px;
+  margin-bottom: 18px;
+}
+
+.card-title-txt {
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.detail-header {
+  background: #eaf3fd;
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 18px;
+}
+
+.plan-tip {
+  font-size: 13px;
+  color: #ea4335;
+  font-weight: normal;
+}
+
+.plan-info-row {
+  margin-top: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #183f8c;
+  margin: 18px 0 12px 0;
+}
+
+.content-area {
+  background: #fff;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.plan-type {
+  color: #00bb00;
+  font-weight: bold;
+}
+
+.plan-status {
+  color: #296cfc;
+  font-weight: bold;
+}
+
+.emph {
+  color: #ea4335;
+}
 </style>

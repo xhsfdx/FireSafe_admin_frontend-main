@@ -53,7 +53,30 @@ export default {
       rules: {
         mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-      }
+      },
+      loading: false,
+      redirect: undefined
+    }
+  },
+  computed: {
+    otherQuery() {
+      return Object.keys(this.$route.query).reduce((acc, cur) => {
+        if (cur !== 'redirect') {
+          acc[cur] = this.$route.query[cur]
+        }
+        return acc
+      }, {})
+    }
+  },
+  watch: {
+    $route: {
+      handler: function(route) {
+        const query = route.query
+        if (query) {
+          this.redirect = query.redirect
+        }
+      },
+      immediate: true
     }
   },
   methods: {

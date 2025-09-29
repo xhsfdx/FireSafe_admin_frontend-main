@@ -35,12 +35,26 @@
       </div>
 
       <div class="step-content">
-        <AddNewContractInformation v-show="activeStep === 0" :data="formData" @next="handleNext"
-          @update="updateFormData" />
-        <AddNewProjectInformation v-show="activeStep === 1" :form-data="formData" @next="handleNext" @prev="handlePrev"
-          @update="updateFormData" />
-        <AddNewDispatchStaff v-show="activeStep === 2" :form-data="formData" @prev="handlePrev" @submit="submitAll"
-          @update="updateFormData" />
+        <AddNewContractInformation
+          v-show="activeStep === 0"
+          :data="formData"
+          @next="handleNext"
+          @update="updateFormData"
+        />
+        <AddNewProjectInformation
+          v-show="activeStep === 1"
+          :form-data="formData"
+          @next="handleNext"
+          @prev="handlePrev"
+          @update="updateFormData"
+        />
+        <AddNewDispatchStaff
+          v-show="activeStep === 2"
+          :form-data="formData"
+          @prev="handlePrev"
+          @submit="submitAll"
+          @update="updateFormData"
+        />
       </div>
     </el-card>
   </div>
@@ -85,13 +99,14 @@ export default {
       try {
         console.log('Final data to be submitted:', this.formData)
 
-        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType);
+        const isOneTime = ['施工', '评估', '检测'].includes(this.formData.contractType)
         const payload = {
           // 合同信息
           name: this.formData.contractName,
           code: this.formData.contractNo,
           clientCompany: this.formData.entrustName,
           creditCode: this.formData.creditCode,
+          contractType: this.formData.contractType || '项目维保', // 添加合同类型
           payCycle: isOneTime ? undefined : this.formData.payCycle,
           warrantyType: isOneTime ? undefined : this.formData.buildType,
           warrantyMethod: isOneTime ? undefined : this.formData.maintType,
@@ -119,12 +134,12 @@ export default {
               companyname: item.ownerName,
               address: item.address,
               district: item.area,
-              position: '', // 可根据需要设置
+              position: item.location ? `${item.location.lng},${item.location.lat}` : '', // 使用地图坐标
               ownerCompany: item.ownerName,
               contactPerson: item.linkman,
               contactPhone: item.phone,
-              logoUrl: '',
-              entranceReportUrl: ''
+              logoUrl: item.logoUrl || '',
+              entranceReportUrl: item.entranceReportUrl || ''
             }))
             : (isOneTime ? [{
               name: this.formData.contractName || '一次性合同项目',
@@ -138,20 +153,20 @@ export default {
               logoUrl: '',
               entranceReportUrl: ''
             }] : [])
-          }
+        }
 
         console.log('Payload sent to backend:', payload)
-        
+
         const res = await createContract(payload) // 使用转换后的 payload
-        if(res.success) {
-            this.$message.success('新增合同成功！')
+        if (res.success) {
+          this.$message.success('新增合同成功！')
           this.$router.push({ name: 'UnitProject' }) // Redirect to the list page
-  } else {
-    this.$message.error(res.message || '提交失败，请检查填写内容')
-  }
-} catch (err) {
-  this.$message.error('请求失败，请稍后重试')
-}
+        } else {
+          this.$message.error(res.message || '提交失败，请检查填写内容')
+        }
+      } catch (err) {
+        this.$message.error('请求失败，请稍后重试')
+      }
     }
   }
 }

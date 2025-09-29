@@ -180,8 +180,7 @@
 <script>
 import axios from 'axios'
 import { uploadImage } from '@/api/upload'
-import { BASE_URL } from '@/utils/request'
-import { getOrganization, updateOrganization } from '@/api/organization';
+import { getOrganization, updateOrganization } from '@/api/organization'
 export default {
   data() {
     return {
@@ -204,7 +203,6 @@ export default {
         businessTypes: [], // 绑定业务类型数据
         enterprisePhotos: [], // 企业照片数组
         organizationPhoto: '', // 企业logo 单张
-        organizationLogo: '',
         businessLicense: '' // 营业执照 单张
       },
       // 表单验证规则
@@ -249,21 +247,21 @@ export default {
     // 保存按钮点击事件
     async onLoad() {
       try {
-        const res = await getOrganization();
+        const res = await getOrganization()
         console.log(res)
-        this.formData = res.data;
+        this.formData = res.data
       } catch (error) {
         this.$message.error(`出现错误${error.msg}`)
       }
     },
     saveInfo() {
-      this.$refs.enterpriseForm.validate( async (valid) => {
+      this.$refs.enterpriseForm.validate(async(valid) => {
         if (valid) {
           // 表单验证通过，可以提交数据到后端
           console.log('表单数据:', this.formData)
           // 触发保存数据的后端请求
-          
-          const res = await updateOrganization(this.formData);
+
+          const res = await updateOrganization(this.formData)
           console.log(res.data)
           // 这里只是模拟保存成功
           this.$message.success('保存成功')
@@ -278,8 +276,8 @@ export default {
       uploadImage(option.file)
         .then(response => {
           if (response.code === 200) {
-            this.PhotoImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
-            this.formData.organizationPhoto = BASE_URL + '/uploads' + response.filePath
+            this.PhotoImageUrl = response.filePath // Set preview image URL
+            this.formData.PhotoImageUrl = response.filePath
             this.$message.success('企业照片上传成功')
           } else {
             this.$message.error('企业照片上传失败: ' + response.message)
@@ -300,8 +298,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.LogoImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
-            this.formData.organizationLogo = BASE_URL + '/uploads' + response.filePath
+            this.LogoImageUrl = response.filePath // Set preview image URL
+            this.formData.LogoImageUrl = response.filePath
             this.$message.success('企业LOGO上传成功')
           } else {
             this.$message.error('企业LOGO上传失败: ' + response.message)
@@ -322,8 +320,8 @@ export default {
         .then(response => {
           // console.log('资质证书上传成功:', response);
           if (response.code === 200) {
-            this.licenseImageUrl = BASE_URL + '/uploads' + response.filePath // Set preview image URL
-            this.formData.businessLicense = BASE_URL + '/uploads' + response.filePath
+            this.licenseImageUrl = response.filePath // Set preview image URL
+            this.formData.licenseImageUrl = response.filePath
             this.$message.success('营业执照上传成功')
           } else {
             this.$message.error('营业执照上传失败: ' + response.message)

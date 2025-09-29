@@ -1,16 +1,22 @@
 <template>
   <div class="app-container">
     <div class="dispatch-staff-page">
+      <!-- 页面标题卡片 -->
+      <div class="card-block card-title">
+        <div class="card-title-txt">维保人员配置</div>
+      </div>
+
       <!-- 搜索与按钮区 -->
       <div class="toolbar">
         <el-input v-model="search" placeholder="输入项目名称搜索" class="input" clearable />
         <el-button type="primary" @click="query">查询</el-button>
         <el-button @click="reset">重置</el-button>
+        <el-button type="info" icon="el-icon-refresh" @click="loadLatestData">刷新数据</el-button>
         <el-button type="success">一键配置勾选项目</el-button>
       </div>
 
       <!-- 表格区 -->
-      <el-table :data="filteredTableData" border>
+      <el-table v-loading="loading" :data="filteredTableData" border element-loading-text="加载最新数据中...">
         <el-table-column type="selection" width="55" />
         <el-table-column label="序号" width="50" type="index" />
         <el-table-column label="业主单位名称" prop="ownerName" />
@@ -40,7 +46,12 @@
 </template>
 
 <script>
+<<<<<<< HEAD:src/views/OwnerUnitManagement/look_newdispatchStaff.vue
 import DispatchStaff from '@/views/MaintenanceManagement/DispatchStaff.vue'
+=======
+import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import { getMaintainPlans } from '@/api/maintainPlan'
+>>>>>>> ec1f661481123490b026b233d4a1e6c41b116551:src/views/Owner unit management/look_newdispatchStaff.vue
 
 export default {
   name: 'AddNewDispatchStaff',
@@ -56,7 +67,8 @@ export default {
       search: '',
       showDialog: false,
       currentRow: {},
-      tableData: []
+      tableData: [],
+      loading: false
     }
   },
   computed: {
@@ -90,7 +102,70 @@ export default {
       deep: true
     }
   },
+  mounted() {
+    // 监听维保人员更新事件
+    window.addEventListener('maintenancePersonnelUpdated', this.handlePersonnelUpdate)
+    // 初始加载最新数据
+    this.loadLatestData()
+  },
+  beforeDestroy() {
+    // 清理事件监听
+    window.removeEventListener('maintenancePersonnelUpdated', this.handlePersonnelUpdate)
+  },
   methods: {
+    // 加载最新的维保人员数据
+    async loadLatestData() {
+      try {
+        console.log('🔄 加载最新的维保人员数据...')
+        this.loading = true
+
+        const response = await getMaintainPlans({
+          page: 1,
+          limit: 1000
+        })
+
+        if (response.success && response.data) {
+          console.log('✅ 获取到最新计划数据:', response.data)
+
+          // 更新表格数据，使用最新的维保人员信息
+          const updatedTableData = this.tableData.map(tableRow => {
+            // 查找对应的计划数据
+            const planData = response.data.find(plan =>
+              plan.projectName === tableRow.projectName
+            )
+
+            if (planData && planData.maintainPersons) {
+              console.log(`🔄 更新项目 ${tableRow.projectName} 的维保人员信息`)
+
+              return {
+                ...tableRow,
+                techLeader: planData.maintainPersons.technical?.name || '未分配',
+                projectLeader: planData.maintainPersons.leader?.name || '未分配',
+                onSiteStaff: planData.maintainPersons.maintainers?.map(m => m.name).join('、') || '未分配',
+                maintainPersons: planData.maintainPersons
+              }
+            }
+
+            return tableRow
+          })
+
+          this.tableData = updatedTableData
+          console.log('✅ 维保人员数据更新完成')
+        }
+      } catch (error) {
+        console.error('❌ 加载最新维保人员数据失败:', error)
+        this.$message.error('加载最新数据失败，请刷新页面重试')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 处理维保人员更新事件
+    handlePersonnelUpdate(event) {
+      console.log('📢 收到维保人员更新事件:', event.detail)
+      this.loadLatestData()
+    },
+
     query() {
       // The computed property 'filteredTableData' handles the search
     },
@@ -142,24 +217,48 @@ export default {
 
 <style scoped>
 .app-container {
-  padding: 20px;
+  background: #fff;
+  padding: 18px 18px 32px 18px;
+  border-radius: 8px;
 }
+
 .dispatch-staff-page {
   background: #fff;
-  padding: 20px;
-  border-radius: 4px;
 }
+
+.card-block {
+  background: #f8f9fb;
+  border-radius: 8px;
+  padding: 18px 16px 10px 16px;
+  margin-bottom: 18px;
+  margin-top: 10px;
+}
+
+.card-title {
+  padding: 12px 18px 12px 18px;
+  margin-bottom: 18px;
+}
+
+.card-title-txt {
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+
 .toolbar {
   margin-bottom: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .input {
   width: 240px;
 }
+
 .footer {
   margin-top: 20px;
   text-align: center;
 }
-</style> 
+</style>

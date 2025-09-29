@@ -31,7 +31,7 @@ export default {
     ComprehensiveRanking
   },
   mounted() {
-    this.drawRoleRing()
+    // this.drawRoleRing() // 已注释，使用PersonnelStatistics组件
   },
   methods: {
     // drawRoleRing() {
@@ -75,8 +75,8 @@ export default {
   color: #00f7ff;
   text-align: center;
   text-shadow:
-    0 0 10px rgba(0, 247, 255, 0.5), 
-    0 0 20px rgba(0, 247, 255, 0.7), 
+    0 0 10px rgba(0, 247, 255, 0.5),
+    0 0 20px rgba(0, 247, 255, 0.7),
     0 0 30px rgba(0, 247, 255, 0.9);
   letter-spacing: 2px;
   animation: techGlow 1.5s infinite alternate;

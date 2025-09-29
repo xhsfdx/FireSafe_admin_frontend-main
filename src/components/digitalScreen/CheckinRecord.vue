@@ -13,7 +13,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in list" :key="item.id">
+        <tr v-for="(item, index) in list" :key="item.id || `checkin-${index}`">
           <td>{{ index + 1 }}</td>
           <td>{{ item.name }}</td>
           <td>{{ item.project }}</td>

@@ -9,7 +9,7 @@
       class="board-column-content"
       :set-data="setData"
     >
-      <div v-for="element in list" :key="element.id" class="board-item">
+      <div v-for="(element, index) in list" :key="element.id || `kanban-${index}`" class="board-item">
         {{ element.name }} {{ element.id }}
       </div>
     </draggable>

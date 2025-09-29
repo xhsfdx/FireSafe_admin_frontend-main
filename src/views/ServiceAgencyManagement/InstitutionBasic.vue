@@ -86,23 +86,23 @@
 </template>
 
 <script>
-import { getOrganization } from '@/api/organization';
+import { getOrganization } from '@/api/organization'
 export default {
   data() {
     return {
       organization: {
-      companyProfile: '无', // 绑定企业简介数据
-      contactNumber: '13438783735', // 绑定联系电话数据
-      socialCreditCode: '91511302MA7FXFWY6L', // 绑定统一社会信用代码数据
-      enterpriseEmail: '无', // 绑定企业邮箱数据
-      legalPerson: '无', // 绑定企业法人数据
-      legalPersonPhone: '无', // 绑定法人电话数据
-      maintenanceSupervisor: '无', // 绑定维保主管数据
-      maintenanceSupervisorPhone: '无', // 绑定主管电话数据
-      enterprisePhotos: '无', // 绑定企业照片数据
-      businessLicense: '无' // 绑定营业执照数据
+        companyProfile: '无', // 绑定企业简介数据
+        contactNumber: '13438783735', // 绑定联系电话数据
+        socialCreditCode: '91511302MA7FXFWY6L', // 绑定统一社会信用代码数据
+        enterpriseEmail: '无', // 绑定企业邮箱数据
+        legalPerson: '无', // 绑定企业法人数据
+        legalPersonPhone: '无', // 绑定法人电话数据
+        maintenanceSupervisor: '无', // 绑定维保主管数据
+        maintenanceSupervisorPhone: '无', // 绑定主管电话数据
+        enterprisePhotos: '无', // 绑定企业照片数据
+        businessLicense: '无' // 绑定营业执照数据
       }
-      
+
     }
   },
   mounted() {
@@ -111,9 +111,9 @@ export default {
   methods: {
     async onLoad() {
       try {
-        const res = await getOrganization();
+        const res = await getOrganization()
         console.log(res)
-        this.organization = res.data;
+        this.organization = res.data
       } catch (error) {
         this.$message.error(`出现错误${error.msg}`)
       }

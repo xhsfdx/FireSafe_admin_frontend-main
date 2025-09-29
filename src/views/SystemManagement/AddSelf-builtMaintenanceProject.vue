@@ -13,56 +13,52 @@
       label-position="left"
       class="main-form"
     >
-      <!-- 第一行：消防系统设施 + 维保项目 -->
+      <!-- 第一行：点位名称 + 点位类型 -->
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="* 消防系统设施" prop="facility">
-            <el-select v-model="form.facility" placeholder="请选择消防系统设施" clearable>
-              <el-option label="消防供配电设施" value="消防供配电设施" />
-              <el-option label="火灾自动报警系统" value="火灾自动报警系统" />
-              <el-option label="电气火灾监控系统" value="电气火灾监控系统" />
-              <el-option label="可燃气体探测报警系统" value="可燃气体探测报警系统" />
-              <el-option label="消防给水及消火栓系统" value="消防给水及消火栓系统" />
-              <el-option label="自动喷水灭火系统" value="自动喷水灭火系统" />
-              <el-option label="泡沫灭火系统" value="泡沫灭火系统" />
-              <el-option label="消防炮灭火系统" value="消防炮灭火系统" />
-            </el-select>
+          <el-form-item label="* 点位名称" prop="name">
+            <el-input v-model="form.name" placeholder="请输入点位名称" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="* 维保项目" prop="project">
-            <el-input v-model="form.project" placeholder="请输入维保项目" />
+          <el-form-item label="* 点位类型" prop="type">
+            <el-select v-model="form.type" placeholder="请选择点位类型" clearable>
+              <el-option label="二维码" value="二维码" />
+              <el-option label="NFC" value="NFC" />
+              <el-option label="蓝牙" value="蓝牙" />
+              <el-option label="其他" value="其他" />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
 
       <div class="content-box">
         <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="* 维保周期" prop="cycle">
-              <el-select v-model="form.cycle" placeholder="请选择维保周期" clearable>
-                <el-option label="月" value="月" />
-                <el-option label="季" value="季" />
-                <el-option label="半年" value="半年" />
-                <el-option label="年" value="年" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="* 检测内容" prop="checkContent">
-              <el-input v-model="form.checkContent" placeholder="请输入检测内容" />
+          <el-col :span="24">
+            <el-form-item label="* 详细地址" prop="address">
+              <el-input v-model="form.address" placeholder="请输入详细地址" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="24">
-            <el-form-item label="检测标准与方法" prop="checkStandard">
+            <el-form-item label="维保项目">
               <el-input
-                v-model="form.checkStandard"
+                v-model="form.maintenanceItems"
                 type="textarea"
-                rows="6"
-                placeholder="请输入检测标准与方法"
+                rows="4"
+                placeholder="请输入维保项目，多个项目用逗号分隔"
               />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="状态">
+              <el-select v-model="form.status" placeholder="请选择状态">
+                <el-option label="启用" value="enabled" />
+                <el-option label="禁用" value="disabled" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -77,33 +73,64 @@
 </template>
 
 <script>
+import { createMaintainProject } from '@/api/maintainProject'
+
 export default {
   name: 'AddSelfBuiltMaintenanceProject',
   data() {
     return {
+      loading: false,
       form: {
-        facility: '',
-        project: '',
-        cycle: '',
-        checkContent: '',
-        checkStandard: ''
+        name: '',
+        type: '',
+        address: '',
+        maintenanceItems: [],
+        status: 'enabled'
       },
       rules: {
-        facility: [{ required: true, message: '请选择消防系统设施', trigger: 'change' }],
-        project: [{ required: true, message: '请输入维保项目', trigger: 'blur' }],
-        cycle: [{ required: true, message: '请选择维保周期', trigger: 'change' }],
-        checkContent: [{ required: true, message: '请输入检测内容', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入点位名称', trigger: 'blur' }],
+        type: [{ required: true, message: '请选择点位类型', trigger: 'change' }],
+        address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
       }
     }
   },
   methods: {
-    onSubmit() {
-      this.$refs.form.validate(valid => {
+    async onSubmit() {
+      this.$refs.form.validate(async valid => {
         if (valid) {
-          this.$message.success('保存成功！（这里只做演示，实际应提交后端）')
+          this.loading = true
+          try {
+            const data = {
+              name: this.form.name,
+              type: this.form.type,
+              address: this.form.address,
+              maintenanceItems: this.form.maintenanceItems ? this.form.maintenanceItems.split(',').map(item => item.trim()).filter(item => item) : [],
+              status: this.form.status
+            }
+
+            console.log('提交数据:', data)
+            const res = await createMaintainProject(data)
+            console.log('创建响应:', res)
+
+            if (res.success) {
+              this.$message.success('保存成功！')
+              // 重置表单
+              this.$refs.form.resetFields()
+              // 返回上一页
+              this.$router.back()
+            } else {
+              this.$message.error(res.message || '保存失败')
+            }
+          } catch (error) {
+            console.error('保存失败:', error)
+            this.$message.error('保存失败')
+          } finally {
+            this.loading = false
+          }
         }
       })
     },
+
     addExtraContent() {
       this.$message.info('自定义内容扩展区域，可根据需要实现')
     }

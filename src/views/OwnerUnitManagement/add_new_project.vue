@@ -2,10 +2,9 @@
   <div class="project-info-root">
     <div class="form-card">
       <div class="section-title">合同关联项目信息</div>
-      <div class="tips">
-        <b>（提示：请完整填写当前合同下的所有关联项目信息。）</b>
-        <div v-if="isOneTimeContract" style="color: #409EFF; margin-top: 8px;">
-          <i class="el-icon-info"></i> 一次性合同可以跳过项目信息，直接进入下一步
+      <div v-if="isOneTimeContract" class="tips">
+        <div style="color: #409EFF;">
+          <i class="el-icon-info" /> 一次性合同可以跳过项目信息，直接进入下一步
         </div>
       </div>
       <!-- 基本信息只读 -->
@@ -47,7 +46,7 @@
       <div style="text-align: center; margin: 30px 0 0 0;">
         <el-button type="primary" size="large" @click="addProject">添加项目</el-button>
       </div>
-      <div style="text-align: right; margin: 28px 0 0 0;">
+      <div style="text-align: center; margin: 28px 0 0 0;">
         <el-button @click="prevStep">上一步</el-button>
         <el-button type="primary" @click="nextStep">下一步</el-button>
       </div>
@@ -100,10 +99,13 @@ export default {
   watch: {
     formData: {
       handler(newVal) {
+        console.log('🔍 AddNewProjectInfo 接收到 formData:', newVal)
         if (newVal) {
           this.form.entrustName = newVal.entrustName || ''
           this.form.creditCode = newVal.creditCode || ''
           this.projectList = newVal.projectList || []
+          console.log('🔍 设置后的 projectList:', this.projectList)
+          console.log('🔍 projectList 长度:', this.projectList.length)
         }
       },
       immediate: true,
@@ -147,9 +149,15 @@ export default {
       this.$emit('prev')
     },
     nextStep() {
+      console.log('🔍 nextStep 被调用')
+      console.log('🔍 当前 projectList:', this.projectList)
+      console.log('🔍 projectList 长度:', this.projectList.length)
+      console.log('🔍 是否一次性合同:', this.isOneTimeContract)
+
       // 如果是一次性合同且没有项目信息，创建一个默认项目
       let projectList = this.projectList
       if (this.isOneTimeContract && this.projectList.length === 0) {
+        console.log('🔍 创建默认项目')
         projectList = [{
           ownerName: this.form.entrustName,
           name: this.formData.contractName || '一次性合同项目',
@@ -160,6 +168,7 @@ export default {
           index: 1
         }]
       }
+      console.log('🔍 最终 projectList:', projectList)
       this.$emit('update', { projectList: projectList })
       this.$emit('next')
     }
@@ -176,5 +185,4 @@ export default {
 .empty-table img { width: 120px; opacity: 0.6;}
 .empty-desc { color: #bbb; margin-top: 8px; }
 </style>
-
 

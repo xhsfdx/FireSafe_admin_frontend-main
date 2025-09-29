@@ -2,25 +2,32 @@
   <div class="checkin-region-page">
     <!-- 查询栏 -->
     <div class="search-bar">
-      <el-select v-model="filters.unit" placeholder="请选择单位" style="width: 200px; margin-right: 12px">
-        <el-option v-for="item in units" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-button type="primary" style="margin-right: 8px" @click="onSearch">查询</el-button>
-      <el-button @click="onReset">重置</el-button>
+      <div class="search-filters">
+        <el-select v-model="filters.unit" placeholder="请选择单位" class="filter-select">
+          <el-option v-for="item in units" :key="item" :label="item" :value="item" />
+        </el-select>
+      </div>
+      <div class="search-actions">
+        <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+        <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+      </div>
     </div>
 
     <!-- 表格区域 -->
     <div class="main-content">
       <el-table
+        v-loading="loading"
         :data="pagedData"
         border
         :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
+        empty-text="暂无数据"
+        header-cell-class-name="table-header"
       >
-        <el-table-column type="index" label="序号" width="60" />
-        <el-table-column prop="unitName" label="单位名称" />
-        <el-table-column prop="range" label="打卡范围（公里）" />
-        <el-table-column prop="purpose" label="打卡用途" />
-        <el-table-column label="操作" width="100" align="right">
+        <el-table-column type="index" label="序号" width="80" align="center" />
+        <el-table-column prop="unitName" label="单位名称" align="center" />
+        <el-table-column prop="range" label="打卡范围（公里）" align="center" />
+        <el-table-column prop="purpose" label="打卡用途" align="center" />
+        <el-table-column label="操作" width="120" align="center">
           <template slot-scope="{ row }">
             <el-link type="primary" @click="viewDetail(row)">详情</el-link>
           </template>
@@ -38,6 +45,10 @@
         :page-size="pageSize"
         :current-page.sync="currentPage"
         :total="filteredData.length"
+        :page-size-text="'条/页'"
+        :total-text="'共 {total} 条'"
+        :go-to-text="'前往'"
+        :jump-text="'页'"
         @current-change="handlePageChange"
       />
     </div>
@@ -100,25 +111,31 @@
 </template>
 
 <script>
+import { getCheckinRegions, updateCheckinRegion, getAllUnits } from '@/api/checkinRegion'
+
 export default {
   name: 'CheckInRegion',
   data() {
     return {
       filters: { unit: '' },
-      units: ['小学', '高坪汽车站'],
-      rawData: [
-        { unitName: '小学', range: 2, purpose: '外出维保打卡' },
-        { unitName: '高坪汽车站', range: 2, purpose: '外出维保打卡' }
-      ],
+      units: [],
+      rawData: [],
       filteredData: [],
       pagedData: [],
       currentPage: 1,
       pageSize: 10,
+      loading: false,
       // 弹窗相关
       dialogVisible: false,
       dialogData: {
         unitName: '',
-        range: 2
+        range: 2,
+        purpose: '外出维保打卡',
+        coordinates: {
+          lng: 106.110698,
+          lat: 30.799492
+        },
+        address: ''
       },
       dialogIndex: -1, // 标记当前编辑的行
       // 地图相关
@@ -130,54 +147,123 @@ export default {
     currentPage() { this.updatePagedData() }
   },
   created() {
-    this.filteredData = this.rawData
-    this.updatePagedData()
+    this.loadData()
+    this.loadUnits()
   },
   methods: {
-    onSearch() {
-      this.filteredData = this.filters.unit
-        ? this.rawData.filter(d => d.unitName === this.filters.unit)
-        : this.rawData
-      this.currentPage = 1
-      this.updatePagedData()
+    // 加载数据
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.currentPage,
+          limit: this.pageSize
+        }
+
+        if (this.filters.unit) {
+          params.unitName = this.filters.unit
+        }
+
+        console.log('请求参数:', params)
+        console.log('当前token:', this.$store.getters.token)
+        const res = await getCheckinRegions(params)
+        console.log('打卡区域API响应:', res)
+        if (res.success) {
+          this.rawData = res.data || []
+          this.filteredData = this.rawData
+          this.updatePagedData()
+          console.log('加载的数据:', this.rawData)
+        } else {
+          this.$message.error(res.message || '加载数据失败')
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        this.$message.error('加载数据失败')
+      } finally {
+        this.loading = false
+      }
     },
+
+    // 加载单位列表
+    async loadUnits() {
+      try {
+        console.log('加载单位列表...')
+        const res = await getAllUnits()
+        console.log('单位列表API响应:', res)
+        if (res.success) {
+          this.units = res.data || []
+          console.log('加载的单位列表:', this.units)
+        }
+      } catch (error) {
+        console.error('加载单位列表失败:', error)
+      }
+    },
+
+    onSearch() {
+      this.currentPage = 1
+      this.loadData()
+    },
+
     onReset() {
       this.filters.unit = ''
-      this.filteredData = this.rawData
       this.currentPage = 1
-      this.updatePagedData()
+      this.loadData()
     },
+
     updatePagedData() {
       const start = (this.currentPage - 1) * this.pageSize
       this.pagedData = this.filteredData.slice(start, start + this.pageSize)
     },
+
     handlePageChange(page) {
       this.currentPage = page
-      this.updatePagedData()
+      this.loadData()
     },
+
     viewDetail(row) {
-      this.dialogIndex = this.rawData.findIndex(item => item.unitName === row.unitName)
-      this.dialogData = { ...row }
-      // 按单位定位地图中心，建议后端实际配置真实坐标
-      if (row.unitName === '高坪汽车站') {
-        this.mapCenter = [106.130833, 30.784689]
+      this.dialogIndex = this.rawData.findIndex(item => item._id === row._id)
+      this.dialogData = {
+        ...row,
+        coordinates: row.coordinates || { lng: 106.110698, lat: 30.799492 }
+      }
+
+      // 设置地图中心点
+      if (row.coordinates && row.coordinates.lng && row.coordinates.lat) {
+        this.mapCenter = [row.coordinates.lng, row.coordinates.lat]
       } else {
         this.mapCenter = [106.110698, 30.799492] // 默认南充
       }
       this.dialogVisible = true
     },
+
     adjustRange(delta) {
       let val = this.dialogData.range + delta
       if (val < 1) val = 1
       if (val > 20) val = 20
       this.dialogData.range = val
     },
-    saveEdit() {
+
+    async saveEdit() {
       if (this.dialogIndex > -1) {
-        this.$set(this.rawData, this.dialogIndex, { ...this.dialogData })
-        this.onSearch()
-        this.dialogVisible = false
-        this.$message.success('保存成功')
+        try {
+          const updateData = {
+            range: this.dialogData.range,
+            coordinates: this.dialogData.coordinates,
+            address: this.dialogData.address || ''
+          }
+
+          const res = await updateCheckinRegion(this.dialogData._id, updateData)
+          if (res.success) {
+            this.$message.success('保存成功')
+            this.dialogVisible = false
+            this.loadData() // 重新加载数据
+          } else {
+            this.$message.error(res.message || '保存失败')
+          }
+        } catch (error) {
+          console.error('保存失败:', error)
+          this.$message.error('保存失败')
+        }
       }
     }
   }
@@ -189,32 +275,66 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #fff;
+  background: #f5f5f5;
   min-width: 800px;
+  padding: 20px;
+  box-sizing: border-box;
 }
+
 .search-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  margin-top: 8px;
-  padding-left: 10px;
-}
-.main-content {
-  padding: 0 40px;
-  width: 100%;
-  box-sizing: border-box;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 16px 20px;
   background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-.footer-bar {
-  height: 48px;
+
+.search-filters {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-select {
+  width: 200px;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: auto;
+}
+
+.footer-bar {
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   background: #fff;
-  padding: 0 36px 0 0;
-  box-shadow: 0 -2px 6px -4px #eee;
+  padding: 0 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
+}
+
+.table-header {
+  background: #f5f7fa !important;
+  color: #606266 !important;
+  font-weight: 600 !important;
 }
 
 /* 弹窗样式 */
@@ -236,5 +356,47 @@ export default {
 }
 .dialog-footer {
   text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .checkin-region-page {
+    padding: 16px;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .search-filters,
+  .search-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkin-region-page {
+    padding: 12px;
+    min-width: auto;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .search-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-actions .el-button {
+    width: 100%;
+  }
 }
 </style>

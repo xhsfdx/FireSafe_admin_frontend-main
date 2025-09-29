@@ -41,11 +41,11 @@ module.exports = {
         target: 'http://localhost:5000',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '/api'
+          '^/api': ''
         }
       }
     },
-    before: require('./mock/mock-server.js')
+    // before: require('./mock/mock-server.js') // 注释掉mock服务器
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

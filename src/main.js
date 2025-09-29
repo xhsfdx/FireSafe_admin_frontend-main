@@ -6,7 +6,7 @@ import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
 import './styles/element-variables.scss'
-
+import zhLang from 'element-ui/lib/locale/lang/zh-CN'// 使用中文语言包
 
 import '@/styles/index.scss' // global css
 
@@ -35,6 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium', // set element-ui default size
+  locale: zhLang // 使用中文语言包
 })
 
 // register global utility filters
