@@ -2,8 +2,11 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+// src/utils/request.js 或者 api 配置文件
+export const BASE_URL = process.env.VUE_APP_BASE_API;
+
 // export const BASE_URL = "https://scbfxf.cn"; 
-export const BASE_URL = "http://192.168.1.24:5000"; 
+// export const BASE_URL = "http://192.168.1.24:5000"; 
 // create an axios instance
 const service = axios.create({
   baseURL: BASE_URL + '/api', // url = base url + request url
