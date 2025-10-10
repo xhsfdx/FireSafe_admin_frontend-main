@@ -46,12 +46,8 @@
 </template>
 
 <script>
-<<<<<<< HEAD:src/views/OwnerUnitManagement/look_newdispatchStaff.vue
 import DispatchStaff from '@/views/MaintenanceManagement/DispatchStaff.vue'
-=======
-import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
 import { getMaintainPlans } from '@/api/maintainPlan'
->>>>>>> ec1f661481123490b026b233d4a1e6c41b116551:src/views/Owner unit management/look_newdispatchStaff.vue
 
 export default {
   name: 'AddNewDispatchStaff',

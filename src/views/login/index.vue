@@ -47,8 +47,8 @@ export default {
   data() {
     return {
       loginForm: {
-        mobile: '17893248975',
-        password: 'chaggle2022'
+        mobile: '',
+        password: ''
       },
       rules: {
         mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }],

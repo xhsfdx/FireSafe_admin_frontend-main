@@ -64,13 +64,8 @@
 </template>
 
 <script>
-<<<<<<<< HEAD:src/views/OwnerUnitManagement/RenewwalConfigure.vue
-import DispatchStaff from '@/views/MaintenanceManagement/DispatchStaff.vue'
-========
-import DispatchStaff from '@/views/Maintenance and Service Management/DispatchStaff.vue'
+import DispatchStaff from '@/views/MaintenanceManagement/DispatchStaff.vue';
 import { getMaintainPlans } from '@/api/maintainPlan'
-
->>>>>>>> ec1f661481123490b026b233d4a1e6c41b116551:src/views/OwnerUnitManagement/Renewal Configure maintenance personnel.vue
 export default {
   name: 'RenewwalConfigureMaintenancePersonnel',
   components: { DispatchStaff },

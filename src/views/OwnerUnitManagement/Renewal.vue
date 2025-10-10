@@ -58,17 +58,10 @@
 
 <script>
 // 续签用的三个步骤组件（你可以后续完善）
-<<<<<<< HEAD:src/views/OwnerUnitManagement/Renewal.vue
 import RenewalContractInfo from './RenewalContract.vue'
 import RenewalProjectInfo from './RenewalProject.vue'
 import RenewalDispatchStaff from './RenewwalConfigure.vue'
 import { getContractDetail, renewalContract } from '@/api/contract' // 你的API
-=======
-import RenewalContractInfo from './Renewal contract information.vue'
-import RenewalProjectInfo from './Renewal Project information.vue'
-import RenewalDispatchStaff from './Renewal Configure maintenance personnel.vue'
-import { getContractDetail, renewalContract } from '@/api/contract' // 使用项目详情API
->>>>>>> ec1f661481123490b026b233d4a1e6c41b116551:src/views/Owner unit management/Renewal.vue
 
 export default {
   name: 'Renewal',

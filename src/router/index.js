@@ -322,7 +322,7 @@ export const asyncRoutes = [
       {
         path: 'point',
         name: 'MaintenancePoint',
-        component: () => import('@/views/OwnerUnitManagement/MaintenancePointManagement.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MaintenancePoint.vue'),
         meta: { title: '维保点位管理' }
       },
       {
@@ -345,28 +345,28 @@ export const asyncRoutes = [
         path: 'point-detail/:pointId',
         name: 'MaintenancePointDetail',
         hidden: true,
-        component: () => import('@/views/Owner unit management/MPM-pointDetail.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MPM-pointDetail.vue'),
         meta: { title: '维保点位详情' }
       },
       {
         path: 'add-point',
         name: 'AddMaintenancePoint',
         hidden: true,
-        component: () => import('@/views/Owner unit management/MPM-addPoint.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MPM-addPoint.vue'),
         meta: { title: '添加点位' }
       },
       {
         path: 'point-basic-info/:pointId',
         name: 'MaintenancePointBasicInfo',
         hidden: true,
-        component: () => import('@/views/Owner unit management/MPM-basicInfo.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MPM-basicInfo.vue'),
         meta: { title: '点位基础信息' }
       },
       {
         path: 'point-maintenance-content/:pointId',
         name: 'MaintenancePointMaintenanceContent',
         hidden: true,
-        component: () => import('@/views/Owner unit management/MPM-maintenanceContent.vue'),
+        component: () => import('@/views/OwnerUnitManagement/MPM-maintenanceContent.vue'),
         meta: { title: '点位维保内容' }
       },
 
@@ -424,7 +424,7 @@ export const asyncRoutes = [
         path: 'renewal-configure-personnel',
         name: 'RenewalConfigurePersonnel',
         hidden: true,
-        component: () => import('@/views/OwnerUnitManagement/RenewalConfigure.vue'),
+        component: () => import('@/views/OwnerUnitManagement/RenewwalConfigure.vue'),
         meta: { title: '续签人员配置' }
       },
 
@@ -501,14 +501,14 @@ export const asyncRoutes = [
         path: 'system-maintenance-plan',
         name: 'SystemMaintenancePlan',
         hidden: true,
-        component: () => import('@/views/Owner unit management/SystemMaintenancePlanForm.vue'),
+        component: () => import('@/views/OwnerUnitManagement/SystemMaintenancePlanForm.vue'),
         meta: { title: '系统维保制定' }
       },
       {
         path: 'point-maintenance-plan',
         name: 'PointMaintenancePlan',
         hidden: true,
-        component: () => import('@/views/Owner unit management/PointMaintenancePlan.vue'),
+        component: () => import('@/views/OwnerUnitManagement/PointMaintenancePlan.vue'),
         meta: { title: '点位维保制定' }
       }
     ]
@@ -539,14 +539,14 @@ export const asyncRoutes = [
       {
         path: 'fault/detail/:id',
         name: 'FaultOrderDetail',
-        component: () => import('@/views/Maintenance and Service Management/FaultOrderDetail.vue'),
+        component: () => import('@/views/MaintenanceManagement/FaultOrderDetail.vue'),
         hidden: true,
         meta: { title: '故障工单详情' }
       },
       {
         path: 'support',
         name: 'AdditionalSupport',
-        component: () => import('@/views/MaintenanceManagement/Additional maintenance and support.vue'),
+        component: () => import('@/views/MaintenanceManagement/AdditionalSupport.vue'),
         meta: { title: '附加维护', icon: 'el-icon-s-cooperation' }
       },
       {
@@ -580,7 +580,7 @@ export const asyncRoutes = [
         path: '/maintenance/create-task',
         name: 'CreateTask',
         hidden: true,
-        component: () => import('@/views/Maintenance and Service Management/CreateTask.vue'),
+        component: () => import('@/views/MaintenanceManagement/CreateTask.vue'),
         meta: { title: '新建维保任务' }
       }
     ]
@@ -645,14 +645,14 @@ export const asyncRoutes = [
         path: '/system/customer-detail',
         name: 'CustomerDetail',
         hidden: true,
-        component: () => import('@/views/System Management/CustomerDetail.vue'),
+        component: () => import('@/views/SystemManagement/CustomerDetail.vue'),
         meta: { title: '客户详情' }
       },
       {
         path: '/system/edit-self-built-maintenance-project/:id',
         name: 'EditSelfBuiltMaintenanceProject',
         hidden: true,
-        component: () => import('@/views/System Management/EditSelf-builtMaintenanceProject.vue'),
+        component: () => import('@/views/SystemManagement/EditSelf-builtMaintenanceProject.vue'),
         meta: { title: '编辑自建维保项目' }
       }
     ]
