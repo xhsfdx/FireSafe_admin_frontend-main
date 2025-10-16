@@ -388,6 +388,34 @@ export const asyncRoutes = [
         component: () => import('@/views/Owner unit management/Maintenance point management.vue'),
         meta: { title: '维保点位管理' }
       },
+      {
+        path: 'point/add',
+        name: 'AddMaintenancePoint',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/MPM-addPoint.vue'),
+        meta: { title: '添加点位' }
+      },
+      {
+        path: 'point/detail/:pointId',
+        name: 'MaintenancePointDetail',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/MPM-pointDetail.vue'),
+        meta: { title: '维保点位详情' }
+      },
+      {
+        path: 'point/basic-info/:pointId',
+        name: 'MaintenancePointBasicInfo',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/MPM-basicInfo.vue'),
+        meta: { title: '基础信息' }
+      },
+      {
+        path: 'point/maintenance-content/:pointId',
+        name: 'MaintenancePointMaintenanceContent',
+        hidden: true,
+        component: () => import('@/views/Owner unit management/MPM-maintenanceContent.vue'),
+        meta: { title: '维保内容' }
+      },
 
       // 🔧 补全缺失页面
       {

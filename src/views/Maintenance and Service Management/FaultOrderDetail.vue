@@ -163,7 +163,7 @@ export default {
         reportPerson: data.reporter || '',
         status: data.resolved ? '已完成' : '未完成',
         unitName: data.task?.project?.ownerCompany || '',
-        method: '系统维保',
+        method: data.task?.contract?.warrantyMethod || '系统维保',
         taskName: data.task?.taskMonth ? `${data.task.taskMonth}任务` : '',
         rating: 0,
         comment: ''

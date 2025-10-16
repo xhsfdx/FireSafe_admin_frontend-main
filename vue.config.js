@@ -44,8 +44,8 @@ module.exports = {
           '^/api': '/api'
         }
       }
-    },
-    before: require('./mock/mock-server.js')
+    }
+    // before: require('./mock/mock-server.js') // 禁用mock服务器，使用真实后端API
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

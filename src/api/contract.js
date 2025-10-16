@@ -43,7 +43,7 @@ export function deleteContract(id) {
 
 export function fetchProjectDetail(id) {
   return request({
-    url: `/contracts/${id}`, // 路径请根据实际后端接口调整
+    url: `/contracts/project/${id}`, // 调用项目详情接口
     method: 'get'
   })
 }
@@ -54,12 +54,17 @@ export function getContractDetail(id) {
     url: `/contracts/${id}/for-renewal`,
     method: 'get'
   }).then(response => {
+    console.log('getContractDetail API响应:', response)
     // 确保返回正确的数据格式
     if (response.success && response.data) {
       return response
     } else {
-      throw new Error('获取合同详情失败')
+      console.error('getContractDetail API响应格式错误:', response)
+      throw new Error(response.message || '获取合同详情失败')
     }
+  }).catch(error => {
+    console.error('getContractDetail API调用失败:', error)
+    throw error
   })
 }
 

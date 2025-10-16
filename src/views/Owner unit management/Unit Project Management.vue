@@ -163,7 +163,7 @@ export default {
               projectid: item.project_id,
               ownerName: item.ownerCompany || '',
               entrustName: item.clientCompany || '',
-              contractType: item.contractType || '长期性合同',
+              contractType: item.contractType || '项目维保',
               status: item.status || '',
               contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '',
               days: days

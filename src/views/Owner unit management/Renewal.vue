@@ -103,8 +103,14 @@ export default {
   methods: {
     async loadContract(id) {
       try {
+        console.log('开始加载合同数据，ID:', id)
         const res = await getContractDetail(id)
-        if (!res || !res.data) throw new Error('数据为空')
+        console.log('API响应:', res)
+        
+        if (!res || !res.data) {
+          console.error('API响应数据为空:', res)
+          throw new Error('数据为空')
+        }
         
         console.log('后端返回的合同数据:', res.data)
         
@@ -186,7 +192,8 @@ export default {
 
       } catch (e) {
         console.error('加载合同数据失败:', e)
-        this.$message.error('加载合同数据失败')
+        console.error('错误详情:', e.message)
+        this.$message.error('加载合同数据失败: ' + (e.message || '未知错误'))
         this.$router.push('/contract/list')
       }
     },

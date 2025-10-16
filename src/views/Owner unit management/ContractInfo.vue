@@ -183,8 +183,9 @@
         :data="maintTree"
         show-checkbox
         node-key="id"
-        :default-checked-keys="[2, 5]"
+        :default-checked-keys="checkedKeys"
         :expand-on-click-node="false"
+        @check="handleTreeCheck"
       />
       <!-- 右侧表 -->
       <el-table :data="maintTableData" border class="maint-table">
@@ -229,19 +230,13 @@ export default {
       buildingData: [
         { name: 'jk', area: 3000, floor: 6, height: 140, remark: '' }
       ],
-      maintTree: [
-        { id: 1, label: '消防供配电设施', children: [
-          { id: 2, label: '配电柜' }
-        ] },
-        { id: 3, label: '火灾自动报警系统', children: [
-          { id: 4, label: '报警主机' }
-        ] }
-      ],
-      maintTableData: [
-        { index: 1, system: '消防供配电设施', item: '配电柜', content: '试验主电源', period: '月检' },
-        { index: 2, system: '消防供配电设施', item: '配电柜', content: '消防设备', period: '月检' }
-      ]
+      maintTree: [],
+      maintTableData: [],
+      checkedKeys: []
     }
+  },
+  mounted() {
+    this.loadMaintainTree()
   },
   methods: {
     addBuilding() {
@@ -249,6 +244,89 @@ export default {
     },
     removeBuilding(index) {
       this.buildingData.splice(index, 1)
+    },
+
+    // 加载维保树形结构
+    async loadMaintainTree() {
+      try {
+        // 这里应该根据合同ID获取该合同的维保内容
+        // 暂时使用标准维保项目作为示例
+        const { getMaintainStandardItems } = await import('@/api/contract')
+        const response = await getMaintainStandardItems()
+        
+        if (response.success && response.data) {
+          this.maintTree = this.transformToTree(response.data)
+          // 这里应该根据合同的实际维保内容设置checkedKeys
+          // 暂时设置为空，表示没有预选项目
+          this.checkedKeys = []
+          this.maintTableData = []
+        }
+      } catch (error) {
+        console.error('加载维保树失败:', error)
+        this.$message.error('加载维保内容失败')
+      }
+    },
+
+    // 将API数据转换为树形结构
+    transformToTree(data) {
+      const tree = []
+      data.forEach((system, systemIndex) => {
+        const systemNode = {
+          id: `system_${systemIndex}`,
+          label: system.category,
+          children: []
+        }
+        
+        system.devices.forEach((device, deviceIndex) => {
+          const deviceNode = {
+            id: `device_${systemIndex}_${deviceIndex}`,
+            label: device.device,
+            children: []
+          }
+          
+          device.items.forEach((item, itemIndex) => {
+            const itemNode = {
+              id: item._id || `item_${systemIndex}_${deviceIndex}_${itemIndex}`,
+              label: item.maintainSlim,
+              maintainContent: item.maintainContent,
+              frequency: item.frequency,
+              systemCategory: system.category,
+              deviceName: device.device
+            }
+            deviceNode.children.push(itemNode)
+          })
+          
+          systemNode.children.push(deviceNode)
+        })
+        
+        tree.push(systemNode)
+      })
+      
+      return tree
+    },
+
+    // 处理树形结构选择变化
+    handleTreeCheck(data, { checkedKeys, checkedNodes }) {
+      this.checkedKeys = checkedKeys
+      this.updateMaintTableData(checkedNodes)
+    },
+
+    // 更新右侧表格数据
+    updateMaintTableData(checkedNodes) {
+      const tableData = []
+      checkedNodes.forEach((node, index) => {
+        // 只处理叶子节点（具体的维保项目）
+        if (!node.children || node.children.length === 0) {
+          tableData.push({
+            index: index + 1,
+            system: node.systemCategory || '未知系统',
+            item: node.deviceName || '未知设备',
+            content: node.maintainContent || '',
+            period: node.frequency || '月检'
+          })
+        }
+      })
+      this.maintTableData = tableData
     }
   }
 }

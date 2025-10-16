@@ -133,11 +133,74 @@
         <el-button type="primary" @click="submitPaymentUpdate">确定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 结款记录对话框 -->
+    <el-dialog title="结款记录" :visible.sync="historyDialogVisible" width="900px" @close="historyDialogVisible = false">
+      <div v-if="currentContract" class="contract-info">
+        <h4>{{ currentContract.ownerName }} - {{ currentContract.entrustName }}</h4>
+        <p>合同金额：{{ currentContract.contractAmount }} | 已结金额：￥{{ currentContract.paidAmount ? currentContract.paidAmount.toLocaleString() : '0' }}</p>
+      </div>
+      
+      <el-table :data="paymentHistory" border style="width: 100%" v-loading="historyLoading" :empty-text="'暂无结款记录'">
+        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column prop="paymentAmount" label="结款金额" align="center">
+          <template slot-scope="{ row }">
+            <span style="color:#67c23a; font-weight: bold">￥{{ row.paymentAmount ? row.paymentAmount.toLocaleString() : '0' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="paymentDate" label="结款日期" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ formatDate(row.paymentDate) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="paymentMethod" label="结款方式" align="center">
+          <template slot-scope="{ row }">
+            <el-tag size="small">{{ row.paymentMethod }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="operatorName" label="操作人" align="center" />
+        <el-table-column prop="previousPaymentStatus" label="结款前状态" align="center">
+          <template slot-scope="{ row }">
+            <el-tag :type="getPaymentStatusTagType(row.previousPaymentStatus)" size="small">
+              {{ row.previousPaymentStatus }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="newPaymentStatus" label="结款后状态" align="center">
+          <template slot-scope="{ row }">
+            <el-tag :type="getPaymentStatusTagType(row.newPaymentStatus)" size="small">
+              {{ row.newPaymentStatus }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="paymentNote" label="备注" align="center" show-overflow-tooltip />
+        <el-table-column prop="createdAt" label="记录时间" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ formatDate(row.createdAt) }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      
+      <!-- 分页控件 -->
+      <div style="text-align:right;margin-top:8px;" v-if="historyPagination.total > 0">
+        <el-pagination 
+          background 
+          layout="prev, pager, next" 
+          :page-size="historyPagination.limit" 
+          :total="historyPagination.total"
+          :current-page="historyPagination.page" 
+          @current-change="handleHistoryPageChange" />
+      </div>
+      
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="historyDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getPaymentList, updatePaymentStatus, getPaymentStats } from '@/api/payment'
+import { getPaymentList, updatePaymentStatus, getPaymentStats, getPaymentHistory } from '@/api/payment'
 
 export default {
   name: 'PaymentManagement',
@@ -159,6 +222,15 @@ export default {
       selectedRows: [],
       paymentDialogVisible: false,
       currentContract: null,
+      // 结款记录相关
+      historyDialogVisible: false,
+      paymentHistory: [],
+      historyLoading: false,
+      historyPagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      },
       paymentForm: {
         paymentStatus: '',
         paidAmount: '',
@@ -210,7 +282,8 @@ export default {
           this.tableData = list.map(item => {
             const unpaidAmount = (item.amount || 0) - (item.paidAmount || 0)
             return {
-              id: item._id,
+              id: item.projectId || item._id, // 优先使用项目ID，如果没有则使用合同ID
+              contractId: item._id, // 保存合同ID用于其他操作
               ownerName: item.ownerName || '',
               entrustName: item.clientCompany || '',
               contractType: item.contractType || '项目维保',
@@ -317,7 +390,9 @@ export default {
       try {
         await this.$refs.paymentForm.validate()
         
-        const res = await updatePaymentStatus(this.currentContract.id, this.paymentForm)
+        // 使用合同ID进行更新
+        const contractId = this.currentContract.contractId || this.currentContract.id
+        const res = await updatePaymentStatus(contractId, this.paymentForm)
         if (res.success) {
           this.$message.success('结款状态更新成功')
           this.paymentDialogVisible = false
@@ -332,8 +407,11 @@ export default {
     },
     
     // 查看结款记录
-    viewPaymentHistory(row) {
-      this.$message.info('结款记录功能开发中...')
+    async viewPaymentHistory(row) {
+      this.currentContract = row
+      this.historyDialogVisible = true
+      this.historyPagination.page = 1
+      await this.loadPaymentHistory()
     },
     
     // 批量更新
@@ -362,6 +440,46 @@ export default {
       })
       
       this.$message.info(`合同金额合计：￥${totalAmount.toLocaleString()}\n已结金额：￥${totalPaidAmount.toLocaleString()}\n未结金额：￥${totalUnpaidAmount.toLocaleString()}`)
+    },
+
+    // 加载结款记录
+    async loadPaymentHistory() {
+      if (!this.currentContract) return
+      
+      this.historyLoading = true
+      try {
+        const params = {
+          page: this.historyPagination.page,
+          limit: this.historyPagination.limit
+        }
+        
+        // 使用合同ID获取结款记录
+        const contractId = this.currentContract.contractId || this.currentContract.id
+        const res = await getPaymentHistory(contractId, params)
+        if (res.success) {
+          this.paymentHistory = res.data || []
+          if (res.pagination) {
+            this.historyPagination.total = res.pagination.total
+            this.historyPagination.page = res.pagination.page
+            this.historyPagination.limit = res.pagination.limit
+          }
+        } else {
+          this.paymentHistory = []
+          this.historyPagination.total = 0
+          this.$message.error(res.message || '获取结款记录失败')
+        }
+      } catch (error) {
+        this.paymentHistory = []
+        this.historyPagination.total = 0
+        this.$message.error('网络异常或接口出错')
+      }
+      this.historyLoading = false
+    },
+
+    // 结款记录分页变化
+    handleHistoryPageChange(page) {
+      this.historyPagination.page = page
+      this.loadPaymentHistory()
     }
   }
 }
@@ -431,5 +549,24 @@ export default {
 
 .dialog-footer {
   text-align: right;
+}
+
+.contract-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.contract-info h4 {
+  margin: 0 0 8px 0;
+  color: #303133;
+  font-size: 16px;
+}
+
+.contract-info p {
+  margin: 0;
+  color: #606266;
+  font-size: 14px;
 }
 </style> 

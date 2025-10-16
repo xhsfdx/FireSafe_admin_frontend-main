@@ -4,7 +4,7 @@ import request from '@/utils/request'
 // 获取维护任务列表
 export function getOrganization() {
   return request({
-    url: '/organization/info/684e6cd42d7fcdbad9c308e5',
+    url: '/organization/info/6881cc98ac2d27087a6492d1',
     method: 'get',
   })
 }

@@ -192,7 +192,7 @@ export default {
         score: data.rating || 0,
         worker: maintainers.length > 0 ? maintainers[0].name : '',
         principal: leader?.name || '',
-        method: '系统维保',
+        method: data.contract?.warrantyMethod || '系统维保',
         maintenance: data.maintainResult || '暂无',
         comment: data.ratingComment || '',
         total: data.totalCheckCount || 0,
