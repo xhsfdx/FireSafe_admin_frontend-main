@@ -1,5 +1,5 @@
 module.exports = {
-  title: '不凡消防维保系统',
+  title: 'Vue Element Admin',
 
   /**
    * @type {boolean} true | false

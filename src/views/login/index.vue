@@ -12,8 +12,8 @@
 
       <div class="right-panel">
         <div class="logo-section">
-          <img :src="require('@/assets/bfxflogo.jpg')" alt="logo" class="logo">
-          <div class="title">四川不凡消防科技有限公司</div>
+          <img :src="require('@/assets/logo.jpeg')" alt="logo" class="logo">
+          <div class="title">四川省消防协会</div>
           <div class="subtitle">消防维保服务管理系统</div>
         </div>
 
@@ -47,36 +47,13 @@ export default {
   data() {
     return {
       loginForm: {
-        mobile: '',
-        password: ''
+        mobile: '17893248975',
+        password: 'chaggle2022'
       },
       rules: {
         mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-      },
-      loading: false,
-      redirect: undefined
-    }
-  },
-  computed: {
-    otherQuery() {
-      return Object.keys(this.$route.query).reduce((acc, cur) => {
-        if (cur !== 'redirect') {
-          acc[cur] = this.$route.query[cur]
-        }
-        return acc
-      }, {})
-    }
-  },
-  watch: {
-    $route: {
-      handler: function(route) {
-        const query = route.query
-        if (query) {
-          this.redirect = query.redirect
-        }
-      },
-      immediate: true
+      }
     }
   },
   methods: {

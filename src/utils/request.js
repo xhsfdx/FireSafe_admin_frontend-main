@@ -2,14 +2,10 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
-// src/utils/request.js 或者 api 配置文件
-export const BASE_URL = process.env.VUE_APP_BASE_API;
 
-// export const BASE_URL = "https://scbfxf.cn"; 
-// export const BASE_URL = "http://192.168.1.24:5000"; 
 // create an axios instance
 const service = axios.create({
-  baseURL: BASE_URL + '/api', // url = base url + request url
+  baseURL: process.env.VUE_APP_BASE_API || '/api', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 10000 // request timeout
 })
@@ -49,30 +45,30 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code === 400) {
+    // 检查响应状态码
+    if (response.status === 200) {
+      // 如果后端返回success字段，检查success状态
+      if (res.hasOwnProperty('success')) {
+        if (res.success) {
+          return res
+        } else {
+          Message({
+            message: res.message || '请求失败',
+            type: 'error',
+            duration: 5 * 1000
+          })
+          return Promise.reject(new Error(res.message || '请求失败'))
+        }
+      }
+      // 如果没有success字段，直接返回响应
+      return res
+    } else {
       Message({
-        message: res.message || '错误',
+        message: res.message || '请求失败',
         type: 'error',
         duration: 5 * 1000
       })
-
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
-          type: 'warning'
-        }).then(() => {
-          store.dispatch('user/resetToken').then(() => {
-            location.reload()
-          })
-        })
-      }
-      return Promise.reject(new Error(res.message || '错误'))
-    } else {
-      return res
+      return Promise.reject(new Error(res.message || '请求失败'))
     }
   },
   error => {

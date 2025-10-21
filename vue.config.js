@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || '不凡消防维保系统' // page title
+const name = defaultSettings.title || 'vue Element Admin' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -25,7 +25,7 @@ module.exports = {
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
   publicPath: '/',
-  outputDir: '/home/ubuntu/firesafe/dist',
+  outputDir: 'dist',
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
@@ -41,11 +41,11 @@ module.exports = {
         target: 'http://localhost:5000',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': ''
+          '^/api': '/api'
         }
       }
-    },
-    // before: require('./mock/mock-server.js') // 注释掉mock服务器
+    }
+    // before: require('./mock/mock-server.js') // 禁用mock服务器，使用真实后端API
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

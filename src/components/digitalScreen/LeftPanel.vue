@@ -33,8 +33,8 @@ export default {
     TotalOwer
   },
   mounted() {
-    // this.drawRing() // 已注释，使用BusinessStats组件
-    // this.drawTrend() // 已注释，使用BusinessTrend组件
+    this.drawRing()
+    this.drawTrend()
   },
   methods: {
     // drawRing() {
@@ -109,8 +109,8 @@ export default {
   color: #00f7ff;
   text-align: center;
   text-shadow:
-    0 0 10px rgba(0, 247, 255, 0.5),
-    0 0 20px rgba(0, 247, 255, 0.7),
+    0 0 10px rgba(0, 247, 255, 0.5), 
+    0 0 20px rgba(0, 247, 255, 0.7), 
     0 0 30px rgba(0, 247, 255, 0.9);
   letter-spacing: 2px;
   animation: techGlow 1.5s infinite alternate;
@@ -126,8 +126,8 @@ export default {
   }
   100% {
     text-shadow:
-      0 0 20px rgba(0, 247, 255, 1),
-      0 0 30px rgba(0, 247, 255, 1.2),
+      0 0 20px rgba(0, 247, 255, 1), 
+      0 0 30px rgba(0, 247, 255, 1.2), 
       0 0 40px rgba(0, 247, 255, 1.5);
   }
 }

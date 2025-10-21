@@ -14,9 +14,9 @@ export function getAllStaff() {
   })
 }
 
-export function getStaffById(id) {
+export function getStaffById() {
   return request({
-    url: `/staff/${id}`,
+    url: '/staff/:id',
     method: 'get'
   })
 }
@@ -28,18 +28,9 @@ export function createStaff(data) {
   })
 }
 
-// 获取人员列表
-export function getStaff(params) {
-  return request({
-    url: '/staff',
-    method: 'get',
-    params
-  })
-}
-
 export function updateRole(id, data) {
   return request({
-    url: `/staff/${id}`,
+    url: `/vue-element-admin/staff/${id}`,
     method: 'put',
     data
   })
@@ -47,15 +38,7 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return request({
-    url: `/staff/${id}`,
+    url: `/vue-element-admin/staff/${id}`,
     method: 'delete'
-  })
-}
-
-export function createUser(id, data) {
-  return request({
-    url: `/staff/usercreate/${id}`,
-    method: 'post',
-    data
   })
 }

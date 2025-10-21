@@ -1,12 +1,12 @@
 <template>
   <div class="ower">
-    <div id="particles-js" />
+    <div id="particles-js"></div>
     <div class="total-unit">
       <div class="total-unit-icon">
         <i class="el-icon-user-solid" />
       </div>
       <div class="total-unit-info">
-        <span>{{ ownerCompanyTotal }}</span>
+        <span>{{ totalUnits }}</span>
         <div class="total-word">家业主单位</div>
       </div>
     </div>
@@ -28,27 +28,24 @@
 </template>
 
 <script>
-import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   name: 'TotalOwer',
   data() {
     return {
-      ownerCompanyTotal: 0,
-      todayChecked: 0,
-      todayCompleted: 0,
-      todayReviews: 0
+      totalUnits: 15,
+      todayChecked: 2,
+      todayCompleted: 3,
+      todayReviews: 2
     }
   },
   mounted() {
     this.initParticles()
-    this.loadOwer()
   },
   methods: {
     initParticles() {
-      /* global particlesJS */
       if (typeof particlesJS === 'undefined') {
-        console.error('particles.js is not loaded!')
-        return
+        console.error('particles.js is not loaded!');
+        return;
       }
 
       particlesJS('particles-js', {
@@ -91,24 +88,7 @@ export default {
           }
         },
         retina_detect: true
-      })
-    },
-    async loadOwer() {
-      try {
-        const res = await getDigitalScreenData()
-        if (res) {
-          const { ownerCompanyTotal, todayChecked, todayCompleted, todayReviews } = res.data
-          this.ownerCompanyTotal = ownerCompanyTotal || 0
-          this.todayChecked = todayChecked || 0
-          this.todayCompleted = todayCompleted || 0
-          this.todayReviews = todayReviews || 0
-        } else {
-          this.$message.error('获取统计数据失败')
-        }
-      } catch (err) {
-        console.error('获取统计数据出错:', err)
-        this.$message.error('服务器错误')
-      }
+      });
     }
 
   }

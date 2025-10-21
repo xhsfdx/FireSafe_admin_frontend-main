@@ -17,7 +17,7 @@ export function getMaintainTask(id) {
   })
 }
 
-// 获取维保任务 基于projectId
+// 获取维保任务 基于projectId 
 export function getMaintainbyProject(id) {
   return request({
     url: `/maintainTask/project/${id}`,
@@ -67,21 +67,4 @@ export function assignMaintainers(id, data) {
     method: 'put',
     data
   })
-}
-
-// 生成任务
-export function generateTasksFromPlan(data) {
-  return request({
-    url: '/maintenancePlan/settask',
-    method: 'post',
-    data
-  })
-}
-
-// 根据项目ID获取微信维保任务
-export function getWechatMaintainByProjectId(projectId) {
-  return request({
-    url: `/Maintain/byProject/${projectId}`,
-    method: 'get'
-  })
-}
+} 

@@ -10,13 +10,13 @@
         <el-col :span="18" :xs="24">
           <el-card>
             <el-tabs v-model="activeTab">
-              <!-- <el-tab-pane label="Activity" name="activity">
+              <el-tab-pane label="Activity" name="activity">
                 <activity />
               </el-tab-pane>
               <el-tab-pane label="Timeline" name="timeline">
                 <timeline />
-              </el-tab-pane> -->
-              <el-tab-pane label="账户" name="account">
+              </el-tab-pane>
+              <el-tab-pane label="Account" name="account">
                 <account :user="user" />
               </el-tab-pane>
             </el-tabs>
@@ -41,18 +41,15 @@ export default {
   data() {
     return {
       user: {},
-      activeTab: 'account'
+      activeTab: 'activity'
     }
   },
   computed: {
     ...mapGetters([
       'name',
       'avatar',
-      'roles',
-      'email',
-      'mobile'
+      'roles'
     ])
-    // computed will run each time the data changes
   },
   created() {
     this.getUser()
@@ -62,9 +59,8 @@ export default {
       this.user = {
         name: this.name,
         role: this.roles.join(' | '),
-        email: this.email,
-        avatar: this.avatar,
-        mobile: this.mobile
+        email: 'admin@test.com',
+        avatar: this.avatar
       }
     }
   }

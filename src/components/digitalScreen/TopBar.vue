@@ -1,7 +1,7 @@
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"></link>
 <template>
   <div class="dashboard-container">
-    <canvas ref="particles" />
+    <canvas ref="particles"></canvas>
     <!-- 顶部标题和右侧信息区域 -->
     <div class="header">
       <div class="left-group">
@@ -9,12 +9,7 @@
         <el-button type="primary" class="digital-screen" @click="digital">数字可视化大屏</el-button>
       </div>
       <div class="title">不凡消防技术服务管理系统</div>
-      <el-button
-        :style="{ backgroundColor: isClicked ? '#007bff' : 'black' }"
-        type="primary"
-        class="service-system"
-        @click="servicesystem"
-      >维保服务系统</el-button>
+      <el-button :style="{ backgroundColor: isClicked ? '#007bff' : 'black' }" type="primary" class="service-system" @click="servicesystem">维保服务系统</el-button>
       <!-- <div class="navigation">
         <div class="nav-item">数字可视化大屏</div>
         <div class="nav-item">维保服务系统</div>
@@ -32,11 +27,11 @@
             <div class="info-title">例行维保</div>
           </div>
           <div class="info-item horizontal">
-            <div class="info-value">{{ maintainThisMonthCompleted }}</div>
+            <div class="info-value">3</div>
             <div class="info-desc">(本月已完成)</div>
           </div>
           <div class="info-item horizontal">
-            <div class="info-value">{{ maintainLastMonthOverdue }}</div>
+            <div class="info-value">0</div>
             <div class="info-desc">(上月逾期数)</div>
           </div>
         </div>
@@ -50,11 +45,11 @@
             <div class="info-title">故障工单</div>
           </div>
           <div class="info-item horizontal">
-            <div class="info-value">{{ faultUnresolved }}</div>
+            <div class="info-value">2</div>
             <div class="info-desc">(当前未完成)</div>
           </div>
           <div class="info-item horizontal">
-            <div class="info-value">{{ faultOverdueUnresolved }}</div>
+            <div class="info-value">2</div>
             <div class="info-desc">(逾期未完成)</div>
           </div>
         </div>
@@ -68,68 +63,109 @@
             <div class="info-title">附加维保</div>
           </div>
           <div class="info-item horizontal">
-            <div class="info-value">{{ additionalMaintainCount }}</div>
-            <div class="info-desc">(当前共完成)</div>
+            <div class="info-value">2</div>
+            <div class="info-desc">(当前未完成)</div>
           </div>
-
+          <div class="info-item horizontal">
+            <div class="info-value">2</div>
+            <div class="info-desc">(逾期未完成)</div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- <div class="data-card">
+        <div class="icon-circle">
+          <i class="el-icon-document" />
+        </div>
+        <div class="card-content">
+          <div class="card-title">例行维保
+            <div class="numbers">
+              <span class="number">{{ routineMaintenance.currentMonthCompleted }}</span>
+              <span class="label">(本月未完成)</span>
+            </div>
+            <div class="numbers">
+            <span class="number overdue">{{ routineMaintenance.lastMonthOverdue }}</span>
+            <span class="label">(上月逾期数)</span>
+          </div>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- <div class="data-card">
+         <div class="icon-circle">
+          <i class="el-icon-setting"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-title">故障工单</div>
+           <div class="numbers">
+            <span class="number">{{ faultWorkOrder.currentMonthCompleted }}</span>
+            <span class="label">(当前未完成)</span>
+          </div>
+          <div class="numbers">
+            <span class="number overdue">{{ faultWorkOrder.overdue }}</span>
+            <span class="label">(逾期未完成)</span>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- <div class="data-card">
+        <div class="icon-circle">
+          <i class="el-icon-lock"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-title">附加维保</div>
+           <div class="numbers">
+            <span class="number">{{ additionalMaintenance.currentMonthCompleted }}</span>
+            <span class="label">(当前未完成)</span>
+          </div>
+           <div class="numbers">
+            <span class="number overdue">{{ additionalMaintenance.overdue }}</span>
+            <span class="label">(逾期未完成)</span>
+          </div>
+        </div>
+      </div> -->
+
+    <!-- 您可以根据需要添加更多数据卡片 -->
   </div>
-  <!-- 您可以根据需要添加更多数据卡片 -->
+    <!-- 您可以根据需要添加更多数据卡片 -->
+  </div>
 </template>
 
 <script>
 
-import { getDigitalScreenData } from '@/api/digitalScreen'
 export default {
   data() {
     return {
       isClicked: false,
       currentDateTime: '',
-      maintainThisMonthCompleted: 0,
-      maintainLastMonthOverdue: 0,
-      faultUnresolved: 0,
-      faultOverdueUnresolved: 0,
-      additionalMaintainCount: 0
-      // screenData: null
+      routineMaintenance: {
+        currentMonthCompleted: 3,
+        lastMonthOverdue: 0
+      },
+      faultWorkOrder: {
+        currentMonthCompleted: 2,
+        overdue: 2
+      },
+      additionalMaintenance: {
+        currentMonthCompleted: 3,
+        overdue: 2
+      }
+      // 您可以根据需要添加更多数据属性
     }
   },
-  // computed: {
-  //   maintainThisMonthCompleted() {
-  //     return this.screenData ? this.screenData.maintainThisMonthCompleted : 0;
-  //   },
-  //   maintainLastMonthOverdue() {
-  //     return this.screenData ? this.screenData.maintainLastMonthOverdue : 0;
-  //   },
-  //   faultUnresolved() {
-  //     return this.screenData ? this.screenData.faultUnresolved : 0;
-  //   },
-  //   faultOverdueUnresolved() {
-  //     return this.screenData ? this.screenData.faultOverdueUnresolved : 0;
-  //   },
-  //   additionalMaintainCount() {
-  //     return this.screenData ? this.screenData.additionalMaintainCount : 0;
-  //   }
-  // },
-
   mounted() {
     // 定时更新时间
     this.updateDateTime()
     this.timer = setInterval(this.updateDateTime, 1000)
     this.initParticles()
     setInterval(this.drawParticles, 33)
-    this.loadScreenData()
   },
   beforeDestroy() {
     // 清除定时器
     clearInterval(this.timer)
   },
   methods: {
-    digital() {
-      // 数字可视化大屏按钮点击事件
-      this.$message.info('您当前已在数字可视化大屏页面')
-    },
     servicesystem() {
       this.$router.push({ name: 'AgencyBasicInfo' })
     },
@@ -197,33 +233,6 @@ export default {
             }
           }
         }
-      }
-    },
-    async loadScreenData() {
-      try {
-        const res = await getDigitalScreenData()
-        console.log(res)
-        if (res) {
-          const data = res.data
-          this.maintainThisMonthCompleted = data.maintainThisMonthCompleted || 0
-          this.maintainLastMonthOverdue = data.maintainLastMonthOverdue || 0
-          this.faultUnresolved = data.faultUnresolved || 0
-          this.faultOverdueUnresolved = data.faultOverdueUnresolved || 0
-          this.additionalMaintainCount = data.additionalMaintainCount || 0
-
-          console.log('赋值成功：', {
-            maintainThisMonthCompleted: this.maintainThisMonthCompleted,
-            maintainLastMonthOverdue: this.maintainLastMonthOverdue,
-            faultUnresolved: this.faultUnresolved,
-            faultOverdueUnresolved: this.faultOverdueUnresolved,
-            additionalMaintainCount: this.additionalMaintainCount
-          })
-        } else {
-          this.$message.error('获取数据失败')
-        }
-      } catch (err) {
-        console.error('获取数字屏数据失败:', err)
-        this.$message.error('服务器错误')
       }
     }
 

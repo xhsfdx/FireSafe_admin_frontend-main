@@ -6,36 +6,13 @@
 
 <script>
 import echarts from 'echarts'
-import { getDigitalScreenData } from '@/api/digitalScreen'
+
 export default {
   name: 'PersonStatistics',
-  data() {
-    return {
-      chartData: [] // 用于存储岗位人员统计数据
-    }
-  },
   mounted() {
-    this.fetchPersonStatistics()
-    // this.initChart()
+    this.initChart()
   },
   methods: {
-    async fetchPersonStatistics() {
-      try {
-        const res = await getDigitalScreenData()
-        if (res) {
-          const stats = res.data.staffRoleStats
-          // 更新 chartData
-          this.chartData = [
-            { value: stats.leaderCount, name: '项目负责人' },
-            { value: stats.technicalCount, name: '技术负责人' },
-            { value: stats.maintainerCount, name: '现场维护人员' }
-          ]
-          this.initChart()
-        }
-      } catch (e) {
-        console.error('获取人员统计数据失败', e)
-      }
-    },
     initChart() {
       const chart = echarts.init(this.$refs.echartsDom)
       const option = {
@@ -118,10 +95,10 @@ export default {
                 shadowColor: '#00ffff'
               }
             },
-            data: this.chartData.length ? this.chartData : [
-              { value: 0, name: '项目负责人' },
-              { value: 0, name: '技术负责人' },
-              { value: 0, name: '现场维护人员' }
+            data: [
+              { value: 1, name: '项目负责人' },
+              { value: 3, name: '现场维护人员' },
+              { value: 1, name: '技术负责人' }
             ]
           }
         ]

@@ -59,4 +59,4 @@ export function createFaultFromTask(data) {
     method: 'post',
     data
   })
-}
+} 

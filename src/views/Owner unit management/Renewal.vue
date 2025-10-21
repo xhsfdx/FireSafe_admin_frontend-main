@@ -1,0 +1,401 @@
+<template>
+  <div class="progress-navbar">
+    <!-- 步骤条 -->
+    <div class="steps-bar">
+      <div
+        v-for="(step, idx) in steps"
+        :key="step.name"
+        :class="['step-item', { active: idx === activeIndex }]"
+      >
+        <div :class="['step-bg', { 'highlight': idx === activeIndex }]">
+          <div class="step-icon">
+            <img :src="step.icon" alt="">
+          </div>
+          <span>{{ step.label }}</span>
+          <div class="step-number" :class="{ active: idx === activeIndex }">{{ idx + 1 }}</div>
+        </div>
+        <template v-if="idx < steps.length - 1">
+          <div class="step-arrow" />
+        </template>
+      </div>
+    </div>
+    <!-- 内容区（按步切换） -->
+    <div class="step-content">
+      <component
+        :is="steps[activeIndex].component"
+        :form-data="getStepFormData()"
+        :key="'step-' + activeIndex + '-' + (formData.originalContractId || 'new')"
+        @next="handleNext"
+        @prev="handlePrev"
+        @update="updateFormData"
+        @submit="handleSubmit"
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+// 续签用的三个步骤组件（你可以后续完善）
+import RenewalContractInfo from './Renewal contract information.vue'
+import RenewalProjectInfo from './Renewal Project information.vue'
+import RenewalDispatchStaff from './Renewwal Configure maintenance personnel.vue'
+import { getContractDetail, renewalContract } from '@/api/contract' // 你的API
+
+export default {
+  name: 'Renewal',
+  components: {
+    RenewalContractInfo,
+    RenewalProjectInfo,
+    RenewalDispatchStaff
+  },
+  data() {
+    return {
+      activeIndex: 0,
+      // 统一数据中心
+      formData: {},
+      contractId: null, // 保存原合同ID
+      steps: [
+        {
+          label: '续签合同信息',
+          name: 'contract',
+          icon: require('@/assets/contract-icon.png'),
+          component: 'RenewalContractInfo'
+        },
+        {
+          label: '续签项目信息',
+          name: 'project',
+          icon: require('@/assets/project-icon.png'),
+          component: 'RenewalProjectInfo'
+        },
+        {
+          label: '配置维保人员',
+          name: 'staff',
+          icon: require('@/assets/staff-icon.png'),
+          component: 'RenewalDispatchStaff'
+        }
+      ]
+    }
+  },
+  created() {
+    // 获取url参数id
+    const contractId = this.$route.query.id
+    if (contractId) {
+      this.contractId = contractId
+      this.loadContract(contractId)
+    } else {
+      this.$message.error('缺少合同ID参数')
+      this.$router.push('/contract/list')
+    }
+  },
+  watch: {
+    // 监听formData变化，确保子组件能及时更新
+    formData: {
+      handler(newVal) {
+        console.log('formData发生变化:', newVal)
+      },
+      deep: true
+    },
+    // 监听activeIndex变化，确保切换步骤时数据正确传递
+    activeIndex(newVal) {
+      console.log('切换到步骤:', newVal)
+    }
+  },
+  methods: {
+    async loadContract(id) {
+      try {
+        console.log('开始加载合同数据，ID:', id)
+        const res = await getContractDetail(id)
+        console.log('API响应:', res)
+        
+        if (!res || !res.data) {
+          console.error('API响应数据为空:', res)
+          throw new Error('数据为空')
+        }
+        
+        console.log('后端返回的合同数据:', res.data)
+        
+        const { id: originalId } = res.data
+
+        // 构建统一的、完整的表单数据
+        this.formData = { 
+          // 合同基本信息
+          entrustName: res.data.clientCompany || '',
+          creditCode: res.data.creditCode || '',
+          contractName: res.data.name || '',
+          contractNo: res.data.code || '',
+          payCycle: res.data.payCycle || '',
+          buildType: res.data.warrantyType || '',
+          maintType: res.data.warrantyMethod || '',
+          maintArea: res.data.warrantyArea || '',
+          amount: res.data.amount || '',
+          dateStart: '', // 清空时间，允许重新设置
+          dateEnd: '', // 清空时间，允许重新设置
+          remind: res.data.autoNotice ? 1 : 0,
+          designOrg: res.data.designCompany || '',
+          debugOrg: res.data.debugCompany || '',
+          recordOrg: res.data.checkCompany || '',
+          remark: res.data.note || '',
+          
+          // 建筑信息
+          buildingList: res.data.buildings ? res.data.buildings.filter(b => b).map(b => ({
+            name: b.name || '',
+            area: b.area || '',
+            floor: b.floors || '',
+            height: b.height || '',
+            remark: ''
+          })) : [],
+          
+          // 维保内容
+          checkedMaintList: res.data.maintainItems ? res.data.maintainItems.filter(item => item).map(item => ({
+            system: item.system || '',
+            item: item.item || '',
+            content: item.content || '',
+            period: item.period || '',
+            standard: item.standard || ''
+          })) : [],
+          
+          // 项目列表
+          projectList: res.data.project ? [{
+              name: res.data.project.name || '',
+              ownerName: res.data.project.ownerCompany || '',
+              address: res.data.project.address || '',
+              area: res.data.project.district || '',
+              linkman: res.data.project.contactPerson || '',
+              phone: res.data.project.contactPhone || '',
+              index: 1
+          }] : [],
+
+          // 维保人员 - 确保有初始数据
+          dispatchStaffList: res.data.maintainPersons ? [{
+              index: 1,
+              owner: (res.data.project && res.data.project.ownerCompany) || '',
+              projectName: (res.data.project && res.data.project.name) || '',
+              techManager: res.data.maintainPersons.technical || '',
+              projManager: res.data.maintainPersons.leader || '',
+              worker: Array.isArray(res.data.maintainPersons.maintainers) ? res.data.maintainPersons.maintainers.join('、') : '',
+              maintainPersons: res.data.maintainPersons
+          }] : [{
+              index: 1,
+              owner: (res.data.project && res.data.project.ownerCompany) || '',
+              projectName: (res.data.project && res.data.project.name) || '',
+              techManager: '',
+              projManager: '',
+              worker: '',
+              maintainPersons: null
+          }],
+          
+          originalContractId: originalId // 保存原合同ID用于续签
+        }
+        
+        console.log('统一的formData已加载:', this.formData)
+        console.log('dispatchStaffList数据:', this.formData.dispatchStaffList)
+
+      } catch (e) {
+        console.error('加载合同数据失败:', e)
+        console.error('错误详情:', e.message)
+        this.$message.error('加载合同数据失败: ' + (e.message || '未知错误'))
+        this.$router.push('/contract/list')
+      }
+    },
+    handleNext(payload) {
+      if (this.activeIndex < this.steps.length - 1) {
+        this.activeIndex++
+      }
+    },
+    handlePrev() {
+      if (this.activeIndex > 0) {
+        this.activeIndex--
+      }
+    },
+    updateFormData(data) {
+      // 直接将子组件的更新合并到统一的formData中
+      this.formData = { ...this.formData, ...data }
+      console.log('formData 已更新:', this.formData)
+      console.log('dispatchStaffList 当前状态:', this.formData.dispatchStaffList)
+    },
+    async handleSubmit(personnelData) {
+      if (personnelData) {
+        this.updateFormData(personnelData);
+      }
+      await this.$nextTick();
+      const projectData = (this.formData.projectList && this.formData.projectList[0]) || {};
+      const cleanBuildings = (this.formData.buildingList || []).map(b => ({
+        name: b.name,
+        area: b.area,
+        floors: b.floor || b.floors || '',
+        height: b.height
+      }))
+      
+      // 修复 maintainItems 组装逻辑 - 确保是字符串数组
+      const maintainItems = (this.formData.checkedMaintList || [])
+        .map(item => {
+          // 如果 item 是对象且有 content 字段，提取 content
+          if (typeof item === 'object' && item !== null && item.content) {
+            return item.content;
+          }
+          // 如果 item 是字符串
+          if (typeof item === 'string') {
+            return item;
+          }
+          return null;
+        })
+        .filter(item => item && item.trim()); // 过滤空字符串和 null
+
+      const payload = {
+        name: this.formData.contractName,
+        code: this.formData.contractNo,
+        clientCompany: this.formData.entrustName,
+        creditCode: this.formData.creditCode,
+        payCycle: this.formData.payCycle,
+        warrantyType: this.formData.buildType,
+        warrantyMethod: this.formData.maintType,
+        warrantyArea: this.formData.maintArea,
+        amount: this.formData.amount,
+        startDate: this.formData.dateStart,
+        endDate: this.formData.dateEnd,
+        autoNotice: this.formData.remind,
+        designCompany: this.formData.designOrg,
+        debugCompany: this.formData.debugOrg,
+        checkCompany: this.formData.recordOrg,
+        note: this.formData.remark,
+        fileUrls: [],
+        buildings: cleanBuildings,
+        maintainItems,
+        projectInfo: projectData
+          ? {
+              name: projectData.name,
+              companyname: projectData.ownerName,
+              address: projectData.address,
+              district: projectData.area,
+              position: '',
+              ownerCompany: projectData.ownerName,
+              contactPerson: projectData.linkman,
+              contactPhone: projectData.phone,
+              logoUrl: '',
+              entranceReportUrl: ''
+            }
+          : null,
+        maintainPersons: this.formData.dispatchStaffList
+          ? this.formData.dispatchStaffList.map(item => item.maintainPersons).filter(p => p)
+          : [],
+        originalContractId: this.contractId
+      };
+      if (!payload.startDate || !payload.endDate) {
+        this.$message.error('请填写合同时间');
+        this.activeIndex = 0;
+        return;
+      }
+      if (!payload.projectInfo.name || !payload.projectInfo.ownerCompany) {
+        this.$message.error('请补全项目信息');
+        return;
+      }
+      try {
+        console.log('提交续签数据:', payload)
+        console.log('maintainItems 数据:', maintainItems)
+        await renewalContract(payload)
+        this.$message.success('续签提交成功')
+        this.$router.push({ name: 'UnitProject' })
+      } catch (e) {
+        console.error('续签提交失败:', e)
+        this.$message.error('续签提交失败')
+      }
+    },
+    getStepFormData() {
+      // 统一把id等关键信息传递下去
+      return {
+        ...this.formData,
+        contractId: this.contractId, // 合同id
+        projectIds: (this.formData.projectList || []).map(p => p.id).filter(Boolean)
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+.progress-navbar {
+  background: #f8f9fb;
+  min-height: 100vh;
+  padding: 0 0 24px 0;
+}
+.steps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 24px 0;
+  min-height: 92px;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+}
+.step-bg {
+  background: #fff;
+  border-radius: 14px 14px 0 14px;
+  box-shadow: 0 4px 16px #e0ebff3b;
+  padding: 18px 54px 18px 28px;
+  min-width: 220px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+.step-bg.highlight {
+  background: linear-gradient(90deg, #e4f0fe 0%, #d7e8fd 100%);
+  box-shadow: 0 4px 24px #7db3f533;
+}
+.step-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+}
+.step-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.step-bg span {
+  font-size: 19px;
+  color: #222;
+  font-weight: 500;
+}
+.step-number {
+  position: absolute;
+  right: 12px;
+  top: 14px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2196f3;
+  opacity: 0.18;
+  z-index: 2;
+}
+.step-bg.highlight .step-number {
+  color: #1e72d8;
+  opacity: 1;
+  background: #1e72d8;
+  color: #fff;
+  border-radius: 7px;
+  padding: 3px 14px;
+  font-size: 20px;
+  position: absolute;
+  right: 15px;
+  top: 10px;
+}
+.step-arrow {
+  width: 64px;
+  height: 6px;
+  border-bottom: 3px solid #e2eaf4;
+  margin: 0 8px;
+  border-radius: 2px;
+  background: transparent;
+  align-self: flex-end;
+}
+.step-content {
+  background: #fff;
+  margin-top: 18px;
+  border-radius: 12px;
+  min-height: 680px;
+  box-shadow: 0 4px 16px #e0ebff3b;
+  padding: 0 0 24px 0;
+}
+</style>

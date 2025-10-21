@@ -25,3 +25,12 @@ export function getPaymentStats() {
     method: 'get'
   })
 }
+
+// 获取结款记录
+export function getPaymentHistory(contractId, params) {
+  return request({
+    url: `/payment/${contractId}/history`,
+    method: 'get',
+    params
+  })
+} 

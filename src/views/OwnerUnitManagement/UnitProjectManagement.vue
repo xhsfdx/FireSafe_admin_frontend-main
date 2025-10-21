@@ -230,9 +230,15 @@ export default {
               projectid: item.project_id || item.contractId || '', // 优先使用project_id，如果没有则使用contractId
               ownerName: item.ownerCompany || '',
               entrustName: item.clientCompany || '',
+<<<<<<< HEAD:src/views/Owner unit management/Unit Project Management.vue
+              contractType: item.contractType || '项目维保',
+              status: item.status || '',
+              contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '',
+=======
               contractType: item.contractType || '长期性合同',
               status: item.status || '草稿',
               contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '￥0',
+>>>>>>> 1d817a0de13138c277eb06861a00ad7e16aa88c6:src/views/OwnerUnitManagement/UnitProjectManagement.vue
               days: days
             }
 
