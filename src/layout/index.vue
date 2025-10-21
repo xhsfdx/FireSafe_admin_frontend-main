@@ -8,10 +8,11 @@
         <tags-view v-if="needTagsView" />
       </div>
       <app-main />
+       <!-- 去除右侧设置
       <right-panel v-if="showSettings">
         <settings />
-      </right-panel>
-    </div>
+      </right-panel> -->
+    </div> 
   </div>
 </template>
 

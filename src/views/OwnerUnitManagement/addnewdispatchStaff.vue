@@ -13,8 +13,8 @@
       <div v-if="!hasConfiguredStaff" class="notice-bar">
         <el-alert
           title="请配置维保人员"
-          description="请点击表格中的"
-          配置"按钮，为项目分配技术负责人、项目负责人和现场维保人员。"
+          description="请点击表格中的'
+          配置'按钮，为项目分配技术负责人、项目负责人和现场维保人员。"
           type="warning"
           show-icon
           :closable="false"

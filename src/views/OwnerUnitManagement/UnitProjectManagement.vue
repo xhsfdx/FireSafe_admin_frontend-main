@@ -130,7 +130,7 @@ export default {
       loading: false,
       pagination: {
         page: 1,
-        limit: 40,
+        limit: 10,
         total: 0
       },
       selectedRows: [],

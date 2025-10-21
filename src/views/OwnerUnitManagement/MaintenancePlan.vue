@@ -209,64 +209,14 @@ export default {
         // 传递参数获取所有数据，设置一个足够大的limit
         const res = await getMaintainPlans({
           page: 1,
-          limit: 1000 // 设置足够大的limit来获取所有数据
+          limit: 10 // 设置足够大的limit来获取所有数据
         })
         console.log('API响应:', res)
-
-        // 检查数据重复问题
-        const rawData = res.data || []
-        console.log('原始数据:', rawData)
-
-        // 去重处理 - 根据_id去重，如果_id相同则根据项目名称和业主单位名称去重
-        const uniqueData = rawData.filter((item, index, self) => {
-          // 首先根据_id去重
-          const idIndex = self.findIndex(t => t._id === item._id)
-          if (idIndex !== index) return false
-
-          // 如果_id相同，则根据项目名称和业主单位名称组合去重
-          const businessKey = `${item.projectName || ''}_${item.ownerName || ''}`
-          const businessIndex = self.findIndex(t =>
-            `${t.projectName || ''}_${t.ownerName || ''}` === businessKey
-          )
-
-          return businessIndex === index
-        })
-
-        // 确保每个项目都有唯一的ID
-        const processedData = uniqueData.map((item, index) => {
-          if (!item._id) {
-            // 如果没有_id，生成一个临时的唯一ID
-            item._id = `temp_${Date.now()}_${index}`
-            console.warn('项目缺少_id，已生成临时ID:', item._id, item)
-          }
-          return item
-        })
-
-        console.log('去重前数据量:', rawData.length)
-        console.log('去重后数据量:', uniqueData.length)
-        console.log('处理后的数据:', processedData)
-        console.log('API返回的total字段:', res.total)
-
-        if (rawData.length !== uniqueData.length) {
-          console.warn('发现重复数据，已自动去重')
-        }
-
-        // 如果API返回的total和实际数据量不匹配，给出警告
-        if (res.total && res.total !== rawData.length) {
-          console.warn(`API返回total: ${res.total}, 实际数据量: ${rawData.length}`)
-        }
-
-        this.allData = processedData
+        this.allData = res.data || []
         this.tableData = [...this.allData]
 
         // 显示更详细的信息
-        this.$message.success(`数据加载成功，共 ${processedData.length} 条记录`)
-
-        // 如果数据量很少，给出提示
-        if (processedData.length < 5) {
-          console.warn('数据量较少，可能存在问题')
-          this.$message.warning(`当前只加载到 ${processedData.length} 条记录，如果预期应该有更多数据，请检查后端数据库`)
-        }
+        this.$message.success(`数据加载成功，共 ${this.allData.length} 条记录`)
       } catch (error) {
         this.$message.error(`数据加载失败：${error.msg || error.message}`)
         this.allData = []
