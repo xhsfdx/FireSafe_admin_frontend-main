@@ -87,8 +87,8 @@ export default {
             this.tableData = newVal.projectList.map(p => ({
               ownerName: p.ownerName,
               projectName: p.name,
-              techLeader: p.leader,
-              projectLeader: p.technical,
+              techLeader: p.technical,
+              projectLeader: p.leader,
               onSiteStaff: p.maintainers.map(item => item.name)
             }))
           }
