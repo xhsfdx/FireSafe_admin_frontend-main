@@ -374,8 +374,8 @@ export default {
             endDate: this.formatDate(item.endDate) || '',
             remainingDays: remainingDays,
             renewStatus: item.renewStatus || '未续签',
-            createTime: this.formatDate(item.createdAt) || '',
-            updateTime: this.formatDate(item.updatedAt) || ''
+            createTime: this.formatDate(item.createTime) || '',
+            updateTime: this.formatDate(item.updateTime) || ''
           }
 
           console.log('✅ 项目详情数据处理完成:', this.projectDetail)
