@@ -313,7 +313,7 @@ export const asyncRoutes = [
       {
         path: 'project',
         name: 'UnitProject',
-        component: () => import('@/views/OwnerUnitManagement/UnitProjectManagement.vue'),
+        component: () => import('@/views/OwnerUnitManagement/ProjectList.vue'),
         meta: {
           title: '单位项目管理',
           roles: ['superadmin', 'admin', 'editor']
