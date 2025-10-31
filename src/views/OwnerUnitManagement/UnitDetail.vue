@@ -446,7 +446,10 @@ export default {
     },
     // 设置按钮
     onSetting() {
-      this.$message.info('设置功能开发中...')
+      this.$router.push({
+        name: 'EditContractDetail',
+        query: { id: this.contractId }
+      })
     },
     // 返回按钮
     goBack() {

@@ -39,7 +39,11 @@
 
       <!-- 弹窗 -->
       <el-dialog title="配置维保人员" :visible.sync="showDialog" width="700px" destroy-on-close>
-        <DispatchStaff :data="currentRow" @submit="onDialogConfirm" @cancel="showDialog = false" />
+        <DispatchStaff ref="dispatchStaff" :data="currentRow" @submit="onDialogConfirm" @cancel="showDialog = false" />
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="showDialog = false">取消</el-button>
+          <el-button type="primary" @click="confirmConfig">确认配置</el-button>
+        </div>
       </el-dialog>
     </div>
   </div>
@@ -89,7 +93,8 @@ export default {
               projectName: p.name,
               techLeader: p.technical,
               projectLeader: p.leader,
-              onSiteStaff: p.maintainers.map(item => item.name)
+              onSiteStaff: p.maintainers.map(item => item.name),
+              maintainPersons: p.maintainPersons
             }))
           }
         }
@@ -146,6 +151,7 @@ export default {
           })
 
           this.tableData = updatedTableData
+          console.log(updatedTableData)
           console.log('✅ 维保人员数据更新完成')
         }
       } catch (error) {
@@ -172,27 +178,108 @@ export default {
       this.currentRow = { ...row }
       this.showDialog = true
     },
+    confirmConfig() {
+      // 触发DispatchStaff组件的保存操作
+      console.log('确认配置维保人员:', this.currentRow)
+      this.$refs.dispatchStaff && this.$refs.dispatchStaff.onSave()
+    },
     onDialogConfirm(newData) {
+      console.log('=== onDialogConfirm 被调用 ===')
+      console.log('接收到的数据:', newData)
+      console.log('当前行数据:', this.currentRow)
+
       if (!this.currentRow.projectName) {
         this.$message.error('未找到当前行的项目名称，无法保存！')
         return
       }
+
       const index = this.tableData.findIndex(item => item.projectName === this.currentRow.projectName)
+      console.log('找到的行索引:', index)
+
       if (index !== -1) {
-        const maintainPersons = {
-          technical: newData.maintainPersons.technical || '',
-          leader: newData.maintainPersons.leader || '',
-          maintainer: Array.isArray(newData.maintainPersons.maintainer) ? newData.maintainPersons.maintainer.filter(Boolean) : []
+        const maintainPersons = newData.maintainPersons
+        const selectedStaff = newData.selectedStaff
+        console.log('=== 维保人员数据处理 ===')
+        console.log('maintainPersons:', maintainPersons)
+        console.log('selectedStaff:', selectedStaff)
+
+        let techLeader = ''
+        let projectLeader = ''
+        let onSiteStaff = ''
+
+        // 从selectedStaff获取人员姓名
+        if (selectedStaff) {
+          // 获取技术负责人姓名
+          if (selectedStaff.tech) {
+            techLeader = selectedStaff.tech.name
+            console.log('技术负责人姓名:', techLeader)
+          }
+
+          // 获取项目负责人姓名
+          if (selectedStaff.manager) {
+            projectLeader = selectedStaff.manager.name
+            console.log('项目负责人姓名:', projectLeader)
+          }
+
+          // 获取现场维护人员姓名
+          if (selectedStaff.workers && selectedStaff.workers.length > 0) {
+            onSiteStaff = selectedStaff.workers
+              .map(worker => worker.name)
+              .filter(Boolean)
+              .join('、')
+            console.log('现场维护人员姓名:', onSiteStaff)
+          }
         }
+
+        console.log('=== 解析后的人员信息 ===')
+        console.log('techLeader:', techLeader)
+        console.log('projectLeader:', projectLeader)
+        console.log('onSiteStaff:', onSiteStaff)
+
+        // 确保maintainPersons数据格式正确
+        console.log('=== 原始maintainPersons数据 ===')
+        console.log('maintainPersons:', maintainPersons)
+        console.log('maintainers原始数据:', maintainPersons.maintainers)
+        console.log('maintainers类型:', typeof maintainPersons.maintainers)
+        console.log('maintainers是否为数组:', Array.isArray(maintainPersons.maintainers))
+
+        const sanitizedMaintainPersons = {
+          technical: maintainPersons.technical || null,
+          leader: maintainPersons.leader || null,
+          maintainers: Array.isArray(maintainPersons.maintainers)
+            ? maintainPersons.maintainers.filter(id => id && typeof id === 'string')
+            : []
+        }
+
+        console.log('=== 处理后的maintainPersons数据 ===')
+        console.log('sanitizedMaintainPersons:', sanitizedMaintainPersons)
+        console.log('maintainers处理后:', sanitizedMaintainPersons.maintainers)
+        console.log('maintainers长度:', sanitizedMaintainPersons.maintainers.length)
+
         const updatedRow = {
           ...this.tableData[index],
-          techLeader: maintainPersons.technical,
-          projectLeader: maintainPersons.leader,
-          onSiteStaff: (maintainPersons.maintainer || []).join('、'),
-          maintainPersons
+          projectName: this.currentRow.projectName, // 确保项目名称正确
+          ownerName: this.currentRow.ownerName, // 确保业主单位正确
+          techLeader,
+          projectLeader,
+          onSiteStaff,
+          maintainPersons: sanitizedMaintainPersons
         }
+
+        console.log('=== 更新前的行数据 ===')
+        console.log(this.tableData[index])
+        console.log('=== 更新后的行数据 ===')
+        console.log(updatedRow)
+
         this.$set(this.tableData, index, updatedRow)
+        console.log('=== 整个表格数据更新后 ===')
+        console.log(this.tableData)
+
         this.emitUpdate()
+        this.$message.success('维保人员配置成功！')
+      } else {
+        console.error('未找到匹配的项目行！')
+        this.$message.error('未找到匹配的项目行！')
       }
       this.showDialog = false
     },
@@ -205,6 +292,8 @@ export default {
       this.$emit('submit')
     },
     emitUpdate() {
+      console.log('📢 触发emitUpdate')
+      console.log('当前数据:', { dispatchStaffList: this.tableData })
       this.$emit('update', { dispatchStaffList: this.tableData })
     }
   }

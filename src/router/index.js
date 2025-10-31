@@ -386,13 +386,6 @@ export const asyncRoutes = [
         meta: { title: '新增项目信息' }
       },
       {
-        path: 'contract-detail',
-        name: 'ContractDetail',
-        hidden: true,
-        component: () => import('@/views/OwnerUnitManagement/ContractDetail.vue'),
-        meta: { title: '合同详情' }
-      },
-      {
         path: 'contract-info',
         name: 'ContractInfo',
         hidden: true,
@@ -436,6 +429,16 @@ export const asyncRoutes = [
         component: () => import('@/views/OwnerUnitManagement/UnitDetail.vue'),
         meta: {
           title: '项目详情',
+          roles: ['superadmin', 'admin', 'editor']
+        }
+      },
+      {
+        path: 'EditContractDetail',
+        name: 'EditContractDetail',
+        hidden: true,
+        component: () => import('@/views/OwnerUnitManagement/Contract_Detail_View.vue'),
+        meta: {
+          title: '编辑合同',
           roles: ['superadmin', 'admin', 'editor']
         }
       },

@@ -234,3 +234,10 @@ export function rejectContract(id, data) {
   })
 }
 
+export function updateContract(id, data) {
+  return request({
+    url: `/contracts/${id}`,
+    method: 'put',
+    data
+  })
+}

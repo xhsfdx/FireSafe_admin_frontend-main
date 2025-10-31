@@ -151,13 +151,14 @@ export default {
       handler(newVal) {
         if (newVal) {
           // 如果是一次性合同且没有项目信息，创建一个默认项目
+          console.log(newVal)
           if (['施工', '评估', '检测'].includes(newVal.contractType) && (!newVal.projectList || newVal.projectList.length === 0)) {
             this.tableData = [{
-              ownerName: newVal.entrustName || '',
+              ownerName: newVal.clientCompany || '',
               projectName: newVal.contractName || '一次性合同项目',
-              techLeader: '',
-              projectLeader: '',
-              onSiteStaff: '',
+              techLeader: newVal.maintainPersons && newVal.maintainPersons.technical,
+              projectLeader: newVal.maintainPersons && newVal.maintainPersons.leader,
+              onSiteStaff: newVal.maintainPersons && newVal.maintainPersons.maintainers,
               isOneTimeContract: true
             }]
           } else if (newVal.projectList) {
@@ -167,9 +168,10 @@ export default {
               this.tableData = newVal.projectList.map(p => ({
                 ownerName: p.ownerName,
                 projectName: p.name,
-                techLeader: '',
-                projectLeader: '',
-                onSiteStaff: ''
+                techLeader: p.technical || '',
+                projectLeader: p.leader || '',
+                onSiteStaff: p?.maintainers?.[0]?.name || '',
+                maintainPersons: p.maintainPersons || ''
               }))
             }
           }
