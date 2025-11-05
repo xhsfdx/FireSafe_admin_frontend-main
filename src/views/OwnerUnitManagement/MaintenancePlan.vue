@@ -39,7 +39,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column type="index" label="序号" width="60" align="center" />
+      <!-- <el-table-column type="index" label="序号" width="60" align="center" /> -->
       <!-- <el-table-column v-show="false" prop="_id" label="项目ID" align="center"  /> -->
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
@@ -107,12 +107,12 @@
 
     <!-- 底部分页与统计 -->
     <div class="table-footer">
-      <div class="total">共查询到 {{ tableData.length }} 条</div>
+      <div class="total">共查询到 {{ total }} 条</div>
       <el-pagination
         background
         layout="prev, pager, next"
         :page-size="pageSize"
-        :total="tableData.length"
+        :total="total"
         style="float:right"
         :current-page="currentPage"
         @current-change="handleCurrentChange"
@@ -137,6 +137,7 @@ export default {
       tableData: [],
       multipleSelection: [],
       currentPage: 1,
+      total: 0,
       pageSize: 10
     }
   },
@@ -190,33 +191,39 @@ export default {
   methods: {
     onSearch() {
       // 根据筛选条件过滤数据
-      const { name, makingStatus, planType, planStatus } = this.filters
-      this.tableData = this.allData.filter(item => {
-        const nameMatch = !name || (item.projectName && item.projectName.toLowerCase().includes(name.toLowerCase()))
-        const makingStatusMatch = !makingStatus || item.planDefinedStatus === makingStatus
-        const planTypeMatch = !planType || item.planType === planType
-        const planStatusMatch = !planStatus || item.planStatus === planStatus
+      
+      // this.tableData = this.allData.filter(item => {
+      //   const nameMatch = !name || (item.projectName && item.projectName.toLowerCase().includes(name.toLowerCase()))
+      //   const makingStatusMatch = !makingStatus || item.planDefinedStatus === makingStatus
+      //   const planTypeMatch = !planType || item.planType === planType
+      //   const planStatusMatch = !planStatus || item.planStatus === planStatus
 
-        return nameMatch && makingStatusMatch && planTypeMatch && planStatusMatch
-      })
+      //   return nameMatch && makingStatusMatch && planTypeMatch && planStatusMatch
+      // })
 
-      // 重置到第一页
+      // // 重置到第一页
       this.currentPage = 1
-      this.$message.success(`查询完成，共找到 ${this.tableData.length} 条记录`)
+      this.onLoad()
     },
     async onLoad() {
       try {
+        const { name, makingStatus, planType, planStatus } = this.filters
         // 传递参数获取所有数据，设置一个足够大的limit
         const res = await getMaintainPlans({
-          page: 1,
-          limit: 10 // 设置足够大的limit来获取所有数据
+          page: this.currentPage,
+          limit: 10, // 设置足够大的limit来获取所有数据
+          projectName: name,
+          planDefinedStatus: makingStatus,
+          planType: planType,
+          planStatus: planStatus
         })
         console.log('API响应:', res)
         this.allData = res.data || []
+        this.total = res.total || 0
         this.tableData = [...this.allData]
 
         // 显示更详细的信息
-        this.$message.success(`数据加载成功，共 ${this.allData.length} 条记录`)
+        this.$message.success(`数据加载成功，共 ${this.total} 条记录`)
       } catch (error) {
         this.$message.error(`数据加载失败：${error.msg || error.message}`)
         this.allData = []
@@ -243,6 +250,7 @@ export default {
     },
     handleCurrentChange(page) {
       this.currentPage = page
+      this.onLoad()
     },
     getStatusType(status) {
       switch (status) {

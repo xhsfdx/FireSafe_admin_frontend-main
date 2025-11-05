@@ -160,6 +160,7 @@ export default {
         const res = await createContract(payload) // 使用转换后的 payload
         if (res.success) {
           this.$message.success('新增合同成功！')
+          await this.$store.dispatch('tagsView/delView', this.$route)
           this.$router.push({ name: 'UnitProject' }) // Redirect to the list page
         } else {
           this.$message.error(res.message || '提交失败，请检查填写内容')
