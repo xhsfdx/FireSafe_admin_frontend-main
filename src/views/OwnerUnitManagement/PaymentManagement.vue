@@ -38,10 +38,11 @@
       style="width: 100%; margin-top: 16px; z-index: 10;"
       :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
       :empty-text="' '"
+      :row-key="'id'"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column type="index" label="序号" width="60" align="center" />
+      <el-table-column type="index" label="序号" width="60" align="center" :index="indexMethod" />
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
       <el-table-column prop="entrustName" label="委托单位" align="center" />
       <el-table-column prop="contractType" label="合同种类" align="center">
@@ -180,7 +181,7 @@
           <h4>结款记录明细</h4>
         </div>
         <el-table :data="paymentHistoryList" border style="width: 100%">
-          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column type="index" label="序号" width="60" align="center" :index="indexMethod" />
           <el-table-column prop="paymentDate" label="结款日期" align="center" width="120">
             <template slot-scope="{ row }">
               <span>{{ formatDate(row.paymentDate) }}</span>
@@ -454,131 +455,6 @@ export default {
       }
     },
 
-    // 加载模拟数据
-    loadMockData() {
-      const mockData = [
-        {
-          id: '1',
-          ownerName: '北京消防科技有限公司',
-          entrustName: '上海维保服务公司',
-          contractType: '项目维保',
-          contractAmount: '￥120,000',
-          paidAmount: 80000,
-          unpaidAmount: 40000,
-          paymentStatus: '部分结款',
-          paymentDate: '2024-01-15',
-          paymentMethod: '银行转账',
-          paymentNote: '第一期结款',
-          amount: 120000
-        },
-        {
-          id: '2',
-          ownerName: '深圳安全设备有限公司',
-          entrustName: '广州检测服务公司',
-          contractType: '检测',
-          contractAmount: '￥85,000',
-          paidAmount: 85000,
-          unpaidAmount: 0,
-          paymentStatus: '已结款',
-          paymentDate: '2024-02-20',
-          paymentMethod: '银行转账',
-          paymentNote: '全额结款',
-          amount: 85000
-        },
-        {
-          id: '3',
-          ownerName: '杭州建筑集团',
-          entrustName: '浙江维保公司',
-          contractType: '施工',
-          contractAmount: '￥200,000',
-          paidAmount: 0,
-          unpaidAmount: 200000,
-          paymentStatus: '未结款',
-          paymentDate: null,
-          paymentMethod: null,
-          paymentNote: null,
-          amount: 200000
-        },
-        {
-          id: '4',
-          ownerName: '成都物业管理公司',
-          entrustName: '四川检测中心',
-          contractType: '评估',
-          contractAmount: '￥65,000',
-          paidAmount: 30000,
-          unpaidAmount: 35000,
-          paymentStatus: '部分结款',
-          paymentDate: '2024-03-10',
-          paymentMethod: '现金',
-          paymentNote: '首期款',
-          amount: 65000
-        },
-        {
-          id: '5',
-          ownerName: '武汉消防工程公司',
-          entrustName: '湖北维保服务',
-          contractType: '项目维保',
-          contractAmount: '￥150,000',
-          paidAmount: 150000,
-          unpaidAmount: 0,
-          paymentStatus: '已结款',
-          paymentDate: '2024-03-25',
-          paymentMethod: '支票',
-          paymentNote: '项目完成结款',
-          amount: 150000
-        },
-        {
-          id: '6',
-          ownerName: '西安建筑装饰公司',
-          entrustName: '陕西消防检测',
-          contractType: '检测',
-          contractAmount: '￥95,000',
-          paidAmount: 50000,
-          unpaidAmount: 45000,
-          paymentStatus: '部分结款',
-          paymentDate: '2024-04-05',
-          paymentMethod: '银行转账',
-          paymentNote: '中期款',
-          amount: 95000
-        },
-        {
-          id: '7',
-          ownerName: '南京物业管理集团',
-          entrustName: '江苏维保公司',
-          contractType: '项目维保',
-          contractAmount: '￥180,000',
-          paidAmount: 0,
-          unpaidAmount: 180000,
-          paymentStatus: '未结款',
-          paymentDate: null,
-          paymentMethod: null,
-          paymentNote: null,
-          amount: 180000
-        },
-        {
-          id: '8',
-          ownerName: '青岛消防设备厂',
-          entrustName: '山东检测服务',
-          contractType: '评估',
-          contractAmount: '￥75,000',
-          paidAmount: 75000,
-          unpaidAmount: 0,
-          paymentStatus: '已结款',
-          paymentDate: '2024-04-15',
-          paymentMethod: '银行转账',
-          paymentNote: '评估完成结款',
-          amount: 75000
-        }
-      ]
-
-      this.tableData = mockData
-      this.pagination.total = mockData.length
-      this.pagination.page = 1
-      this.pagination.limit = 10
-
-      this.$message.success('已加载模拟数据')
-    },
-
     // 获取合同类型标签样式
     getContractTypeTagType(type) {
       const typeMap = {
@@ -842,6 +718,9 @@ export default {
       this.selectedRows = val
     },
 
+    indexMethod(index) {
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
     // 提交批量更新
     async submitBatchUpdate() {
       try {
