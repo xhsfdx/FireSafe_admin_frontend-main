@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import DispatchStaff from '@/views/MaintenanceManagement/DispatchStaff.vue'
+import DispatchStaff from '@/views/maintenance-management/DispatchStaff.vue'
 import { getMaintainPlans } from '@/api/maintainPlan'
 
 export default {

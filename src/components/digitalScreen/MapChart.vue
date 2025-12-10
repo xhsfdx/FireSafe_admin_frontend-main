@@ -1,32 +1,17 @@
 <template>
   <div class="map-chart">
-    <!-- 总面积组件 -->
-    <TotalmaintenceArea />
-
     <!-- 地图容器 -->
     <div id="map-container" class="map-container" />
-
-    <!-- 科幻光圈 -->
-    <div class="sci-fi-radar">
-      <div class="circle circle1" />
-      <div class="circle circle2" />
-      <div class="circle circle3" />
-      <div class="pulse" />
-    </div>
   </div>
 </template>
 
 <script>
-import TotalmaintenceArea from '@/components/digitalScreen/TotalmaintenanceArea.vue'
 import echarts from 'echarts'
 import sichuan from '@/assets/geo/sichuan.json'
 import { getDigitalScreenData } from '@/api/digitalScreen'
 
 export default {
   name: 'MapChart',
-  components: {
-    TotalmaintenceArea
-  },
   data() {
     return {
       mapData: [], // 用于存储地图数据
@@ -35,13 +20,22 @@ export default {
   },
   async mounted() {
     echarts.registerMap('四川', sichuan)
-    this.chart = echarts.init(document.getElementById('map-container'))
-    await this.loadData()
-    this.renderMap()
-    window.addEventListener('resize', this.chart.resize)
+    this.$nextTick(() => {
+      const container = document.getElementById('map-container') || this.$el.querySelector('.map-container')
+      if (container) {
+        this.chart = echarts.init(container)
+        this.loadData().then(() => {
+          this.renderMap()
+        })
+        window.addEventListener('resize', this.handleResize)
+      }
+    })
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.chart.resize)
+    window.removeEventListener('resize', this.handleResize)
+    if (this.chart) {
+      this.chart.dispose()
+    }
   },
   methods: {
     async loadData() {
@@ -81,15 +75,18 @@ export default {
           left: 'left',
           bottom: '20px',
           min: 0,
-          max: 20,
+          max: Math.max(...this.mapData.map(d => d.value || 0), 1),
           text: ['高', '低'],
           calculable: true,
           inRange: {
-            color: ['#3aa9ff', '#001f3f']
+            color: ['#00c0ff', '#0088cc', '#004466', '#001f3f']
           },
           textStyle: {
-            color: '#00ffff'
-          }
+            color: '#00ffff',
+            fontSize: 11
+          },
+          itemWidth: 15,
+          itemHeight: 100
         },
         series: [
           {
@@ -115,19 +112,39 @@ export default {
                 ]
               },
               borderColor: '#00c0ff',
-              borderWidth: 1,
+              borderWidth: 2,
               shadowColor: '#00ffff',
-              shadowBlur: 25
+              shadowBlur: 30,
+              shadowOffsetX: 0,
+              shadowOffsetY: 0
             },
             emphasis: {
-              label: { show: true, color: '#ffff00' },
-              itemStyle: { areaColor: '#0077aa', shadowColor: '#00ffff', shadowBlur: 40 }
+              label: { 
+                show: true, 
+                color: '#ffff00',
+                fontSize: 14,
+                fontWeight: 'bold',
+                textShadowBlur: 10,
+                textShadowColor: '#ffff00'
+              },
+              itemStyle: { 
+                areaColor: '#0077aa', 
+                shadowColor: '#00ffff', 
+                shadowBlur: 50,
+                borderColor: '#00ffff',
+                borderWidth: 3
+              }
             },
             data: this.mapData
           }
         ]
       }
       this.chart.setOption(option)
+    },
+    handleResize() {
+      if (this.chart) {
+        this.chart.resize()
+      }
     }
   }
   // mounted() {
@@ -248,31 +265,75 @@ export default {
 
 <style scoped>
 .map-chart {
-  width: 70%;
-  padding: 10px;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(0, 20, 40, 0.6);
-  position: relative;
+  justify-content: center;
 }
+
 .map-container {
-  width: 550px;
-  height: 550px;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
   border: none;
-  border-radius: 12px;
-  margin-top: 10px;
-  align-items: center;
-  margin-right: -20px;
-  /* box-shadow: 0 0 30px #00c0ff inset; */
+  border-radius: 8px;
+}
+
+/* Responsive styles */
+@media (max-width: 1440px) {
+  .map-chart {
+    width: 36%;
+    min-width: 350px;
+  }
+  
+  .map-container {
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .map-chart {
+    width: 100%;
+    min-width: auto;
+    order: -1;
+  }
+  
+  .map-container {
+    max-width: 100%;
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-chart {
+    padding: 10px;
+  }
+  
+  .map-container {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-chart {
+    padding: 8px;
+  }
+  
+  .map-container {
+    min-height: 250px;
+  }
 }
 
 /* 科幻立体光圈容器 */
 /* 立体光圈容器 */
 .sci-fi-radar {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  aspect-ratio: 1;
   margin-top: -50px;
   perspective: 800px;
 }

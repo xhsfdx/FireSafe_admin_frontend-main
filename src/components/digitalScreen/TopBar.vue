@@ -118,12 +118,15 @@ export default {
     this.updateDateTime()
     this.timer = setInterval(this.updateDateTime, 1000)
     this.initParticles()
-    setInterval(this.drawParticles, 33)
+    this.particleInterval = setInterval(this.drawParticles, 33)
     this.loadScreenData()
+    window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
     // 清除定时器
-    clearInterval(this.timer)
+    if (this.timer) clearInterval(this.timer)
+    if (this.particleInterval) clearInterval(this.particleInterval)
+    window.removeEventListener('resize', this.handleResize)
   },
   methods: {
     digital() {
@@ -202,28 +205,24 @@ export default {
     async loadScreenData() {
       try {
         const res = await getDigitalScreenData()
-        console.log(res)
-        if (res) {
+        if (res && res.data) {
           const data = res.data
           this.maintainThisMonthCompleted = data.maintainThisMonthCompleted || 0
           this.maintainLastMonthOverdue = data.maintainLastMonthOverdue || 0
           this.faultUnresolved = data.faultUnresolved || 0
           this.faultOverdueUnresolved = data.faultOverdueUnresolved || 0
           this.additionalMaintainCount = data.additionalMaintainCount || 0
-
-          console.log('赋值成功：', {
-            maintainThisMonthCompleted: this.maintainThisMonthCompleted,
-            maintainLastMonthOverdue: this.maintainLastMonthOverdue,
-            faultUnresolved: this.faultUnresolved,
-            faultOverdueUnresolved: this.faultOverdueUnresolved,
-            additionalMaintainCount: this.additionalMaintainCount
-          })
-        } else {
-          this.$message.error('获取数据失败')
         }
       } catch (err) {
         console.error('获取数字屏数据失败:', err)
-        this.$message.error('服务器错误')
+      }
+    },
+    handleResize() {
+      this.w = window.innerWidth
+      this.h = window.innerHeight
+      if (this.$refs.particles) {
+        this.$refs.particles.width = this.w
+        this.$refs.particles.height = this.h
       }
     }
 
@@ -235,10 +234,10 @@ export default {
 .dashboard-container {
   position: relative;
   font-family: 'Orbitron', sans-serif;
-  background: #000;
+  background: transparent;
   color: #00f0ff;
-  /* min-height: 100vh; */
   overflow: hidden;
+  width: 100%;
 }
 
 /* 粒子背景canvas */
@@ -247,6 +246,8 @@ export default {
   top: 0;
   left: 0;
   z-index: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* 头部 */
@@ -256,12 +257,33 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 20, 40, 0.6);
-  border: 1px solid #00f0ff55;
-  border-radius: 10px;
-  box-shadow: 0 0 20px #00f0ff88, inset 0 0 20px #00f0ff33;
-  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(0, 20, 40, 0.8) 0%, rgba(0, 40, 80, 0.6) 100%);
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, #00f0ff, #0088cc, #00f0ff) 1;
+  border-radius: 12px;
+  box-shadow: 
+    0 0 30px rgba(0, 240, 255, 0.6),
+    inset 0 0 30px rgba(0, 240, 255, 0.2),
+    0 0 60px rgba(0, 136, 204, 0.4);
+  padding: 15px 25px;
   margin: 10px;
+  backdrop-filter: blur(10px);
+  animation: borderGlow 3s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px rgba(0, 240, 255, 0.6),
+      inset 0 0 30px rgba(0, 240, 255, 0.2),
+      0 0 60px rgba(0, 136, 204, 0.4);
+  }
+  50% {
+    box-shadow: 
+      0 0 50px rgba(0, 240, 255, 0.9),
+      inset 0 0 40px rgba(0, 240, 255, 0.4),
+      0 0 90px rgba(0, 136, 204, 0.6);
+  }
 }
 
 .left-group {
@@ -272,24 +294,60 @@ export default {
 }
 
 .datetime {
-  font-size: 14px;
+  font-size: 16px;
   color: #00f0ff;
   margin-right: 20px;
+  font-weight: 600;
+  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  letter-spacing: 1px;
+  padding: 8px 15px;
+  background: rgba(0, 240, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .title {
-  font-size: 30px;
+  font-size: clamp(20px, 3vw, 36px);
   font-weight: bold;
   flex-grow: 1;
   text-align: center;
   color: #00f0ff;
-  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  text-shadow: 
+    0 0 10px #00f0ff,
+    0 0 20px #00f0ff,
+    0 0 30px #00f0ff,
+    0 0 40px rgba(0, 240, 255, 0.5);
   position: absolute;
   left: 0;
   right: 0;
   margin: auto;
   text-align: center;
   pointer-events: none;
+  letter-spacing: 3px;
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  0% {
+    text-shadow: 
+      0 0 10px #00f0ff,
+      0 0 20px #00f0ff,
+      0 0 30px #00f0ff;
+  }
+  100% {
+    text-shadow: 
+      0 0 20px #00f0ff,
+      0 0 30px #00f0ff,
+      0 0 40px #00f0ff,
+      0 0 50px rgba(0, 240, 255, 0.8);
+  }
 }
 
 .digital-screen {
@@ -320,37 +378,107 @@ export default {
   display: flex;
   gap: 20px;
   padding: 20px;
+  flex-wrap: wrap;
 }
 
 .data-card {
   flex: 1;
-  padding: 20px;
-  border-radius: 12px;
-  backdrop-filter: blur(12px);
-  background: rgba(0, 20, 40, 0.4);
-  border: 1px solid #00f0ff55;
-  box-shadow: 0 0 20px #00f0ff88, inset 0 0 20px #00f0ff33;
+  min-width: 250px;
+  padding: 25px;
+  border-radius: 16px;
+  backdrop-filter: blur(15px);
+  background: linear-gradient(135deg, rgba(0, 20, 40, 0.6) 0%, rgba(0, 40, 80, 0.4) 100%);
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, rgba(0, 240, 255, 0.5), rgba(0, 136, 204, 0.5)) 1;
+  box-shadow: 
+    0 0 25px rgba(0, 240, 255, 0.5),
+    inset 0 0 25px rgba(0, 240, 255, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
 }
+
+.data-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+  animation: rotate  8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .data-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 30px #00f0ffcc, inset 0 0 30px #00f0ff55;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 0 40px rgba(0, 240, 255, 0.8),
+    inset 0 0 35px rgba(0, 240, 255, 0.25),
+    0 12px 48px rgba(0, 0, 0, 0.4);
+  border-image: linear-gradient(135deg, rgba(0, 240, 255, 0.8), rgba(0, 136, 204, 0.8)) 1;
 }
 
 .icon-circle {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
   border-radius: 50%;
-  background-color: #00f0ff55;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 136, 204, 0.3) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 30px;
+  font-size: 32px;
   color: #00f0ff;
-  box-shadow: 0 0 20px #00f0ff88;
+  box-shadow: 
+    0 0 25px rgba(0, 240, 255, 0.6),
+    inset 0 0 15px rgba(0, 240, 255, 0.2);
   margin-right: 20px;
+  border: 2px solid rgba(0, 240, 255, 0.4);
+  animation: iconPulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.icon-circle::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 240, 255, 0.6);
+  animation: iconRipple 2s ease-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 25px rgba(0, 240, 255, 0.6),
+      inset 0 0 15px rgba(0, 240, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 35px rgba(0, 240, 255, 0.9),
+      inset 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+}
+
+@keyframes iconRipple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
 .maintenance-info {
@@ -368,17 +496,93 @@ export default {
 }
 
 .info-value {
-  font-size: 28px;
+  font-size: clamp(20px, 2.5vw, 32px);
   font-weight: bold;
   color: #00f0ff;
   animation: flicker 2s infinite alternate;
+  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
 }
+
 @keyframes flicker {
   0% {
-    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.5);
   }
   100% {
-    text-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
+    text-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff, 0 0 60px rgba(0, 240, 255, 0.8);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .header {
+    padding: 12px 18px;
+    margin: 8px;
+  }
+  
+  .title {
+    font-size: clamp(18px, 2.5vw, 28px);
+  }
+  
+  .data-display {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .data-card {
+    min-width: 200px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 15px;
+  }
+  
+  .title {
+    position: static;
+    margin: 10px 0;
+  }
+  
+  .left-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .data-display {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .data-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .datetime {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .data-card {
+    padding: 15px;
+  }
+  
+  .icon-circle {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    font-size: 24px;
+    margin-right: 15px;
+  }
+  
+  .info-value {
+    font-size: 24px;
   }
 }
 .info-desc {

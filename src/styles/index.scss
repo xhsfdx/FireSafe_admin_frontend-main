@@ -189,3 +189,29 @@ aside {
 .multiselect--active {
   z-index: 1000 !important;
 }
+
+// Digital Screen Mode - Hide UI elements
+body.digital-screen-active {
+  .sidebar-container,
+  .navbar,
+  .tags-view-container,
+  .app-breadcrumb,
+  .hamburger-container,
+  .right-menu {
+    display: none !important;
+  }
+  
+  .main-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .app-main {
+    min-height: 100vh !important;
+    padding-top: 0 !important;
+  }
+  
+  .fixed-header {
+    display: none !important;
+  }
+}

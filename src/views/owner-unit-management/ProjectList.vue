@@ -43,8 +43,8 @@
     >
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column label="序号" width="60" align="center">
-        <template slot-scope="{ $index }">
-          {{ getSerialNumber($index) }}
+        <template slot-scope="scope">
+          {{ getSerialNumber(scope.$index) }}
         </template>
       </el-table-column>
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
@@ -115,9 +115,12 @@
 </template>
 <script>
 import { fetchContracts, deleteContract, approveContract, rejectContract } from '@/api/contract'
+import tableListMixin from '@/utils/mixins/table-list'
+import { getStatusTagType, getStatusDisplayText, getRemainDays, formatAmount } from '@/utils/status-helper'
 
 export default {
   name: 'UnitProject',
+  mixins: [tableListMixin],
   data() {
     return {
       filters: {
@@ -125,13 +128,6 @@ export default {
         entrustName: '',
         status: '',
         contractType: ''
-      },
-      tableData: [],
-      loading: false,
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: 0
       },
       selectedRows: [],
       // 审核相关数据
@@ -157,49 +153,9 @@ export default {
     this.loadData()
   },
   methods: {
-    // 获取序号（基于实际数据条数计算）
-    getSerialNumber(index) {
-      // 如果是第一页，直接返回index + 1
-      if (this.pagination.page === 1) {
-        return index + 1
-      }
-
-      // 如果不是第一页，需要计算前面页面的实际数据条数
-      // 这里我们使用一个简化的方法：基于当前页面的数据条数来推算
-      // 第一页有7条数据，所以第二页从8开始
-      if (this.pagination.page === 2) {
-        return 10 + index + 1 // 7 + 0 + 1 = 8, 7 + 1 + 1 = 9
-      }
-
-      // 如果有更多页面，可以继续扩展这个逻辑
-      return index + 1
-    },
-    // 获取总数据条数（基于当前页面的序号计算）
+    // 获取总数据条数
     getTotalCount() {
-      if (this.tableData.length === 0) return 0
-
-      // 调试信息
-      console.log('分页信息:', {
-        page: this.pagination.page,
-        limit: this.pagination.limit,
-        dataLength: this.tableData.length
-      })
-
-      // 基于实际数据条数计算最后一条的序号
-      let lastIndex
-      if (this.pagination.page === 1) {
-        lastIndex = this.tableData.length
-      } else if (this.pagination.page === 2) {
-        lastIndex = 7 + this.tableData.length // 第一页7条 + 当前页数据条数
-      } else {
-        lastIndex = this.tableData.length
-      }
-
-      console.log('序号计算:', {
-        lastIndex
-      })
-
-      return lastIndex
+      return this.pagination.total || this.tableData.length
     },
     // 加载数据
     async loadData() {
@@ -211,137 +167,42 @@ export default {
         }
         if (this.filters.status) params.status = this.filters.status
         if (this.filters.entrustName) params.clientCompany = this.filters.entrustName
-        if (this.filters.ownerName) params.ownerName = this.filters.ownerName// 如果后端有这个字段
+        if (this.filters.ownerName) params.ownerName = this.filters.ownerName
         if (this.filters.contractType) params.contractType = this.filters.contractType
 
-        console.log('发送给后端的参数:', params)
         const res = await fetchContracts(params)
-        console.log('后端返回的响应:', res)
-
-        if (res && res.success) {
-          const list = res.data || []
-          console.log('实际返回的数据条数:', list.length)
-
-          this.tableData = list.map((item, index) => {
-            // 确保每个字段都有默认值
-            const days = item.endDate ? this.getRemainDays(item.endDate) : 0
-            const mappedItem = {
-              id: item.contractId || `temp_${Date.now()}_${index}`, // 确保有唯一ID
-              projectid: item.project_id || item.contractId || '', // 优先使用project_id，如果没有则使用contractId
-              ownerName: item.ownerCompany || '',
-              entrustName: item.clientCompany || '',
-              contractType: item.contractType || '长期性合同',
-              status: item.status || '草稿',
-              contractAmount: item.amount ? `￥${item.amount.toLocaleString()}` : '￥0',
-              days: days
-            }
-
-            // 调试信息：检查每个项目的ID映射
-            console.log(`项目 ${index + 1} 数据映射:`, {
-              原始contractId: item.contractId,
-              原始project_id: item.project_id,
-              映射后的id: mappedItem.id,
-              映射后的projectid: mappedItem.projectid,
-              业主单位: mappedItem.ownerName
-            })
-            return mappedItem
-          })
-
-          // 分页信息
-          if (res.pagination) {
-            this.pagination.total = res.pagination.total || 0
-            this.pagination.page = res.pagination.page || 1
-            this.pagination.limit = res.pagination.limit || 20
-
-            // 调试信息
-            console.log('后端返回的分页信息:', res.pagination)
-            console.log('设置后的分页信息:', {
-              page: this.pagination.page,
-              limit: this.pagination.limit,
-              total: this.pagination.total
-            })
-          } else {
-            // 如果没有分页信息，使用默认值
-            this.pagination.total = this.tableData.length
-            console.log('没有分页信息，使用默认值')
+        
+        // 使用mixin提供的数据映射方法
+        const dataMapper = (item, index) => {
+          const days = item.endDate ? getRemainDays(item.endDate) : 0
+          return {
+            id: item.contractId || `temp_${Date.now()}_${index}`,
+            projectid: item.project_id || item.contractId || '',
+            ownerName: item.ownerCompany || '',
+            entrustName: item.clientCompany || '',
+            contractType: item.contractType || '长期性合同',
+            status: item.status || '草稿',
+            contractAmount: formatAmount(item.amount),
+            days: days
           }
-        } else {
-          this.tableData = []
-          this.pagination.total = 0
-          const errorMsg = res?.message || '获取数据失败'
-          console.error('API返回错误:', errorMsg)
-          this.$message.error(errorMsg)
         }
+        
+        this.handleApiResponse(res, dataMapper)
       } catch (e) {
-        console.error('加载数据异常:', e)
-        this.tableData = []
-        this.pagination.total = 0
-        this.$message.error('网络异常或接口出错: ' + (e.message || '未知错误'))
-      }
-      this.loading = false
-    },
-    // 获取剩余天数
-    getRemainDays(endDate) {
-      try {
-        if (!endDate) return 0
-        const end = new Date(endDate)
-        const now = new Date()
-
-        // 检查日期是否有效
-        if (isNaN(end.getTime())) {
-          console.warn('无效的结束日期:', endDate)
-          return 0
-        }
-
-        const diff = Math.ceil((end - now) / (1000 * 3600 * 24))
-        return diff > 0 ? diff : 0
-      } catch (error) {
-        console.error('计算剩余天数时出错:', error, 'endDate:', endDate)
-        return 0
+        this.handleApiError(e)
+      } finally {
+        this.loading = false
       }
     },
-
-    // 获取状态标签类型
+    
+    // 获取状态标签类型（使用工具函数）
     getStatusTagType(status) {
-      if (!status) return 'info'
-      const statusMap = {
-        '草稿': 'info',
-        '已提交': 'warning',
-        '已审核': 'success',
-        '已归档': 'primary',
-        '已续签': 'success'
-      }
-      return statusMap[status] || 'info'
+      return getStatusTagType(status)
     },
-
-    // 获取状态显示文本
+    
+    // 获取状态显示文本（使用工具函数）
     getStatusDisplayText(status) {
-      if (!status) return '未知状态'
-      const statusMap = {
-        '草稿': '待处理',
-        '已提交': '待审核',
-        '已审核': '服务中',
-        '已归档': '已完成',
-        '已续签': '已续签'
-      }
-      return statusMap[status] || status
-    },
-
-    // 翻页事件
-    handlePageChange(page) {
-      this.pagination.page = page
-      this.loadData()
-    },
-    // 查询
-    onSearch() {
-      this.pagination.page = 1 // 查询重置到第一页
-      this.loadData()
-    },
-    // 重置
-    onReset() {
-      this.filters = { ownerName: '', entrustName: '', status: '', contractType: '' }
-      this.pagination.page = 1
-      this.loadData()
+      return getStatusDisplayText(status)
     },
     // 新增
     onAdd() {

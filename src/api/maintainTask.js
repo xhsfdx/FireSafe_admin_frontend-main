@@ -69,10 +69,19 @@ export function assignMaintainers(id, data) {
   })
 }
 
+// 重新分配维护人员
+export function reassignMaintainers(id, data) {
+  return request({
+    url: `/maintainTask/${id}/reassign`,
+    method: 'put',
+    data
+  })
+}
+
 // 生成任务
 export function generateTasksFromPlan(data) {
   return request({
-    url: '/maintenancePlan/settask',
+    url: '/plan/settask',
     method: 'post',
     data
   })

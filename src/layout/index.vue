@@ -1,9 +1,9 @@
 <template>
   <div :class="classObj" class="app-wrapper">
     <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
-    <sidebar class="sidebar-container" />
-    <div :class="{hasTagsView:needTagsView}" class="main-container">
-      <div :class="{'fixed-header':fixedHeader}">
+    <sidebar v-if="!isDigitalScreen" class="sidebar-container" />
+    <div :class="{hasTagsView:needTagsView && !isDigitalScreen}" class="main-container">
+      <div v-if="!isDigitalScreen" :class="{'fixed-header':fixedHeader}">
         <navbar />
         <tags-view v-if="needTagsView" />
       </div>
@@ -41,12 +41,16 @@ export default {
       needTagsView: state => state.settings.tagsView,
       fixedHeader: state => state.settings.fixedHeader
     }),
+    isDigitalScreen() {
+      return this.$route.path.includes('/digital-screen') || this.$route.name === 'DigitalScreenMain'
+    },
     classObj() {
       return {
-        hideSidebar: !this.sidebar.opened,
-        openSidebar: this.sidebar.opened,
+        hideSidebar: !this.sidebar.opened || this.isDigitalScreen,
+        openSidebar: this.sidebar.opened && !this.isDigitalScreen,
         withoutAnimation: this.sidebar.withoutAnimation,
-        mobile: this.device === 'mobile'
+        mobile: this.device === 'mobile',
+        'digital-screen-mode': this.isDigitalScreen
       }
     }
   },
@@ -99,5 +103,21 @@ export default {
 
   .mobile .fixed-header {
     width: 100%;
+  }
+
+  /* Hide layout elements for digital screen */
+  .digital-screen-mode {
+    .sidebar-container {
+      display: none !important;
+    }
+    
+    .main-container {
+      margin-left: 0 !important;
+      width: 100% !important;
+    }
+    
+    .fixed-header {
+      display: none !important;
+    }
   }
 </style>

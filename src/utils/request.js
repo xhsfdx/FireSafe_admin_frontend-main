@@ -37,48 +37,71 @@ service.interceptors.request.use(
 // response interceptor
 service.interceptors.response.use(
   /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
-
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
+   * Handle successful responses
+   * Backend format: { success: true, data: {...}, message: '...' }
    */
   response => {
     const res = response.data
+    const statusCode = response.status
 
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code === 400) {
-      Message({
-        message: res.message || '错误',
-        type: 'error',
-        duration: 5 * 1000
-      })
+    // Handle HTTP success status codes (200, 201, etc.)
+    if (statusCode >= 200 && statusCode < 300) {
+      // If backend returns success: false, treat it as an error
+      if (res.success === false) {
+        const errorMessage = res.message || '请求失败'
+        Message({
+          message: errorMessage,
+          type: 'error',
+          duration: 5 * 1000
+        })
+        return Promise.reject(new Error(errorMessage))
+      }
+      
+      // Return the response data (which includes success, data, message)
+      return res
+    }
 
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+    // Handle unexpected success status codes
+    return res
+  },
+  error => {
+    console.log('err', error) // for debug
+    
+    // Handle HTTP error responses
+    if (error.response) {
+      const { status, data } = error.response
+      const errorMessage = data?.message || data?.error || error.message || '请求失败'
+
+      // Handle authentication errors (401)
+      if (status === 401) {
+        MessageBox.confirm('登录已过期，请重新登录', '确认登出', {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           store.dispatch('user/resetToken').then(() => {
             location.reload()
           })
+        }).catch(() => {
+          // User cancelled, do nothing
         })
       }
-      return Promise.reject(new Error(res.message || '错误'))
-    } else {
-      return res
+
+      // Handle other HTTP errors
+      Message({
+        message: errorMessage,
+        type: 'error',
+        duration: 5 * 1000
+      })
+
+      // Return error with backend message if available
+      return Promise.reject(new Error(errorMessage))
     }
-  },
-  error => {
-    console.log('err' + error) // for debug
+
+    // Handle network errors or other errors
+    const errorMessage = error.message || '网络错误，请检查网络连接'
     Message({
-      message: error.message,
+      message: errorMessage,
       type: 'error',
       duration: 5 * 1000
     })
