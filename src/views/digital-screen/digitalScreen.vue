@@ -205,6 +205,46 @@
       </div>
     </div>
 
+    <!-- Navigation Menu -->
+    <div class="nav-menu-container">
+      <div class="nav-menu-button" @click="toggleNavMenu" title="导航菜单">
+        <i class="el-icon-menu"></i>
+        <span class="nav-text">菜单</span>
+      </div>
+      <transition name="menu-fade">
+        <div v-if="showNavMenu" class="nav-menu-dropdown">
+          <div class="nav-menu-item" @click="navigateTo('/')">
+            <i class="el-icon-s-home"></i>
+            <span>首页</span>
+          </div>
+          <div class="nav-menu-item" @click="navigateTo('/agency/basic')">
+            <i class="el-icon-office-building"></i>
+            <span>服务机构管理</span>
+          </div>
+          <div class="nav-menu-item" @click="navigateTo('/owner/plan')">
+            <i class="el-icon-s-custom"></i>
+            <span>项目管理</span>
+          </div>
+          <div class="nav-menu-item" @click="navigateTo('/maintenance/routine')">
+            <i class="el-icon-setting"></i>
+            <span>例行维护</span>
+          </div>
+          <div class="nav-menu-item" @click="navigateTo('/maintenance/fault')">
+            <i class="el-icon-warning"></i>
+            <span>故障工单</span>
+          </div>
+          <div class="nav-menu-divider"></div>
+          <div class="nav-menu-item exit-item" @click="exitDigitalScreen">
+            <i class="el-icon-close"></i>
+            <span>退出数字大屏</span>
+          </div>
+        </div>
+      </transition>
+    </div>
+    
+    <!-- Click outside to close menu -->
+    <div v-if="showNavMenu" class="menu-overlay" @click="showNavMenu = false"></div>
+
     <!-- Fullscreen indicator -->
     <div v-if="fullscreenCountdown > 0" class="fullscreen-countdown">
       全屏模式将在 {{ fullscreenCountdown }} 秒后启动
@@ -234,7 +274,8 @@ export default {
       dataRefreshTimer: null,
       isFullscreen: false,
       currentDateTime: '',
-      screenData: {}
+      screenData: {},
+      showNavMenu: false
     }
   },
   mounted() {
@@ -395,6 +436,53 @@ export default {
       } catch (error) {
         console.error('Failed to exit fullscreen:', error)
       }
+    },
+    exitDigitalScreen() {
+      // Close menu if open
+      this.showNavMenu = false
+      
+      // Stop countdown if still running
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer)
+        this.countdownTimer = null
+      }
+      
+      // Exit fullscreen if active
+      if (this.isFullscreen) {
+        this.exitFullscreen()
+      }
+      
+      // Show layout elements
+      this.showLayoutElements()
+      
+      // Navigate to dashboard or home
+      this.$router.push({ path: '/dashboard' }).catch(err => {
+        // If dashboard doesn't exist, try root
+        if (err.name !== 'NavigationDuplicated') {
+          this.$router.push({ path: '/' })
+        }
+      })
+    },
+    toggleNavMenu() {
+      this.showNavMenu = !this.showNavMenu
+    },
+    navigateTo(path) {
+      this.showNavMenu = false
+      
+      // Exit fullscreen if active
+      if (this.isFullscreen) {
+        this.exitFullscreen()
+      }
+      
+      // Show layout elements
+      this.showLayoutElements()
+      
+      // Navigate to the selected path
+      this.$router.push({ path }).catch(err => {
+        if (err.name !== 'NavigationDuplicated') {
+          console.error('Navigation error:', err)
+        }
+      })
     }
   }
 }
@@ -847,11 +935,140 @@ export default {
   color: #00f0ff;
 }
 
+/* Navigation Menu */
+.nav-menu-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10002;
+}
+
+.nav-menu-button {
+  background: linear-gradient(135deg, rgba(0, 192, 255, 0.9) 0%, rgba(0, 136, 204, 0.9) 100%);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(0, 192, 255, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-family: 'Microsoft YaHei', sans-serif;
+}
+
+.nav-menu-button:hover {
+  background: linear-gradient(135deg, rgba(0, 220, 255, 1) 0%, rgba(0, 160, 220, 1) 100%);
+  box-shadow: 
+    0 0 30px rgba(0, 192, 255, 0.9),
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-menu-button:active {
+  transform: translateY(0);
+}
+
+.nav-menu-button i {
+  font-size: 18px;
+}
+
+.nav-text {
+  letter-spacing: 1px;
+}
+
+.nav-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: linear-gradient(135deg, rgba(0, 20, 40, 0.95) 0%, rgba(0, 40, 80, 0.95) 100%);
+  border: 2px solid rgba(0, 192, 255, 0.5);
+  border-radius: 8px;
+  box-shadow: 
+    0 0 30px rgba(0, 192, 255, 0.6),
+    inset 0 0 20px rgba(0, 192, 255, 0.1);
+  backdrop-filter: blur(15px);
+  min-width: 200px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.nav-menu-item {
+  padding: 12px 20px;
+  color: #00f0ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-menu-item:hover {
+  background: rgba(0, 192, 255, 0.2);
+  border-left-color: #00f0ff;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+}
+
+.nav-menu-item i {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-menu-item.exit-item {
+  color: #ff6b6b;
+  border-top: 1px solid rgba(0, 192, 255, 0.3);
+  margin-top: 4px;
+  padding-top: 16px;
+}
+
+.nav-menu-item.exit-item:hover {
+  background: rgba(255, 77, 77, 0.2);
+  border-left-color: #ff6b6b;
+  color: #ff9999;
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+}
+
+.nav-menu-divider {
+  height: 1px;
+  background: rgba(0, 192, 255, 0.3);
+  margin: 8px 0;
+}
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10001;
+  background: transparent;
+}
+
+.menu-fade-enter-active, .menu-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.menu-fade-enter, .menu-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* Fullscreen Countdown */
 .fullscreen-countdown {
   position: fixed;
   top: 20px;
-  right: 20px;
+  right: 80px;
   background: rgba(0, 0, 0, 0.8);
   color: #00ffff;
   padding: 10px 20px;
@@ -910,6 +1127,36 @@ export default {
   
   .metrics-row {
     grid-template-columns: 1fr;
+  }
+  
+  .nav-menu-container {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .nav-menu-button {
+    padding: 10px 15px;
+    font-size: 12px;
+  }
+  
+  .nav-menu-button i {
+    font-size: 16px;
+  }
+  
+  .nav-menu-dropdown {
+    min-width: 180px;
+  }
+  
+  .nav-menu-item {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
+  
+  .fullscreen-countdown {
+    top: 10px;
+    right: 80px;
+    padding: 8px 15px;
+    font-size: 12px;
   }
 }
 </style>
