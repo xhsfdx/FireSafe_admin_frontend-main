@@ -254,7 +254,7 @@ export default {
       console.log('到:', to.path, to.query)
 
       // 只有当路由变化到详情页面且新路由有参数时才重新加载数据
-      if (to.path === '/owner/mpmTD-detail' &&
+      if (to.path === '/owner/MaintenanceTaskDetail' &&
           Object.keys(to.query).length > 0 &&
           (to.query.id || to.query.planId || to.query.taskId)) {
         console.log('✅ 路由变化有效，重新加载数据')

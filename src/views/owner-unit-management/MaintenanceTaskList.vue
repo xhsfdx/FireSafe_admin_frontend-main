@@ -2,13 +2,13 @@
   <div class="task-detail-root">
     <!-- 页面标题卡片 -->
     <div class="card-block card-title">
-      <div class="card-title-txt">维保计划管理</div>
+      <div class="card-title-txt">维保任务列表</div>
       <div class="breadcrumb">
         <span class="breadcrumb-item">业主单位管理</span>
         <span class="breadcrumb-separator">></span>
         <span class="breadcrumb-item">维保计划管理</span>
         <span class="breadcrumb-separator">></span>
-        <span class="breadcrumb-item active">计划详情</span>
+        <span class="breadcrumb-item active">任务列表</span>
       </div>
     </div>
 
@@ -19,19 +19,21 @@
 
     <el-row :gutter="14" style="margin-bottom:16px;">
       <el-col :span="6">
-        <el-select v-model="filter.time" placeholder="计划时效" style="width: 100%;">
+        <el-select v-model="filter.time" placeholder="任务时效" style="width: 100%;">
           <el-option label="全部" value="" />
           <el-option label="正常" value="正常" />
           <el-option label="已逾期" value="已逾期" />
         </el-select>
       </el-col>
       <el-col :span="6">
-        <el-select v-model="filter.status" placeholder="计划状态" style="width: 100%;">
+        <el-select v-model="filter.status" placeholder="任务状态" style="width: 100%;">
           <el-option label="全部" value="" />
-          <el-option label="计划已制定" value="计划已制定" />
-          <el-option label="任务已生成" value="任务已生成" />
-          <el-option label="执行中" value="执行中" />
+          <el-option label="已派发" value="已派发" />
+          <el-option label="已到达" value="已到达" />
+          <el-option label="处理中" value="处理中" />
+          <el-option label="已提交" value="已提交" />
           <el-option label="已完成" value="已完成" />
+          <el-option label="已评价" value="已评价" />
         </el-select>
       </el-col>
       <el-col :span="4">
@@ -42,12 +44,12 @@
       </el-col>
     </el-row>
     <el-table v-loading="loading" :data="tableData" border element-loading-text="加载中...">
-      <el-table-column prop="index" label="序号" width="60" align="center" />
+      <el-table-column type="index" label="序号" width="60" align="center" :index="indexMethod" />
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="planType" label="计划类型" align="center">
         <template slot-scope="{ row }">
           <el-tag
-            :type="row.planType === '月' ? 'primary' : 'warning'"
+            :type="row.planType === '月' ? 'primary' : row.planType === '季度' ? 'warning' : 'success'"
             size="small"
             style="font-weight: bold;"
           >
@@ -55,11 +57,23 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="taskName" label="计划名称" align="center" />
-      <el-table-column prop="technicalLeader" label="维保技术负责人" align="center" />
-      <el-table-column prop="projectManager" label="维保项目负责人" align="center" />
-      <el-table-column prop="maintainer" label="现场维保人员" align="center" />
-      <el-table-column prop="status" label="计划状态" align="center">
+      <el-table-column prop="taskMonth" label="任务月份" align="center" />
+      <el-table-column label="维保技术负责人" align="center">
+        <template slot-scope="{ row }">
+          {{ getPersonName(row.maintainPersons && row.maintainPersons.technical) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="维保项目负责人" align="center">
+        <template slot-scope="{ row }">
+          {{ getPersonName(row.maintainPersons && row.maintainPersons.leader) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="现场维保人员" align="center">
+        <template slot-scope="{ row }">
+          {{ getMaintainersText(row.maintainPersons && row.maintainPersons.maintainers) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="任务状态" align="center">
         <template slot-scope="{ row }">
           <el-tag
             :type="getStatusType(row.status)"
@@ -70,7 +84,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="isOverdue" label="计划时效" align="center">
+      <el-table-column prop="isOverdue" label="任务时效" align="center">
         <template slot-scope="{ row }">
           <el-tag
             :type="row.isOverdue === '正常' ? 'success' : 'danger'"
@@ -85,6 +99,7 @@
         <template slot-scope="{ row }">
           <el-link type="primary" @click="goDetail(row)">详情</el-link>
           <el-link
+            v-if="row.status === '已派发' || row.status === '已到达'"
             type="success"
             style="margin-left:8px;"
             @click="goDispatchStaff(row)"
@@ -98,11 +113,11 @@
   </div>
 </template>
 <script>
-// 计划详情页面，需要导入计划相关API
-import { getMaintenancePlan } from '@/api/maintainPlan'
+// 任务列表页面，需要导入任务相关API
+import { getMaintainbyPlan } from '@/api/maintainTask'
 
 export default {
-  name: 'PlanDetail',
+  name: 'TaskList',
   data() {
     return {
       filter: { time: '', status: '' },
@@ -124,6 +139,9 @@ export default {
     window.removeEventListener('planDataUpdated', this.handlePlanDataUpdated)
   },
   methods: {
+    indexMethod(index) {
+      return index + 1
+    },
     onSearch() {
       // 根据筛选条件过滤数据
       const { time, status } = this.filter
@@ -138,14 +156,14 @@ export default {
       const projectId = this.$route.query.projectId
       const projectName = this.$route.query.projectName
       const planId = this.$route.query.planId || this.$route.query.id
-      console.log('计划详情页面接收到的参数:', this.$route.query)
+      console.log('任务列表页面接收到的参数:', this.$route.query)
       console.log('使用的projectId:', projectId)
       console.log('使用的projectName:', projectName)
       console.log('使用的planId:', planId)
 
       if (!planId) {
         console.error('❌ 缺少计划ID参数，当前路由参数:', this.$route.query)
-        this.$message.error('缺少计划ID参数，无法加载计划详情')
+        this.$message.error('缺少计划ID参数，无法加载任务列表')
         // 直接返回维保计划管理页面
         setTimeout(() => {
           this.$router.push({ name: 'MaintenancePlan' })
@@ -155,35 +173,35 @@ export default {
 
       this.loading = true
       try {
-        // 根据planId从后端获取具体的计划数据
-        console.log('🔄 正在从后端获取计划数据，planId:', planId)
-        const response = await getMaintenancePlan(planId)
-        console.log('📋 后端返回的计划数据:', response)
+        // 根据planId从后端获取任务列表
+        console.log('🔄 正在从后端获取任务列表，planId:', planId)
+        const response = await getMaintainbyPlan(planId)
+        console.log('📋 后端返回的任务列表数据:', response)
 
         if (response.success && response.data) {
-          const planData = response.data
-          console.log('✅ 成功获取计划数据:', planData)
+          const tasks = response.data
+          console.log('✅ 成功获取任务列表数据:', tasks)
 
-          // 使用后端返回的真实数据
-          this.showPlanInfoFromBackend(planData)
-          this.$message.success('计划数据加载成功')
+          // 处理任务数据
+          this.processTaskList(tasks)
+          this.$message.success(`任务列表加载成功，共 ${tasks.length} 条任务`)
         } else {
           console.log('❌ 后端返回数据格式错误:', response)
-          this.$message.error('获取计划数据失败，请重试')
+          this.$message.error('获取任务列表失败，请重试')
           this.allData = []
           this.tableData = []
         }
       } catch (error) {
-        console.error('❌ 加载计划数据失败:', error)
+        console.error('❌ 加载任务列表失败:', error)
         console.error('❌ 错误详情:', {
           message: error.message,
           response: error.response,
-          status: error.response?.status,
-          data: error.response?.data
+          status: error.response && error.response.status,
+          data: error.response && error.response.data
         })
 
-        if (error.response?.status === 404) {
-          this.$message.error('项目或合同不存在，可能已被删除')
+        if (error.response && error.response.status === 404) {
+          this.$message.error('计划不存在或该计划下暂无任务')
         } else {
           this.$message.error(`加载数据失败：${error.msg || error.message || '请重试'}`)
         }
@@ -192,7 +210,7 @@ export default {
         this.tableData = []
 
         // 如果是404错误，3秒后自动返回
-        if (error.response?.status === 404) {
+        if (error.response && error.response.status === 404) {
           setTimeout(() => {
             this.$router.push({ name: 'MaintenancePlan' })
           }, 3000)
@@ -202,109 +220,41 @@ export default {
       }
     },
 
+    // 处理任务数据
+    processTaskList(tasks) {
+      this.allData = tasks.map((task, index) => ({
+        _id: task._id,
+        projectName: task.projectName || (task.project && task.project.name) || '未知项目',
+        planType: task.planType || '月',
+        taskMonth: task.taskMonth || '',
+        status: task.status || '已派发',
+        isOverdue: task.isOverdue || '正常',
+        maintainPersons: task.maintainPersons || {},
+        createdAt: task.createdAt
+      }))
+
+      this.tableData = [...this.allData]
+      console.log('✅ 任务数据已处理完成:', {
+        allData: this.allData,
+        tableData: this.tableData
+      })
+    },
+
     // 处理计划数据更新事件
     async handlePlanDataUpdated(event) {
       try {
         const updatedPlanData = event.detail
         console.log('收到计划数据更新事件:', updatedPlanData)
 
-        // 重新加载计划数据
+        // 重新加载任务数据
         await this.onLoad()
 
-        this.$message.success('计划数据已更新')
+        this.$message.success('任务数据已更新')
       } catch (error) {
-        console.error('处理计划数据更新失败:', error)
+        console.error('处理任务数据更新失败:', error)
       }
     },
 
-    // 显示计划信息（使用后端真实数据）
-    showPlanInfoFromBackend(planData) {
-      console.log('📋 处理后端计划数据:', planData)
-      console.log('🔍 检查maintainPersons字段:', planData.maintainPersons)
-      console.log('🔍 检查leader字段:', planData.maintainPersons?.leader)
-      console.log('🔍 检查maintainers字段:', planData.maintainPersons?.maintainers)
-      console.log('🔍 检查technicalLeader字段:', planData.maintainPersons?.technicalLeader)
-      console.log('🔍 检查technical字段:', planData.maintainPersons?.technical)
-
-      // 处理维保人员信息
-      const getPersonName = (person) => {
-        console.log('🔍 处理人员信息:', person)
-        if (!person) {
-          console.log('❌ 人员信息为空')
-          return '未分配'
-        }
-        if (typeof person === 'string') {
-          console.log('✅ 人员信息为字符串:', person)
-          return person
-        }
-        const name = person.name || person.userName || person.fullName || person.displayName || '未知'
-        console.log('✅ 提取到人员姓名:', name)
-        return name
-      }
-
-      // 处理维保人员列表
-      const getMaintainersText = (maintainers) => {
-        if (!maintainers || !Array.isArray(maintainers)) return '未分配'
-        return maintainers.map(m => getPersonName(m)).join('、')
-      }
-
-      // 处理计划状态
-      const getPlanStatus = (status) => {
-        if (!status) return '计划已制定'
-        return status
-      }
-
-      // 处理计划时效
-      const getPlanOverdue = (planData) => {
-        // 这里可以根据计划的创建时间或截止时间来判断是否逾期
-        // 暂时返回正常，实际应该根据业务逻辑判断
-        return '正常'
-      }
-
-      // 创建表格数据
-      this.allData = [{
-        _id: planData._id,
-        index: 1,
-        projectName: planData.projectName || planData.project?.name || '未知项目',
-        planType: planData.planType || '月',
-        taskName: planData.planName || planData.name || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}计划`,
-        projectManager: getPersonName(
-          planData.maintainPersons?.leader ||
-          planData.leader ||
-          planData.projectManager ||
-          planData.manager
-        ),
-        maintainer: getMaintainersText(
-          planData.maintainPersons?.maintainers ||
-          planData.maintainers ||
-          planData.maintenanceStaff
-        ),
-        technicalLeader: getPersonName(
-          planData.maintainPersons?.technical ||
-          planData.maintainPersons?.technicalLeader ||
-          planData.technicalLeader ||
-          planData.techLeader
-        ),
-        status: getPlanStatus(planData.planStatus || planData.status),
-        isOverdue: getPlanOverdue(planData),
-        isPlanData: true, // 标记这是计划数据
-        // 保存完整的计划数据，供改派人员使用
-        fullPlanData: planData
-      }]
-
-      this.tableData = [...this.allData]
-
-      this.planInfo = {
-        projectName: planData.projectName || '未知项目',
-        ownerName: planData.ownerName || '未知业主',
-        planType: planData.planType || '月'
-      }
-
-      console.log('✅ 计划数据已处理完成:', {
-        allData: this.allData,
-        planInfo: this.planInfo
-      })
-    },
 
     // 显示计划信息（保留原有方法作为备用）
     showPlanInfo(projectName, projectId, planId) {
@@ -337,36 +287,26 @@ export default {
 
     getPersonName(person) {
       if (!person) return '未分配'
+      if (typeof person === 'string') return person
       return person.name || person.userName || '未知'
+    },
+    getMaintainersText(maintainers) {
+      if (!maintainers || !Array.isArray(maintainers)) return '未分配'
+      return maintainers.map(m => this.getPersonName(m)).join('、')
     },
     getStatusType(status) {
       switch (status) {
-        case '计划已制定':
+        case '已派发':
           return 'info'
-        case '任务已生成':
+        case '已到达':
           return 'primary'
-        case '执行中':
-          return 'warning'
-        case '已完成':
-          return 'success'
-        // 兼容原有状态
-        case '待处理':
-          return 'info'
         case '处理中':
           return 'warning'
-        case '待审批':
-          return 'primary'
-        case '获取详情':
-          return 'info'
-        case '打卡签到':
-          return 'primary'
-        case '开始维保':
-          return 'warning'
-        case '完成维保':
+        case '已提交':
           return 'success'
-        case '等待审批':
-          return 'primary'
-        case '完成审批':
+        case '已完成':
+          return 'success'
+        case '已评价':
           return 'success'
         default:
           return 'info'
@@ -398,11 +338,14 @@ export default {
     },
     goDetail(row) {
       this.$router.push({
-        name: 'MpmTDDetail',
+        name: 'MaintenanceTaskDetail',
+        params: {
+          id: row._id
+        },
         query: {
-          id: row._id,
           projectId: this.$route.query.projectId,
-          planId: this.$route.query.planId
+          planId: this.$route.query.planId,
+          projectName: this.$route.query.projectName
         }
       })
     },

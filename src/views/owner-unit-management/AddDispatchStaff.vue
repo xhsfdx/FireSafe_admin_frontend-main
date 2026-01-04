@@ -189,7 +189,7 @@ export default {
       try {
         // DispatchStaff组件会自己从后端加载数据，这里不需要重复加载
         // 如果需要，可以在这里添加其他逻辑
-        console.log('addnewdispatchStaff: 员工列表将由DispatchStaff组件加载')
+        console.log('AddDispatchStaff: 员工列表将由DispatchStaff组件加载')
       } catch (e) {
         console.error('加载员工列表失败:', e)
       }

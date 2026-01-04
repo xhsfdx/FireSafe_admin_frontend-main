@@ -74,10 +74,10 @@
 </template>
 
 <script>
-import PersonList from './personList.vue'
+import PersonList from './PersonList.vue'
 import { createStaff } from '@/api/staff'
-// import PersonCard from './personCard.vue'
-// import PersonList from './personList.vue'
+// import PersonCard from './PersonCard.vue'
+// import PersonList from './PersonList.vue'
 
 export default {
   name: 'CreateAccount',

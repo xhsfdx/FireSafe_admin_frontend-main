@@ -60,7 +60,7 @@
 // 续签用的三个步骤组件（你可以后续完善）
 import RenewalContractInfo from './RenewalContract.vue'
 import RenewalProjectInfo from './RenewalProject.vue'
-import RenewalDispatchStaff from './RenewwalConfigure.vue'
+import RenewalDispatchStaff from './RenewalConfigurePersonnel.vue'
 import { getContractDetail, renewalContract } from '@/api/contract' // 你的API
 
 export default {

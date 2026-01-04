@@ -67,7 +67,7 @@
 import DispatchStaff from '@/views/maintenance-management/DispatchStaff.vue';
 import { getMaintainPlans } from '@/api/maintainPlan'
 export default {
-  name: 'RenewwalConfigureMaintenancePersonnel',
+  name: 'RenewalConfigurePersonnel',
   components: { DispatchStaff },
   props: {
     formData: {

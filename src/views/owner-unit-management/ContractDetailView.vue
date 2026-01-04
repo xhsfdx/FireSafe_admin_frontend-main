@@ -65,8 +65,8 @@
 // Import the new EDIT component for Step 1
 import EditContractInfoView from './EditContractInfoView.vue' 
 // Re-use your existing components for Steps 2 and 3
-import LookProjectInfoView from './look_ProjectInfo_View.vue' 
-import AddNewDispatchStaff from './addnewdispatchStaff.vue' 
+import LookProjectInfoView from './ViewProjectInfo.vue' 
+import AddNewDispatchStaff from './AddDispatchStaff.vue' 
 // Import your API functions, including a new 'updateContract'
 import { fetchProjectDetail, updateContract } from '@/api/contract' 
 

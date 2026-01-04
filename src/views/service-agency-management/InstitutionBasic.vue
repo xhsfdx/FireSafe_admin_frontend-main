@@ -108,6 +108,18 @@ export default {
   mounted() {
     this.onLoad()
   },
+  activated() {
+    // For keep-alive components, reload data when activated
+    this.onLoad()
+  },
+  watch: {
+    '$route'(to, from) {
+      // Reload data when route changes (e.g., navigating from digital screen)
+      if (to.path !== from.path) {
+        this.onLoad()
+      }
+    }
+  },
   methods: {
     async onLoad() {
       try {

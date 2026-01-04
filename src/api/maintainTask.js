@@ -25,6 +25,14 @@ export function getMaintainbyProject(id) {
   })
 }
 
+// 获取维保任务 基于planId
+export function getMaintainbyPlan(id) {
+  return request({
+    url: `/maintainTask/plan/${id}`,
+    method: 'get'
+  })
+}
+
 // 创建维护任务
 export function createMaintainTask(data) {
   return request({

@@ -172,7 +172,7 @@ export default {
 </script>
 
 <style scoped>
-/* (All styles from look_ContractInfo_View.vue) */
+/* (All styles from ViewContractInfo.vue) */
 .contract-info-root {
   width: 100%;
   padding: 0 16px 26px 16px;

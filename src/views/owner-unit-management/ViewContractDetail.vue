@@ -62,9 +62,9 @@
 
 <script>
 import { file } from 'jszip/lib/object'
-import LookContractInfoView from './look_ContractInfo_View.vue'
-import LookProjectInfoView from './look_ProjectInfo_View.vue'
-import LookNewDispatchStaff from './look_newdispatchStaff.vue'
+import LookContractInfoView from './ViewContractInfo.vue'
+import LookProjectInfoView from './ViewProjectInfo.vue'
+import LookNewDispatchStaff from './ViewDispatchStaff.vue'
 import { fetchProjectDetail } from '@/api/contract'
 
 export default {

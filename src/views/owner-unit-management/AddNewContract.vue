@@ -41,7 +41,7 @@
             <el-form-item label="合同编号">
               <el-input v-model="form.contractNo" placeholder="请输入合同编号" />
             </el-form-item>
-            <el-form-item label="付款周期">
+            <el-form-item label="付款周期" required>
               <el-select v-model="form.payCycle" placeholder="请选择付款周期" style="width: 100%"
                 :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="月" value="月" />
@@ -51,7 +51,7 @@
 
               </el-select>
             </el-form-item>
-            <el-form-item label="维保建筑类型">
+            <el-form-item label="维保建筑类型" required>
               <el-select v-model="form.buildType" placeholder="请选择维保建筑类型" style="width: 100%"
                 :disabled="['施工', '评估', '检测'].includes(form.contractType)">
                 <el-option label="高层" value="高层" />

@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import PersonCard from './personCard.vue'
+import PersonCard from './PersonCard.vue'
 import axios from 'axios'
 import { getAllStaff } from '@/api/staff'
 

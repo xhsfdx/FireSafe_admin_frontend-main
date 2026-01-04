@@ -61,9 +61,9 @@
 </template>
 
 <script>
-import AddNewContractInformation from './add_new_contract.vue'
-import AddNewProjectInformation from './add_new_project.vue'
-import AddNewDispatchStaff from './addnewdispatchStaff.vue'
+import AddNewContractInformation from './AddNewContract.vue'
+import AddNewProjectInformation from './AddNewProject.vue'
+import AddNewDispatchStaff from './AddDispatchStaff.vue'
 import { createContract } from '@/api/contract'
 
 export default {

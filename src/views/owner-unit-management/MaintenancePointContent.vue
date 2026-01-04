@@ -79,7 +79,7 @@ export default {
     }
   },
   mounted() {
-    console.log('MPM-maintenanceContent 组件已挂载')
+    console.log('MaintenancePointContent 组件已挂载')
     console.log('路由参数:', this.$route.params)
     console.log('查询参数:', this.$route.query)
     this.loadPointMaintenanceContent()

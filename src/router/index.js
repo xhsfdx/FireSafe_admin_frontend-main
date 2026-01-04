@@ -193,7 +193,7 @@ export const asyncRoutes = [
     name: 'Screen',
     meta: {
       title: '数字大屏',
-      icon: ''
+      icon: 'el-icon-monitor'
     },
     children: [
       {
@@ -215,7 +215,7 @@ export const asyncRoutes = [
     name: 'Agency',
     meta: {
       title: '服务机构管理',
-      icon: 'nested' // 你可以换成你想用的图标
+      icon: 'el-icon-office-building'
     },
 
     children: [
@@ -238,7 +238,7 @@ export const asyncRoutes = [
         path: 'staff',
         name: 'AgencyStaffInfo',
         hidden: true,
-        component: () => import('@/views/service-agency-management/personCard.vue'),
+        component: () => import('@/views/service-agency-management/PersonCard.vue'),
         meta: {
           title: '机构人员信息'
         }
@@ -275,7 +275,7 @@ export const asyncRoutes = [
         path: 'person-list',
         name: 'PersonList',
         // hidden: true, // 不显示在侧边栏
-        component: () => import('@/views/service-agency-management/personList.vue'),
+        component: () => import('@/views/service-agency-management/PersonList.vue'),
         meta: { title: '人员列表' }
       },
       {
@@ -307,7 +307,7 @@ export const asyncRoutes = [
     redirect: '/owner/plan',
     alwaysShow: true,
     name: 'OwnerUnitManagement',
-    meta: { title: '项目管理', icon: 'nested' },
+    meta: { title: '项目管理', icon: 'el-icon-folder-opened' },
     children: [
       // 已有的
       {
@@ -345,28 +345,28 @@ export const asyncRoutes = [
         path: 'point-detail/:pointId',
         name: 'MaintenancePointDetail',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/MPM-pointDetail.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenancePointDetail.vue'),
         meta: { title: '维保点位详情' }
       },
       {
         path: 'add-point',
         name: 'AddMaintenancePoint',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/MPM-addPoint.vue'),
+        component: () => import('@/views/owner-unit-management/AddMaintenancePoint.vue'),
         meta: { title: '添加点位' }
       },
       {
         path: 'point-basic-info/:pointId',
         name: 'MaintenancePointBasicInfo',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/MPM-basicInfo.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenancePointBasicInfo.vue'),
         meta: { title: '点位基础信息' }
       },
       {
         path: 'point-maintenance-content/:pointId',
         name: 'MaintenancePointMaintenanceContent',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/MPM-maintenanceContent.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenancePointContent.vue'),
         meta: { title: '点位维保内容' }
       },
 
@@ -375,14 +375,14 @@ export const asyncRoutes = [
         path: 'new-contract-info',
         name: 'AddNewContractInfo',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/add_new_contract.vue'),
+        component: () => import('@/views/owner-unit-management/AddNewContract.vue'),
         meta: { title: '新增合同信息' }
       },
       {
         path: 'new-project-info',
         name: 'AddNewProjectInfo',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/add_new_project.vue'),
+        component: () => import('@/views/owner-unit-management/AddNewProject.vue'),
         meta: { title: '新增项目信息' }
       },
       {
@@ -417,7 +417,7 @@ export const asyncRoutes = [
         path: 'renewal-configure-personnel',
         name: 'RenewalConfigurePersonnel',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/RenewwalConfigure.vue'),
+        component: () => import('@/views/owner-unit-management/RenewalConfigurePersonnel.vue'),
         meta: { title: '续签人员配置' }
       },
 
@@ -436,7 +436,7 @@ export const asyncRoutes = [
         path: 'EditContractDetail',
         name: 'EditContractDetail',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/Contract_Detail_View.vue'),
+        component: () => import('@/views/owner-unit-management/ContractDetailView.vue'),
         meta: {
           title: '编辑合同',
           roles: ['superadmin', 'admin', 'editor']
@@ -446,7 +446,7 @@ export const asyncRoutes = [
         path: 'look_ContractDetail_View',
         name: 'ContractDetailView',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/look_ContractDetail_View.vue'),
+        component: () => import('@/views/owner-unit-management/ViewContractDetail.vue'),
         meta: {
           title: '合同完整详情',
           roles: ['superadmin', 'admin', 'editor']
@@ -457,7 +457,7 @@ export const asyncRoutes = [
         path: 'contract/add',
         name: 'AddContractPage',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/add.vue'),
+        component: () => import('@/views/owner-unit-management/AddContractAndProject.vue'),
         // 第一个contract试试写接口
         meta: { title: '新增项目管理页面' }
       },
@@ -465,7 +465,7 @@ export const asyncRoutes = [
         path: 'contract/addnewdispatchStaff',
         name: 'addnewDispatchStaff',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/addnewdispatchStaff.vue'),
+        component: () => import('@/views/owner-unit-management/AddDispatchStaff.vue'),
         meta: { title: '新增配置维保人员' }
       },
 
@@ -474,21 +474,21 @@ export const asyncRoutes = [
         path: 'plan-detail',
         name: 'PlanDetail',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/mpm-PlanDetail.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenancePlanDetail.vue'),
         meta: { title: '任务详情' }
       },
       {
         path: 'task-detail',
         name: 'OwnerTaskDetail',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/mpm-TaskDetail.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenanceTaskList.vue'),
         meta: { title: '任务详情' }
       },
       {
         path: 'mpmTD-detail',
         name: 'MpmTDDetail',
         hidden: true,
-        component: () => import('@/views/owner-unit-management/mpmTD-detail.vue'),
+        component: () => import('@/views/owner-unit-management/MaintenanceTaskDetail.vue'),
         meta: { title: '维保任务详情' }
       },
       {
@@ -524,7 +524,7 @@ export const asyncRoutes = [
     name: 'MaintenanceServiceManagement',
     meta: {
       title: '维护业务管理',
-      icon: 'el-icon-s-order' // 文档/工单类型图标
+      icon: 'el-icon-s-order'
     },
     children: [
       {
@@ -555,7 +555,7 @@ export const asyncRoutes = [
       {
         path: 'report',
         name: 'WorkReport',
-        component: () => import('@/views/maintenance-management/Workreport.vue'),
+        component: () => import('@/views/maintenance-management/WorkReport.vue'),
         meta: { title: '工作上报', icon: 'el-icon-upload2' }
       },
       {
@@ -596,13 +596,13 @@ export const asyncRoutes = [
     name: 'SystemManagement',
     meta: {
       title: '系统管理',
-      icon: 'el-icon-s-tools' // 设置/系统管理
+      icon: 'el-icon-setting'
     },
     children: [
       {
         path: 'checkin',
         name: 'CheckinArea',
-        component: () => import('@/views/system-management/Check-in area settings.vue'),
+        component: () => import('@/views/system-management/CheckinAreaSettings.vue'),
         meta: { title: '打卡区域设置', icon: 'el-icon-location-outline' }
       },
       {

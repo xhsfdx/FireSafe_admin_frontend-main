@@ -258,6 +258,7 @@ import TrendChart from '@/components/digitalScreen/TrendChart.vue'
 import DonutChart from '@/components/digitalScreen/DonutChart.vue'
 import RadarChart from '@/components/digitalScreen/RadarChart.vue'
 import { getDigitalScreenData } from '@/api/digitalScreen'
+import store from '@/store'
 
 export default {
   name: 'DigitalScreen',
@@ -288,6 +289,19 @@ export default {
   },
   beforeDestroy() {
     this.cleanup()
+  },
+  beforeRouteLeave(to, from, next) {
+    // Clean up when leaving the route
+    this.restoreUI()
+    next()
+  },
+  watch: {
+    '$route'(to, from) {
+      // If navigating away from digital screen, restore UI
+      if (!to.path.includes('/digital-screen') && from.path.includes('/digital-screen')) {
+        this.restoreUI()
+      }
+    }
   },
   methods: {
     updateDateTime() {
@@ -416,10 +430,7 @@ export default {
       document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange)
       document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange)
       document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange)
-      this.showLayoutElements()
-      if (this.isFullscreen) {
-        this.exitFullscreen()
-      }
+      this.restoreUI()
     },
     exitFullscreen() {
       try {
@@ -441,6 +452,69 @@ export default {
       // Close menu if open
       this.showNavMenu = false
       
+      // Clean up and restore UI first
+      this.restoreUI()
+      
+      // Wait a bit for UI to restore, then navigate
+      setTimeout(() => {
+        this.performNavigation('/agency/basic')
+      }, 150)
+    },
+    toggleNavMenu() {
+      this.showNavMenu = !this.showNavMenu
+    },
+    navigateTo(path) {
+      this.showNavMenu = false
+      
+      // Clean up and restore UI first
+      this.restoreUI()
+      
+      // Clear cache and navigate using redirect (single refresh)
+      const targetRoute = this.$router.resolve({ path })
+      if (targetRoute && targetRoute.route && targetRoute.route.name) {
+        // Clear cache to force component re-mount
+        store.dispatch('tagsView/delCachedView', { name: targetRoute.route.name }).then(() => {
+          // Navigate using redirect mechanism (forces single refresh)
+          this.performNavigation(path)
+        }).catch(() => {
+          // If cache clearing fails, still navigate
+          this.performNavigation(path)
+        })
+      } else {
+        // If we can't resolve the route, navigate directly
+        this.performNavigation(path)
+      }
+    },
+    performNavigation(path) {
+      // Navigate directly to the path, then reload window
+      try {
+        const pushResult = this.$router.push({ path })
+        
+        // Check if push returns a Promise
+        if (pushResult && typeof pushResult.then === 'function') {
+          pushResult.then(() => {
+            // Reload window after navigation completes
+            window.location.reload()
+          }).catch((err) => {
+            if (err.name !== 'NavigationDuplicated') {
+              console.error('Navigation error:', err)
+              // Still reload even if navigation has error
+              window.location.reload()
+            }
+          })
+        } else {
+          // If push doesn't return a Promise, reload after a short delay
+          setTimeout(() => {
+            window.location.reload()
+          }, 100)
+        }
+      } catch (err) {
+        console.error('Navigation error:', err)
+        // Reload on error as well
+        window.location.reload()
+      }
+    },
+    restoreUI() {
       // Stop countdown if still running
       if (this.countdownTimer) {
         clearInterval(this.countdownTimer)
@@ -452,37 +526,50 @@ export default {
         this.exitFullscreen()
       }
       
-      // Show layout elements
-      this.showLayoutElements()
+      // Force remove the body class immediately
+      document.body.classList.remove('digital-screen-active')
       
-      // Navigate to dashboard or home
-      this.$router.push({ path: '/dashboard' }).catch(err => {
-        // If dashboard doesn't exist, try root
-        if (err.name !== 'NavigationDuplicated') {
-          this.$router.push({ path: '/' })
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        // Force show layout elements by removing any inline styles
+        const mainContainer = document.querySelector('.main-container')
+        if (mainContainer) {
+          mainContainer.style.marginLeft = ''
+          mainContainer.style.width = ''
         }
-      })
-    },
-    toggleNavMenu() {
-      this.showNavMenu = !this.showNavMenu
-    },
-    navigateTo(path) {
-      this.showNavMenu = false
-      
-      // Exit fullscreen if active
-      if (this.isFullscreen) {
-        this.exitFullscreen()
-      }
-      
-      // Show layout elements
-      this.showLayoutElements()
-      
-      // Navigate to the selected path
-      this.$router.push({ path }).catch(err => {
-        if (err.name !== 'NavigationDuplicated') {
-          console.error('Navigation error:', err)
+        
+        const appMain = document.querySelector('.app-main')
+        if (appMain) {
+          appMain.style.minHeight = ''
+          appMain.style.paddingTop = ''
         }
-      })
+        
+        // Force show sidebar, navbar, etc.
+        const elements = [
+          '.sidebar-container',
+          '.navbar',
+          '.tags-view-container',
+          '.app-breadcrumb',
+          '.hamburger-container',
+          '.right-menu'
+        ]
+        
+        elements.forEach(selector => {
+          const el = document.querySelector(selector)
+          if (el) {
+            el.style.display = ''
+            // Also remove any inline styles that might hide it
+            el.style.visibility = ''
+            el.style.opacity = ''
+          }
+        })
+        
+        // Trigger a resize event to ensure layout recalculates
+        window.dispatchEvent(new Event('resize'))
+        
+        // Force Vue to re-render by triggering a route update
+        this.$forceUpdate()
+      }, 50)
     }
   }
 }

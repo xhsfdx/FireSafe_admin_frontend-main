@@ -54,9 +54,81 @@ export default {
       }
     }
   },
+  watch: {
+    '$route'(to, from) {
+      // Sync body class with route changes
+      this.$nextTick(() => {
+        const isDigital = to.path.includes('/digital-screen') || to.name === 'DigitalScreenMain'
+        
+        if (isDigital) {
+          document.body.classList.add('digital-screen-active')
+        } else {
+          // Remove the class and force show layout elements
+          document.body.classList.remove('digital-screen-active')
+          this.forceShowLayoutElements()
+        }
+      })
+    },
+    isDigitalScreen(newVal) {
+      // Also watch the computed property
+      this.$nextTick(() => {
+        if (newVal) {
+          document.body.classList.add('digital-screen-active')
+        } else {
+          document.body.classList.remove('digital-screen-active')
+          this.forceShowLayoutElements()
+        }
+      })
+    }
+  },
+  mounted() {
+    // Initial sync
+    this.$nextTick(() => {
+      if (this.isDigitalScreen) {
+        document.body.classList.add('digital-screen-active')
+      } else {
+        document.body.classList.remove('digital-screen-active')
+      }
+    })
+  },
   methods: {
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
+    },
+    forceShowLayoutElements() {
+      // Force show all layout elements by removing inline styles
+      const elements = [
+        '.sidebar-container',
+        '.navbar',
+        '.tags-view-container',
+        '.app-breadcrumb',
+        '.hamburger-container',
+        '.right-menu'
+      ]
+      
+      elements.forEach(selector => {
+        const el = document.querySelector(selector)
+        if (el) {
+          el.style.display = ''
+        }
+      })
+      
+      const mainContainer = document.querySelector('.main-container')
+      if (mainContainer) {
+        mainContainer.style.marginLeft = ''
+        mainContainer.style.width = ''
+      }
+      
+      const appMain = document.querySelector('.app-main')
+      if (appMain) {
+        appMain.style.minHeight = ''
+        appMain.style.paddingTop = ''
+      }
+      
+      // Trigger resize to recalculate layout
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 100)
     }
   }
 }
