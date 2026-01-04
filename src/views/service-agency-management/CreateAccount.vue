@@ -91,19 +91,18 @@ export default {
     }
   },
   created() {
-    // 从路由查询参数中获取电话号码
-    const phoneFromQuery = this.$route.query.phone
-    if (phoneFromQuery) {
-      this.account.phone = phoneFromQuery
-      // 读取后立即清除查询参数，避免保留历史记录
-      this.$nextTick(() => {
-        this.clearQueryParams()
-      })
-    } else {
-      // 如果有ID但没有phone参数，尝试从API获取人员信息
-      const id = this.$route.params.id
-      if (id) {
-        this.fetchStaffPhone(id)
+    this.loadAccountData()
+  },
+  // 如果组件被 keep-alive 缓存，使用 activated 钩子
+  activated() {
+    this.loadAccountData()
+  },
+  watch: {
+    // 监听路由变化，确保每次进入页面时都重新加载数据
+    '$route'(to, from) {
+      // 只有当路由真正变化时才重新加载（避免重复加载）
+      if (to.name === 'CreateAccount' && to.fullPath !== from.fullPath) {
+        this.loadAccountData()
       }
     }
   },
@@ -112,6 +111,32 @@ export default {
     this.clearQueryParams()
   },
   methods: {
+    // 加载账号数据（从查询参数或API）
+    loadAccountData() {
+      // 重置表单数据
+      this.account = {
+        phone: '',
+        name: '',
+        password: '',
+        confirmPassword: ''
+      }
+      
+      // 从路由查询参数中获取电话号码
+      const phoneFromQuery = this.$route.query.phone
+      if (phoneFromQuery) {
+        this.account.phone = phoneFromQuery
+        // 读取后立即清除查询参数，避免保留历史记录
+        this.$nextTick(() => {
+          this.clearQueryParams()
+        })
+      } else {
+        // 如果有ID但没有phone参数，尝试从API获取人员信息
+        const id = this.$route.params.id
+        if (id) {
+          this.fetchStaffPhone(id)
+        }
+      }
+    },
     // 清除路由查询参数
     clearQueryParams() {
       if (this.$route.query.phone) {
