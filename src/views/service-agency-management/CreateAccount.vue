@@ -17,8 +17,7 @@
             placeholder="请输入电话号码"
             required
             class="form-input readonly-input"
-            readonly="readonly"
-            value="13890873478"
+            readonly
           >
         </div>
 
@@ -28,7 +27,7 @@
           </label>
           <input
             id="username"
-            v-model="account.username"
+            v-model="account.name"
             type="text"
             placeholder="请输入用户名"
             required
@@ -75,7 +74,7 @@
 
 <script>
 import PersonList from './PersonList.vue'
-import { createStaff } from '@/api/staff'
+import { createUser, getStaffById } from '@/api/staff'
 // import PersonCard from './PersonCard.vue'
 // import PersonList from './PersonList.vue'
 
@@ -84,31 +83,98 @@ export default {
   data() {
     return {
       account: {
-        phone: '', // 示例中的电话号码似乎是预填的
-        username: '',
+        phone: '', // 从路由参数或查询参数中获取电话号码
+        name: '',
         password: '',
         confirmPassword: ''
       }
     }
   },
+  created() {
+    // 从路由查询参数中获取电话号码
+    const phoneFromQuery = this.$route.query.phone
+    if (phoneFromQuery) {
+      this.account.phone = phoneFromQuery
+      // 读取后立即清除查询参数，避免保留历史记录
+      this.$nextTick(() => {
+        this.clearQueryParams()
+      })
+    } else {
+      // 如果有ID但没有phone参数，尝试从API获取人员信息
+      const id = this.$route.params.id
+      if (id) {
+        this.fetchStaffPhone(id)
+      }
+    }
+  },
+  beforeDestroy() {
+    // 组件销毁前清除查询参数
+    this.clearQueryParams()
+  },
   methods: {
+    // 清除路由查询参数
+    clearQueryParams() {
+      if (this.$route.query.phone) {
+        this.$router.replace({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: {}
+        })
+      }
+    },
+    // 获取人员电话号码
+    async fetchStaffPhone(id) {
+      try {
+        const res = await getStaffById(id)
+        if (res.success && res.data && res.data.phone) {
+          this.account.phone = res.data.phone
+        }
+      } catch (error) {
+        console.error('获取人员信息失败:', error)
+      }
+    },
     // 处理表单提交 (新增)
-    handleSubmit() {
+    async handleSubmit() {
       // 在这里可以进行简单的客户端验证，例如检查密码和确认密码是否一致
       if (this.account.password !== this.account.confirmPassword) {
-        alert('密码和确认密码不一致！')
+        this.$message.error('密码和确认密码不一致！')
         return
       }
-      // get the id from the route params
-      const id = this.$route.params.id
-      createStaff(id, this.account).then(res => { 
-        console.log(res)
-        this.$router.push({ name: 'PersonList' })
-      })
-      console.log('提交创建账号:', this.account)
       
-      // 模拟创建成功的提示
-      this.handleClose() // 模拟关闭对话框
+      // 检查是否有员工ID
+      const id = this.$route.params.id
+      if (!id) {
+        this.$message.error('缺少员工ID，无法创建账号')
+        return
+      }
+      
+      // 检查电话号码
+      if (!this.account.phone) {
+        this.$message.error('电话号码不能为空')
+        return
+      }
+      
+      try {
+        // 准备发送给后端的数据（后端期望 username, password, mobile）
+        const accountData = {
+          username: this.account.name,
+          password: this.account.password,
+          mobile: this.account.phone // 后端使用 mobile 字段
+        }
+        
+        // 使用 createUser API，它对应后端的 /staff/usercreate/:id 端点
+        const res = await createUser(id, accountData)
+        
+        if (res.success) {
+          this.$message.success('账号创建成功')
+          this.$router.push({ name: 'PersonList' })
+        } else {
+          this.$message.error(res.message || '账号创建失败')
+        }
+      } catch (error) {
+        console.error('创建账号失败:', error)
+        this.$message.error(error.response?.data?.message || '创建账号失败，请重试')
+      }
     },
 
     // 处理重置按钮点击

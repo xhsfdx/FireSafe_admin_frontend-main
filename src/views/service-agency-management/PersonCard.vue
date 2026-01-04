@@ -60,7 +60,12 @@ export default {
     },
 
     AccountCreate(id) {
-      this.$router.push({ name: 'CreateAccount', params: { id: id }})
+      // 传递人员ID和电话号码，使用 replace 清除历史记录
+      this.$router.replace({ 
+        name: 'CreateAccount', 
+        params: { id: id },
+        query: { phone: this.person.phone }
+      })
     },
 
     PersonInfo(id) {

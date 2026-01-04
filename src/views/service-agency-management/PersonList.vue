@@ -113,8 +113,12 @@ export default {
     },
 
     handleAdd() {
-      // 跳转或打开新增弹窗等
-      this.$router.push({ name: 'PersonInfo' })
+      // 跳转到创建账号页面（新增人员时没有电话号码，所以不传递phone参数）
+      // 使用 replace 清除历史记录
+      this.$router.replace({ 
+        name: 'CreateAccount',
+        query: {} // 明确清除查询参数
+      })
     },
 
     handleDelete(id) {
