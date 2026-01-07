@@ -144,6 +144,12 @@
       </el-col>
     </el-row>
 
+    <!-- 底部确认按钮 -->
+    <div class="footer-actions">
+      <el-button @click="onCancel">取消</el-button>
+      <el-button type="primary" @click="onSave">确认</el-button>
+    </div>
+
   </div>
 </template>
 
@@ -630,8 +636,8 @@ export default {
     },
 
     onCancel() {
-      console.log('用户点击取消，关闭对话框')
-      this.$emit('close')
+      console.log('用户点击取消，返回上一页')
+      this.$router.go(-1)
     },
 
     async onSave() {
@@ -1019,5 +1025,17 @@ export default {
   padding: 20px;
   color: #789;
   font-size: 16px;
+}
+.footer-actions {
+  position: fixed;
+  bottom: 20px;
+  right: 40px;
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+  background: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 </style>
