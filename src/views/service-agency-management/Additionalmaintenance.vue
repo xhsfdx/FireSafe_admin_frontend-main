@@ -1,358 +1,625 @@
-<!-- <template>
-  <div class="work-order-management-page">
-    <!-- 顶部导航/选项卡 -->
-    <div class="tab-navigation">
-      <button
-        v-for="(tab, index) in tabs"
-        :key="index"
-        :class="{ 'tab-item': true, 'active': currentTab === tab.value }"
-        @click="selectTab(tab.value)"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <!-- 内容区域：根据选项卡展示不同界面 -->
-    <div class="tab-content">
-      <!-- 例行维保 -->
-      <div v-show="currentTab === 'routine'">
-        <div class="search-filter">
-          <div class="filter-item">
-            <input
-              type="text"
-              v-model="searchParams.projectName"
-              placeholder="输入项目名称搜索"
-              class="filter-input"
-            />
+<template>
+  <div class="additional-maintenance-page">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="title-section">
+          <div class="page-icon">
+            <i class="el-icon-s-tools" />
           </div>
-          <div class="filter-item">
-            <select v-model="searchParams.status" class="filter-select">
-              <option value="">选择计划类型</option>
-              <option value="0">月</option>
-              <option value="1">季</option>
-              <option value="2">年</option>
-              <option value="3">半年</option>
-            </select>
+          <div class="title-info">
+            <h1 class="page-title">附加维保</h1>
+            <p class="page-subtitle">管理和监控附加维保任务的执行情况</p>
           </div>
-          <div class="filter-item">
-            <select v-model="searchParams.status" class="filter-select">
-              <option value="">任务状态</option>
-              <option value="pending">待处理</option>
-              <option value="processing">处理中</option>
-              <option value="completed">已完成</option>
-              <option value="canceled">待审批</option>
-            </select>
+        </div>
+        <div class="header-stats">
+          <div class="stat-card stat-total">
+            <div class="stat-icon">
+              <i class="el-icon-s-data" />
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ tableData.length }}</div>
+              <div class="stat-label">总任务数</div>
+            </div>
           </div>
-          <div class="filter-item">
-            <select v-model="searchParams.timeliness" class="filter-select">
-              <option value="">任务时效</option>
-              <option value="timely">正常</option>
-              <option value="overdue">已逾期</option>
-            </select>
+          <div class="stat-card stat-completed">
+            <div class="stat-icon">
+              <i class="el-icon-circle-check" />
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ getStatusCount('已完成') }}</div>
+              <div class="stat-label">已完成</div>
+            </div>
           </div>
-          <el-date-picker
-            type="date"
-            placeholder="选择任务日期"
-            class="input-item"
-            style="width: 200px"
-          />
-          <div class="filter-actions">
-            <button class="btn btn-primary" @click="handleSearch">
-              <i class="search-icon"></i> 查询
-            </button>
-            <button class="btn btn-secondary" @click="handleReset">
-              <i class="reset-icon"></i> 重置
-            </button>
+          <div class="stat-card stat-pending">
+            <div class="stat-icon">
+              <i class="el-icon-loading" />
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ getStatusCount('处理中') }}</div>
+              <div class="stat-label">处理中</div>
+            </div>
+          </div>
+          <div class="stat-card stat-overdue">
+            <div class="stat-icon">
+              <i class="el-icon-warning" />
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ getStatusCount('待处理') }}</div>
+              <div class="stat-label">待处理</div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 查询筛选区域 -->
+    <div class="search-section">
+      <div class="search-header">
+        <h3><i class="el-icon-search" /> 筛选条件</h3>
+        <el-button
+          type="text"
+          class="toggle-btn"
+          @click="toggleSearchBar"
+        >
+          {{ searchBarVisible ? '收起' : '展开' }}
+          <i :class="searchBarVisible ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" />
+        </el-button>
+      </div>
+
+      <el-collapse-transition>
+        <div v-show="searchBarVisible" class="search-bar">
+          <div class="search-row">
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-office-building" /> 项目名称
+              </label>
+              <el-input
+                v-model="filters.projectName"
+                placeholder="请输入项目名称进行搜索"
+                prefix-icon="el-icon-search"
+                clearable
+              />
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-time" /> 工单状态
+              </label>
+              <el-select v-model="filters.status" placeholder="请选择工单状态" clearable>
+                <el-option label="待处理" value="待处理" />
+                <el-option label="处理中" value="处理中" />
+                <el-option label="待审批" value="待审批" />
+                <el-option label="已完成" value="已完成" />
+                <el-option label="已取消" value="已取消" />
+              </el-select>
+            </div>
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-document" /> 来源类型
+              </label>
+              <el-select v-model="filters.sourceType" placeholder="请选择来源类型" clearable>
+                <el-option label="工作上报" value="工作上报" />
+                <el-option label="故障工单" value="故障工单" />
+                <el-option label="例行维保" value="例行维保" />
+                <el-option label="手动创建" value="手动创建" />
+              </el-select>
+            </div>
+          </div>
+
+          <div class="search-row">
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-date" /> 创建时间
+              </label>
+              <el-date-picker
+                v-model="filters.dateRange"
+                type="daterange"
+                range-separator=" 至 "
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                clearable
+              />
+            </div>
+            <div class="search-item search-actions">
+              <el-button type="primary" icon="el-icon-search" class="search-btn" @click="onSearch">
+                查询
+              </el-button>
+              <el-button icon="el-icon-refresh" class="reset-btn" @click="onReset">
+                重置
+              </el-button>
+            </div>
+          </div>
+        </div>
+      </el-collapse-transition>
+    </div>
+
+    <!-- 数据表格区域 -->
+    <div class="table-section">
+      <div class="table-header">
+        <h3><i class="el-icon-s-grid" /> 附加维保列表</h3>
+        <div class="table-actions">
+          <el-button type="info" icon="el-icon-download" @click="exportData">
+            导出数据
+          </el-button>
+          <el-button type="primary" icon="el-icon-plus" @click="handleCreate">
+            新建附加维保
+          </el-button>
+        </div>
+      </div>
+
       <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>项目名称</th>
-                    <th>计划类型</th>
-                    <th>任务名称</th>
-                    <th>项目负责人</th>
-                    <th>现场维保人员</th>
-                    <th>任务状态</th>
-                    <th>任务时效</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 始终显示无数据状态 -->
-                <tr>
-                    <td colspan="9" class="no-data">
-                        <div class="empty-state">
-                            <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
-                            <p>暂无数据</p>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-         <!-- 可以在这里添加分页组件 -->
-    </div>
+        <el-table
+          v-loading="loading"
+          :data="filteredData"
+          stripe
+          element-loading-text="数据加载中..."
+          empty-text="暂无数据"
+          class="maintenance-table"
+          :header-cell-style="{
+            background: '#f5f7fa',
+            color: '#606266',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }"
+        >
+          <el-table-column type="index" label="序号" width="70" align="center" />
 
-      <!-- 故障工单 -->
-      <div v-show="currentTab === 'fault'">
-        <p>这是故障工单页面内容</p>
-      </div>
+          <el-table-column prop="projectName" label="项目名称" min-width="200" show-overflow-tooltip />
 
-      <!-- 附加维保 -->
-      <div v-show="currentTab === 'additional'">
-        <!-- 搜索过滤区域 -->
-        <div class="search-filter">
-          <div class="filter-item">
-            <input
-              type="text"
-              v-model="searchParams.projectName"
-              placeholder="输入项目名称搜索"
-              class="filter-input"
-            />
-          </div>
-          <div class="filter-item">
-            <select v-model="searchParams.status" class="filter-select">
-              <option value="">选择工单状态</option>
-              <option value="pending">待处理</option>
-              <option value="processing">处理中</option>
-              <option value="completed">已完成</option>
-              <option value="canceled">已取消</option>
-            </select>
-          </div>
-          <div class="filter-item">
-            <select v-model="searchParams.timeliness" class="filter-select">
-              <option value="">选择工单时效</option>
-              <option value="timely">及时</option>
-              <option value="overdue">超时</option>
-            </select>
-          </div>
-          <div class="filter-actions">
-            <button class="btn btn-primary" @click="handleSearch">
-              <i class="search-icon"></i> 查询
-            </button>
-            <button class="btn btn-secondary" @click="handleReset">
-              <i class="reset-icon"></i> 重置
-            </button>
-          </div>
+          <el-table-column prop="title" label="维保标题" min-width="200" show-overflow-tooltip />
+
+          <el-table-column prop="sourceType" label="来源类型" width="120" align="center">
+            <template slot-scope="{ row }">
+              <el-tag :type="getSourceTypeTagType(row.sourceType)" size="small">
+                {{ row.sourceType || '未知' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="status" label="状态" width="100" align="center">
+            <template slot-scope="{ row }">
+              <el-tag :type="getStatusTagType(row.status)" size="small">
+                {{ row.status || '未知' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="createdAt" label="创建时间" width="180" align="center">
+            <template slot-scope="{ row }">
+              {{ formatDate(row.createdAt) }}
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="expectedCompletionDate" label="预计完成时间" width="180" align="center">
+            <template slot-scope="{ row }">
+              {{ row.expectedCompletionDate ? formatDate(row.expectedCompletionDate) : '-' }}
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="200" align="center" fixed="right">
+            <template slot-scope="{ row }">
+              <el-button
+                type="text"
+                size="small"
+                icon="el-icon-view"
+                @click="handleView(row)"
+              >
+                查看
+              </el-button>
+              <el-button
+                v-if="row.status === '待审批'"
+                type="text"
+                size="small"
+                icon="el-icon-check"
+                @click="handleApprove(row)"
+              >
+                审批
+              </el-button>
+              <el-button
+                v-if="['待处理', '已取消'].includes(row.status)"
+                type="text"
+                size="small"
+                icon="el-icon-delete"
+                style="color: #f56c6c"
+                @click="handleDelete(row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="pagination-container">
+          <el-pagination
+            :current-page="pagination.page"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="pagination.limit"
+            :total="pagination.total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handlePageChange"
+          />
         </div>
-
-        <!-- 表格区域 -->
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>序号</th>
-                <th>项目名称</th>
-                <th>上报时间</th>
-                <th>上报人员</th>
-                <th>工单时效</th>
-                <th>工单状态</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colspan="9" class="no-data">
-                  <div class="empty-state">
-                    <img src="your-xls-icon-path.png" alt="没有数据" class="empty-icon">
-                    <p>暂无数据</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 工作上报 -->
-      <div v-show="currentTab === 'report'">
-        <p>这是工作上报页面内容</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getAdditionalMaintenances, deleteAdditionalMaintenance, approveAdditionalMaintenance } from '@/api/additionalMaintenance'
+
 export default {
   name: 'AdditionalMaintenance',
   data() {
     return {
-      tabs: [
-        { label: '例行维保', value: 'routine' },
-        { label: '故障工单', value: 'fault' },
-        { label: '附加维保', value: 'additional' },
-        { label: '工作上报', value: 'report' }
-      ],
-      currentTab: 'additional',
-      searchParams: {
+      loading: false,
+      searchBarVisible: true,
+      tableData: [],
+      filters: {
         projectName: '',
-        submitter: '',
         status: '',
-        timeliness: '',
-        source: ''
+        sourceType: '',
+        dateRange: null
+      },
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
       }
     }
   },
-  methods: {
-    selectTab(tabValue) {
-      this.currentTab = tabValue
-      this.handleReset()
-    },
-    handleSearch() {
-      console.log('执行搜索:', this.searchParams)
-    },
-    handleReset() {
-      this.searchParams = {
-        projectName: '',
-        submitter: '',
-        status: '',
-        timeliness: '',
-        source: ''
+  computed: {
+    filteredData() {
+      let data = this.tableData
+
+      if (this.filters.projectName) {
+        data = data.filter(item => 
+          item.projectName && item.projectName.includes(this.filters.projectName)
+        )
       }
+
+      if (this.filters.status) {
+        data = data.filter(item => item.status === this.filters.status)
+      }
+
+      if (this.filters.sourceType) {
+        data = data.filter(item => item.sourceType === this.filters.sourceType)
+      }
+
+      if (this.filters.dateRange && this.filters.dateRange.length === 2) {
+        const [start, end] = this.filters.dateRange
+        data = data.filter(item => {
+          const createdAt = new Date(item.createdAt)
+          const startDate = new Date(start)
+          const endDate = new Date(end)
+          endDate.setHours(23, 59, 59, 999)
+          return createdAt >= startDate && createdAt <= endDate
+        })
+      }
+
+      return data
+    }
+  },
+  mounted() {
+    this.loadData()
+  },
+  methods: {
+    async loadData() {
+      this.loading = true
+      try {
+        const params = {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        }
+
+        if (this.filters.projectName) params.projectName = this.filters.projectName
+        if (this.filters.status) params.status = this.filters.status
+        if (this.filters.sourceType) params.sourceType = this.filters.sourceType
+
+        const res = await getAdditionalMaintenances(params)
+        if (res.success) {
+          this.tableData = res.data || []
+          if (res.pagination) {
+            this.pagination.total = res.pagination.total
+            this.pagination.page = res.pagination.page
+            this.pagination.limit = res.pagination.limit
+          }
+        } else {
+          this.$message.error(res.message || '获取数据失败')
+          this.tableData = []
+        }
+      } catch (error) {
+        console.error('加载附加维保数据失败:', error)
+        this.$message.error('网络异常或接口出错')
+        this.tableData = []
+      } finally {
+        this.loading = false
+      }
+    },
+    toggleSearchBar() {
+      this.searchBarVisible = !this.searchBarVisible
+    },
+    onSearch() {
+      this.pagination.page = 1
+      this.loadData()
+    },
+    onReset() {
+      this.filters = {
+        projectName: '',
+        status: '',
+        sourceType: '',
+        dateRange: null
+      }
+      this.pagination.page = 1
+      this.loadData()
+    },
+    handleSizeChange(size) {
+      this.pagination.limit = size
+      this.pagination.page = 1
+      this.loadData()
+    },
+    handlePageChange(page) {
+      this.pagination.page = page
+      this.loadData()
+    },
+    handleView(row) {
+      // 跳转到详情页
+      this.$router.push({
+        name: 'AdditionalMaintenanceDetail',
+        params: { id: row._id }
+      })
+    },
+    handleApprove(row) {
+      this.$prompt('请输入审批意见', '审批附加维保', {
+        confirmButtonText: '通过',
+        cancelButtonText: '不通过',
+        inputPlaceholder: '请输入审批意见'
+      }).then(({ value }) => {
+        return approveAdditionalMaintenance(row._id, {
+          approved: true,
+          approvalComment: value || '审批通过'
+        })
+      }).then(() => {
+        this.$message.success('审批成功')
+        this.loadData()
+      }).catch((error) => {
+        if (error !== 'cancel') {
+          console.error('审批失败:', error)
+          this.$message.error('审批失败')
+        }
+      })
+    },
+    handleDelete(row) {
+      this.$confirm('确定要删除此附加维保吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return deleteAdditionalMaintenance(row._id)
+      }).then(() => {
+        this.$message.success('删除成功')
+        this.loadData()
+      }).catch((error) => {
+        if (error !== 'cancel') {
+          console.error('删除失败:', error)
+          this.$message.error('删除失败')
+        }
+      })
+    },
+    handleCreate() {
+      // 跳转到创建页面
+      this.$router.push({
+        name: 'AdditionalMaintenanceCreate'
+      })
+    },
+    exportData() {
+      this.$message.info('导出功能开发中')
+    },
+    getStatusCount(status) {
+      return this.tableData.filter(item => item.status === status).length
+    },
+    getStatusTagType(status) {
+      const typeMap = {
+        '待处理': 'info',
+        '处理中': 'warning',
+        '待审批': 'primary',
+        '已完成': 'success',
+        '已取消': 'danger'
+      }
+      return typeMap[status] || 'info'
+    },
+    getSourceTypeTagType(sourceType) {
+      const typeMap = {
+        '工作上报': 'primary',
+        '故障工单': 'warning',
+        '例行维保': 'success',
+        '手动创建': 'info'
+      }
+      return typeMap[sourceType] || 'info'
+    },
+    formatDate(dateStr) {
+      if (!dateStr) return '-'
+      const date = new Date(dateStr)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${minutes}`
     }
   }
 }
 </script>
 
 <style scoped>
-/* 原样保留原有样式，这里省略样式部分以节省空间，可根据需要继续使用原样式 */
-.work-order-management-page {
+.additional-maintenance-page {
   padding: 20px;
+  background-color: #f5f7fa;
+  min-height: calc(100vh - 50px);
 }
 
-/* 顶部导航/选项卡 */
-.tab-navigation {
-  display: flex;
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 24px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  color: white;
 }
 
-.tab-item {
-  padding: 10px 15px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #666;
-  position: relative;
-  margin-right: 10px;
-}
-
-.tab-item.active {
-  color: #409EFF; /* 选中状态颜色 */
-  border-bottom: 2px solid #409EFF; /* 选中状态下划线 */
-  font-weight: bold;
-}
-
-/* 搜索过滤区域 */
-.search-filter {
+.header-content {
   display: flex;
-  flex-wrap: wrap; /* 自动换行 */
-  gap: 15px; /* 输入框之间的间隔 */
-  margin-bottom: 20px;
-  align-items: center; /* 垂直居中对齐 */
+  justify-content: space-between;
+  align-items: center;
 }
 
-.filter-item {
-    display: flex;
-    align-items: center;
-}
-
-.filter-input,
-.filter-select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  height: 36px; /* 统一高度 */
-}
-
-.filter-actions {
-  display: flex;
-  gap: 10px; /* 按钮之间的间隔 */
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+.title-section {
   display: flex;
   align-items: center;
 }
 
-.btn-primary {
-  background-color: #409EFF; /* 主色调 */
-  color: white;
+.page-icon {
+  font-size: 48px;
+  margin-right: 16px;
 }
 
-.btn-primary:hover {
-   background-color: #66b1ff;
+.title-info {
+  flex: 1;
 }
 
-.btn-secondary {
-   background-color: #f0f0f0;
-   color: #333;
-}
-
-.btn-secondary:hover {
-   background-color: #ddd;
-}
-
-/* 图标样式 (示例，需要替换为实际的 SVG 或图标字体) */
-.search-icon, .reset-icon {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 5px;
-    /* 这里可以添加背景图片或使用图标字体 */
-    content: ""; /* 必要，否则伪元素不显示 */
-}
-
-/* 表格样式 */
-.table-container {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  overflow-x: auto; /* 水平滚动 */
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th,
-.data-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.data-table th {
-  background-color: #f5f7fa; /* 表头背景色 */
+.page-title {
+  font-size: 28px;
   font-weight: bold;
+  margin: 0 0 8px 0;
 }
 
-/* 无数据状态 */
-.no-data {
-  text-align: center;
-  padding: 50px 0;
-  color: #909399;
+.page-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
 }
 
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.header-stats {
+  display: flex;
+  gap: 16px;
 }
 
-.empty-icon {
-    width: 80px; /* 根据图标实际大小调整 */
-    height: 80px; /* 根据图标实际大小调整 */
-    margin-bottom: 10px;
+.stat-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-</style> -->
+
+.stat-icon {
+  font-size: 32px;
+  opacity: 0.9;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.search-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #303133;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-label {
+  display: block;
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 8px;
+}
+
+.search-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.table-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.table-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #303133;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.maintenance-table {
+  width: 100%;
+}
+</style>

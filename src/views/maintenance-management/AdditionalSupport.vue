@@ -1,15 +1,58 @@
 <template>
-  <div class="additional-support-page">
+  <div class="additional-maintenance-page">
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-content">
         <div class="title-section">
           <div class="page-icon">
-            <i class="el-icon-s-tools" />
+            <i class="el-icon-s-cooperation" />
           </div>
           <div class="title-info">
-            <h1 class="page-title">额外维护支持</h1>
-            <p class="page-subtitle">管理和跟踪额外的维护服务请求</p>
+            <h1 class="page-title">附加维保</h1>
+            <p class="page-subtitle">管理和监控附加维保任务的执行情况</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <el-button type="primary" icon="el-icon-plus" @click="createAdditionalMaintenance">
+            新建附加维保
+          </el-button>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">
+            <i class="el-icon-s-data" />
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">总任务数</div>
+          </div>
+        </div>
+        <div class="stat-card stat-pending">
+          <div class="stat-icon">
+            <i class="el-icon-time" />
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.pending }}</div>
+            <div class="stat-label">待处理</div>
+          </div>
+        </div>
+        <div class="stat-card stat-processing">
+          <div class="stat-icon">
+            <i class="el-icon-loading" />
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.processing }}</div>
+            <div class="stat-label">处理中</div>
+          </div>
+        </div>
+        <div class="stat-card stat-completed">
+          <div class="stat-icon">
+            <i class="el-icon-circle-check" />
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.completed }}</div>
+            <div class="stat-label">已完成</div>
           </div>
         </div>
       </div>
@@ -36,62 +79,68 @@
               <label class="search-label">
                 <i class="el-icon-office-building" /> 项目名称
               </label>
-              <el-input v-model="filters.projectName" placeholder="请输入项目名称进行搜索" prefix-icon="el-icon-search" clearable />
+              <el-input
+                v-model="filters.projectName"
+                placeholder="请输入项目名称进行搜索"
+                prefix-icon="el-icon-search"
+                clearable
+              />
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-user" /> 当前所属人
+                <i class="el-icon-s-home" /> 业主单位
               </label>
-              <el-input v-model="filters.owner" placeholder="请输入当前所属人进行搜索" prefix-icon="el-icon-user" clearable />
+              <el-input
+                v-model="filters.ownerUnitName"
+                placeholder="请输入业主单位"
+                prefix-icon="el-icon-search"
+                clearable
+              />
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-phone" /> 上报人员
+                <i class="el-icon-time" /> 状态
               </label>
-              <el-input v-model="filters.reporter" placeholder="请输入上报人员" prefix-icon="el-icon-phone" clearable />
-            </div>
-          </div>
-
-          <div class="search-row">
-            <div class="search-item">
-              <label class="search-label">
-                <i class="el-icon-warning-outline" /> 支持类型
-              </label>
-              <el-select v-model="filters.supportType" placeholder="请选择支持类型" clearable>
-                <el-option label="技术咨询" value="技术咨询" />
-                <el-option label="设备维修" value="设备维修" />
-                <el-option label="培训服务" value="培训服务" />
-                <el-option label="应急响应" value="应急响应" />
-              </el-select>
-            </div>
-            <div class="search-item">
-              <label class="search-label">
-                <i class="el-icon-time" /> 工单状态
-              </label>
-              <el-select v-model="filters.status" placeholder="请选择工单状态" clearable>
+              <el-select v-model="filters.status" placeholder="请选择状态" clearable>
                 <el-option label="待处理" value="待处理" />
                 <el-option label="处理中" value="处理中" />
+                <el-option label="待审批" value="待审批" />
                 <el-option label="已完成" value="已完成" />
-                <el-option label="已关闭" value="已关闭" />
+                <el-option label="已取消" value="已取消" />
               </el-select>
             </div>
             <div class="search-item">
               <label class="search-label">
-                <i class="el-icon-warning" /> 工单时效
+                <i class="el-icon-document" /> 来源类型
               </label>
-              <el-select v-model="filters.timeliness" placeholder="请选择工单时效" clearable>
-                <el-option label="正常" value="正常" />
-                <el-option label="已逾期" value="已逾期" />
+              <el-select v-model="filters.sourceType" placeholder="请选择来源类型" clearable>
+                <el-option label="工作上报" value="工作上报" />
+                <el-option label="故障工单" value="故障工单" />
+                <el-option label="例行维保" value="例行维保" />
+                <el-option label="手动创建" value="手动创建" />
               </el-select>
             </div>
           </div>
-
           <div class="search-row">
+            <div class="search-item">
+              <label class="search-label">
+                <i class="el-icon-calendar" /> 创建时间
+              </label>
+              <el-date-picker
+                v-model="filters.dateRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                clearable
+              />
+            </div>
             <div class="search-item search-actions">
-              <el-button type="primary" icon="el-icon-search" class="search-btn" @click="onSearch">
+              <el-button type="primary" icon="el-icon-search" @click="onSearch">
                 查询
               </el-button>
-              <el-button icon="el-icon-refresh" class="reset-btn" @click="onReset">
+              <el-button icon="el-icon-refresh" @click="onReset">
                 重置
               </el-button>
             </div>
@@ -100,64 +149,17 @@
       </el-collapse-transition>
     </div>
 
-    <!-- 统计信息 -->
-    <div class="stats-section">
-      <div class="stats-cards">
-        <div class="stat-card">
-          <div class="stat-icon pending">
-            <i class="el-icon-time" />
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ stats.total }}</div>
-            <div class="stat-label">总支持请求</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon processing">
-            <i class="el-icon-loading" />
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ stats.processing }}</div>
-            <div class="stat-label">处理中</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon completed">
-            <i class="el-icon-circle-check" />
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ stats.completed }}</div>
-            <div class="stat-label">已完成</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon overdue">
-            <i class="el-icon-warning" />
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ stats.overdue }}</div>
-            <div class="stat-label">已逾期</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 表格区域 -->
     <div class="table-section">
       <div class="table-header">
         <div class="table-title">
-          <h3><i class="el-icon-s-order" /> 支持请求列表</h3>
+          <h3><i class="el-icon-s-grid" /> 附加维保列表</h3>
           <span class="record-count">共 {{ pagination.total }} 条记录</span>
         </div>
         <div class="table-actions">
-          <el-button-group>
-            <el-button size="small" icon="el-icon-refresh" @click="refreshData">
-              刷新
-            </el-button>
-            <el-button size="small" icon="el-icon-download" @click="exportTable">
-              导出
-            </el-button>
-          </el-button-group>
+          <el-button size="small" icon="el-icon-refresh" @click="loadData">
+            刷新
+          </el-button>
         </div>
       </div>
 
@@ -167,42 +169,23 @@
         border
         stripe
         :header-cell-style="{ background: '#f5f7fa', color: '#606266', fontWeight: 'bold' }"
-        :row-style="{ height: '65px' }"
         empty-text="暂无数据"
-        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
+        <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
 
-        <el-table-column label="工单编号" prop="faultOrderId" width="140" fixed="left">
+        <el-table-column label="项目名称" prop="projectName" min-width="180" show-overflow-tooltip />
+
+        <el-table-column label="业主单位" prop="ownerUnitName" min-width="150" show-overflow-tooltip />
+
+        <el-table-column label="来源类型" prop="sourceType" width="120">
           <template slot-scope="scope">
-            <el-link type="primary" @click="viewDetail(scope.row)">
-              {{ scope.row.faultOrderId }}
-            </el-link>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="项目名称" prop="projectName" min-width="200" show-overflow-tooltip />
-
-        <el-table-column label="支持类型" prop="supportType" width="120">
-          <template slot-scope="scope">
-            <el-tag :type="getSupportTypeTag(scope.row.supportType)">
-              {{ scope.row.supportType || '未分类' }}
+            <el-tag :type="getSourceTypeTag(scope.row.sourceType)" size="small">
+              {{ scope.row.sourceType || '手动创建' }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column label="当前所属人" prop="owner" width="120">
-          <template slot-scope="scope">
-            <div class="owner-info">
-              <el-avatar :size="30" icon="el-icon-user-solid" />
-              <span class="owner-name">{{ scope.row.owner || '未分配' }}</span>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="上报人员" prop="reporter" width="120" />
-
-        <el-table-column label="工单状态" prop="status" width="120">
+        <el-table-column label="状态" prop="status" width="120">
           <template slot-scope="scope">
             <el-tag :type="getStatusTagType(scope.row.status)" size="medium">
               {{ scope.row.status }}
@@ -210,71 +193,54 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="工单时效" prop="timeliness" width="120">
+        <el-table-column label="预计费用" prop="estimatedCost" width="120">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.timeliness === '已逾期' ? 'danger' : 'success'" size="medium">
-              <i :class="scope.row.timeliness === '已逾期' ? 'el-icon-warning' : 'el-icon-circle-check'" />
-              {{ scope.row.timeliness }}
-            </el-tag>
+            <span v-if="scope.row.estimatedCost">¥{{ scope.row.estimatedCost.toLocaleString() }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="优先级" prop="priority" width="100">
+        <el-table-column label="实际费用" prop="actualCost" width="120">
           <template slot-scope="scope">
-            <el-tag :type="getPriorityTag(scope.row.priority)" size="small">
-              {{ scope.row.priority || '普通' }}
-            </el-tag>
+            <span v-if="scope.row.actualCost">¥{{ scope.row.actualCost.toLocaleString() }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="上报时间" prop="reportTime" width="160">
+        <el-table-column label="创建时间" prop="createdAt" width="180">
           <template slot-scope="scope">
-            <div class="time-info">
-              <div class="time-date">{{ formatDate(scope.row.reportTime) }}</div>
-              <div class="time-time">{{ formatTime(scope.row.reportTime) }}</div>
-            </div>
+            {{ formatDateTime(scope.row.createdAt) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="250" fixed="right">
           <template slot-scope="scope">
-            <div class="action-buttons">
-              <el-button size="mini" type="primary" @click="viewDetail(scope.row)">
-                <i class="el-icon-view" /> 详情
-              </el-button>
-              <el-button
-                v-if="scope.row.status === '待处理'"
-                size="mini"
-                type="success"
-                @click="assignSupport(scope.row)"
-              >
-                <i class="el-icon-user" /> 分配
-              </el-button>
-              <el-button
-                v-if="scope.row.status === '处理中'"
-                size="mini"
-                type="warning"
-                @click="completeSupport(scope.row)"
-              >
-                <i class="el-icon-circle-check" /> 完成
-              </el-button>
-              <el-dropdown trigger="click" @command="(command) => handleAction(command, scope.row)">
-                <el-button size="mini">
-                  更多<i class="el-icon-arrow-down el-icon--right" />
-                </el-button>
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="edit">
-                    <i class="el-icon-edit" /> 编辑
-                  </el-dropdown-item>
-                  <el-dropdown-item command="history">
-                    <i class="el-icon-time" /> 历史记录
-                  </el-dropdown-item>
-                  <el-dropdown-item command="delete" divided>
-                    <i class="el-icon-delete" /> 删除
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
-            </div>
+            <el-button size="mini" type="primary" @click="viewDetail(scope.row)">
+              详情
+            </el-button>
+            <el-button
+              v-if="scope.row.status === '待审批'"
+              size="mini"
+              type="success"
+              @click="approveAdditionalMaintenance(scope.row)"
+            >
+              审批
+            </el-button>
+            <el-button
+              v-if="scope.row.status === '待处理' || scope.row.status === '处理中'"
+              size="mini"
+              type="warning"
+              @click="updateStatus(scope.row)"
+            >
+              更新状态
+            </el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="deleteAdditionalMaintenance(scope.row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -287,32 +253,21 @@
           :page-size="pagination.limit"
           layout="total, sizes, prev, pager, next, jumper"
           :total="pagination.total"
-          :page-size-text="'条/页'"
-          :total-text="'共'"
-          :page-text="'页'"
-          :prev-text="'上一页'"
           @size-change="handleSizeChange"
-          :next-text="'下一页'"
           @current-change="handleCurrentChange"
-          :jumper-text="'跳至'"
         />
       </div>
-    </div>
-
-    <!-- 无数据时自定义内容 -->
-    <div
-      v-if="tableData.length === 0"
-      class="table-empty"
-    >
-      <img :src="require('@/assets/无数据.jpg')" alt="无数据" class="empty-img">
-
-      <div class="empty-text">暂无数据</div>
     </div>
   </div>
 </template>
 
 <script>
-import { getFaultRecords } from '@/api/faultRecord'
+import {
+  getAdditionalMaintenances,
+  deleteAdditionalMaintenance,
+  approveAdditionalMaintenance,
+  updateAdditionalMaintenanceStatus
+} from '@/api/additionalMaintenance'
 
 export default {
   name: 'AdditionalSupport',
@@ -321,14 +276,12 @@ export default {
       tableData: [],
       loading: false,
       searchBarVisible: true,
-      selectedRows: [],
       filters: {
         projectName: '',
-        owner: '',
-        reporter: '',
-        supportType: '',
+        ownerUnitName: '',
         status: '',
-        timeliness: ''
+        sourceType: '',
+        dateRange: []
       },
       pagination: {
         page: 1,
@@ -337,20 +290,16 @@ export default {
       },
       stats: {
         total: 0,
+        pending: 0,
         processing: 0,
-        completed: 0,
-        overdue: 0
+        completed: 0
       }
     }
   },
   mounted() {
     this.loadData()
   },
-  activated() {
-    this.loadData()
-  },
   methods: {
-    // 加载数据
     async loadData() {
       this.loading = true
       try {
@@ -359,46 +308,35 @@ export default {
           limit: this.pagination.limit
         }
 
-        // 添加筛选条件
         if (this.filters.projectName) params.projectName = this.filters.projectName
-        if (this.filters.owner) params.owner = this.filters.owner
-        if (this.filters.reporter) params.reporter = this.filters.reporter
-        if (this.filters.supportType) params.supportType = this.filters.supportType
+        if (this.filters.ownerUnitName) params.ownerUnitName = this.filters.ownerUnitName
         if (this.filters.status) params.status = this.filters.status
-        if (this.filters.timeliness) params.timeliness = this.filters.timeliness
+        if (this.filters.sourceType) params.sourceType = this.filters.sourceType
+        if (this.filters.dateRange && this.filters.dateRange.length === 2) {
+          params.startDate = this.filters.dateRange[0]
+          params.endDate = this.filters.dateRange[1]
+        }
 
-        const res = await getFaultRecords(params)
+        const res = await getAdditionalMaintenances(params)
         if (res.success) {
-          // 处理数据，添加额外字段
-          this.tableData = (res.data || []).map(item => ({
-            ...item,
-            faultOrderId: item._id ? item._id.toString().slice(0, 8) + 'xxxx' : 'N/A',
-            supportType: item.supportType || '技术咨询',
-            priority: item.priority || '普通',
-            status: item.status || '待处理',
-            timeliness: this.calculateTimeliness(item),
-            owner: this.getCurrentOwner(item)
-          }))
-
+          this.tableData = res.data || []
           if (res.pagination) {
             this.pagination.total = res.pagination.total
             this.pagination.page = res.pagination.page
             this.pagination.limit = res.pagination.limit
           }
-
-          // 计算统计数据
           this.calculateStats()
         } else {
-          this.tableData = []
-          this.pagination.total = 0
           this.$message.error(res.message || '获取数据失败')
+          this.tableData = []
         }
-      } catch (e) {
-        this.tableData = []
-        this.pagination.total = 0
+      } catch (error) {
+        console.error('加载附加维保数据失败:', error)
         this.$message.error('网络异常或接口出错')
+        this.tableData = []
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
     onSearch() {
       this.pagination.page = 1
@@ -407,173 +345,168 @@ export default {
     onReset() {
       this.filters = {
         projectName: '',
-        owner: '',
-        reporter: '',
-        supportType: '',
+        ownerUnitName: '',
         status: '',
-        timeliness: ''
+        sourceType: '',
+        dateRange: []
       }
       this.pagination.page = 1
       this.loadData()
     },
-
-    // 计算时效性
-    calculateTimeliness(item) {
-      if (!item.expectedCompletionTime) return '正常'
-      const now = new Date()
-      const expectedTime = new Date(item.expectedCompletionTime)
-      return now > expectedTime ? '已逾期' : '正常'
-    },
-
-    // 获取当前负责人
-    getCurrentOwner(item) {
-      if (item.assignedTo && item.assignedTo.name) {
-        return item.assignedTo.name
-      }
-      if (item.acceptedBy && item.acceptedBy.name) {
-        return item.acceptedBy.name
-      }
-      return '未分配'
-    },
-
-    // 计算统计数据
     calculateStats() {
       this.stats.total = this.tableData.length
+      this.stats.pending = this.tableData.filter(item => item.status === '待处理').length
       this.stats.processing = this.tableData.filter(item => item.status === '处理中').length
       this.stats.completed = this.tableData.filter(item => item.status === '已完成').length
-      this.stats.overdue = this.tableData.filter(item => item.timeliness === '已逾期').length
     },
-
-    // 切换搜索栏显示
     toggleSearchBar() {
       this.searchBarVisible = !this.searchBarVisible
     },
-
-    // 处理选择变化
-    handleSelectionChange(selection) {
-      this.selectedRows = selection
-    },
-
-    // 获取支持类型标签样式
-    getSupportTypeTag(type) {
-      const typeMap = {
-        '技术咨询': 'info',
-        '设备维修': 'warning',
-        '培训服务': 'success',
-        '应急响应': 'danger'
-      }
-      return typeMap[type] || 'info'
-    },
-
-    // 获取状态标签样式
-    getStatusTagType(status) {
-      const statusMap = {
-        '待处理': 'info',
-        '处理中': 'warning',
-        '已完成': 'success',
-        '已关闭': 'info'
-      }
-      return statusMap[status] || 'info'
-    },
-
-    // 获取优先级标签样式
-    getPriorityTag(priority) {
-      const priorityMap = {
-        '低': 'info',
-        '普通': '',
-        '高': 'warning',
-        '紧急': 'danger'
-      }
-      return priorityMap[priority] || ''
-    },
-
-    // 格式化日期
-    formatDate(date) {
-      if (!date) return ''
-      return new Date(date).toLocaleDateString()
-    },
-
-    // 格式化时间
-    formatTime(date) {
-      if (!date) return ''
-      return new Date(date).toLocaleTimeString()
-    },
-
-    // 格式化日期时间
-    formatDateTime(date) {
-      if (!date) return ''
-      return new Date(date).toLocaleString()
-    },
-
-    // 刷新数据
-    refreshData() {
-      this.loadData()
-    },
-
-    // 导出表格
-    exportTable() {
-      this.$message.info('导出功能开发中...')
-    },
-
-    // 分页大小变化
     handleSizeChange(val) {
       this.pagination.limit = val
       this.pagination.page = 1
       this.loadData()
     },
-
-    // 当前页变化
     handleCurrentChange(val) {
       this.pagination.page = val
       this.loadData()
     },
-
-    // 分配支持
-    assignSupport(row) {
-      this.$message.info(`分配支持请求: ${row.faultOrderId}`)
-    },
-
-    // 完成支持
-    completeSupport(row) {
-      this.$message.info(`完成支持请求: ${row.faultOrderId}`)
-    },
-
-    // 处理操作
-    handleAction(command, row) {
-      switch (command) {
-        case 'edit':
-          this.$message.info(`编辑支持请求: ${row.faultOrderId}`)
-          break
-        case 'history':
-          this.$message.info(`查看历史记录: ${row.faultOrderId}`)
-          break
-        case 'delete':
-          this.$confirm('确定要删除这个支持请求吗？', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.$message.success('删除成功')
-          })
-          break
+    getSourceTypeTag(type) {
+      const typeMap = {
+        '工作上报': 'success',
+        '故障工单': 'danger',
+        '例行维保': 'warning',
+        '手动创建': 'info'
       }
+      return typeMap[type] || 'info'
     },
-
+    getStatusTagType(status) {
+      const statusMap = {
+        '待处理': 'info',
+        '处理中': 'warning',
+        '待审批': 'primary',
+        '已完成': 'success',
+        '已取消': 'danger'
+      }
+      return statusMap[status] || 'info'
+    },
+    formatDateTime(date) {
+      if (!date) return ''
+      return new Date(date).toLocaleString('zh-CN')
+    },
     viewDetail(row) {
       this.$router.push({
-        name: 'FaultOrderDetail',
+        name: 'AdditionalMaintenanceDetail',
         params: { id: row._id }
       })
     },
-    onSetting() {
-      this.$message.info('设置')
+    createAdditionalMaintenance() {
+      this.$router.push({
+        name: 'AdditionalMaintenanceCreate'
+      })
+    },
+    async approveAdditionalMaintenance(row) {
+      try {
+        const { value } = await this.$prompt('请输入审批意见', '审批附加维保', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '请输入审批意见（可选）',
+          inputType: 'textarea'
+        })
+
+        const res = await approveAdditionalMaintenance(row._id, {
+          approvalComment: value || ''
+        })
+
+        if (res.success) {
+          this.$message.success('审批成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '审批失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('审批失败:', error)
+          this.$message.error('审批失败')
+        }
+      }
+    },
+    async updateStatus(row) {
+      const statusOptions = []
+      if (row.status === '待处理') {
+        statusOptions.push('处理中')
+      }
+      if (row.status === '处理中') {
+        statusOptions.push('待审批', '已完成')
+      }
+      if (row.status === '待审批') {
+        statusOptions.push('已完成')
+      }
+      statusOptions.push('已取消')
+
+      if (statusOptions.length === 0) {
+        this.$message.warning('当前状态无法更新')
+        return
+      }
+
+      try {
+        const { value } = await this.$prompt(
+          `请选择新状态（可选：${statusOptions.join('、')}）`,
+          '更新状态',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPlaceholder: statusOptions[0]
+          }
+        )
+
+        const selectedStatus = statusOptions.find(s => s === value) || statusOptions[0]
+
+        const res = await updateAdditionalMaintenanceStatus(row._id, {
+          status: selectedStatus
+        })
+
+        if (res.success) {
+          this.$message.success('状态更新成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '状态更新失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('更新状态失败:', error)
+          this.$message.error('更新状态失败')
+        }
+      }
+    },
+    async deleteAdditionalMaintenance(row) {
+      try {
+        await this.$confirm('确定要删除此附加维保吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+
+        const res = await deleteAdditionalMaintenance(row._id)
+        if (res.success) {
+          this.$message.success('删除成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '删除失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除失败:', error)
+          this.$message.error('删除失败')
+        }
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.additional-support-page {
+.additional-maintenance-page {
   min-height: 100vh;
   background: #f5f7fa;
   padding: 20px;
@@ -585,13 +518,14 @@ export default {
   border-radius: 12px;
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 24px 32px;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 32px;
+  margin-bottom: 24px;
 }
 
 .title-section {
@@ -634,6 +568,54 @@ export default {
   gap: 12px;
 }
 
+.header-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stat-icon i {
+  font-size: 24px;
+  color: white;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
+}
+
 /* 搜索区域 */
 .search-section {
   background: white;
@@ -657,11 +639,6 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.toggle-btn {
-  color: #666;
-  font-size: 14px;
 }
 
 .search-bar {
@@ -691,92 +668,10 @@ export default {
   gap: 6px;
 }
 
-.search-label i {
-  color: #666;
-}
-
 .search-actions {
   display: flex;
   gap: 12px;
   align-items: flex-end;
-}
-
-.search-btn, .reset-btn {
-  padding: 10px 24px;
-  border-radius: 6px;
-}
-
-/* 统计卡片 */
-.stats-section {
-  margin-bottom: 20px;
-}
-
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-icon i {
-  font-size: 24px;
-  color: white;
-}
-
-.stat-icon.pending {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-}
-
-.stat-icon.processing {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-}
-
-.stat-icon.completed {
-  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
-}
-
-.stat-icon.overdue {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #666;
-  margin-top: 4px;
 }
 
 /* 表格区域 */
@@ -814,95 +709,10 @@ export default {
   font-size: 14px;
 }
 
-.table-actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* 表格内容 */
-.owner-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.owner-name {
-  font-size: 14px;
-  color: #333;
-}
-
-.time-info {
-  text-align: center;
-}
-
-.time-date {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-
-.time-time {
-  font-size: 12px;
-  color: #666;
-  margin-top: 2px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-/* 分页 */
 .pagination-container {
   padding: 20px 24px;
   display: flex;
   justify-content: center;
   border-top: 1px solid #f0f0f0;
-}
-
-/* 无数据状态 */
-.table-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-}
-
-.empty-img {
-  width: 200px;
-  height: 200px;
-  object-fit: contain;
-  margin-bottom: 16px;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .search-row {
-    flex-direction: column;
-  }
-
-  .search-item {
-    min-width: auto;
-  }
-
-  .stats-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .table-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
 }
 </style>

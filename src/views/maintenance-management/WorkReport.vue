@@ -254,7 +254,7 @@ export default {
     },
     viewDetail(row) {
       this.$router.push({
-        name: 'TaskDetail',
+        name: 'WorkReportDetail',
         params: { id: row._id }
       })
     },
@@ -287,15 +287,16 @@ export default {
     // 审核工作上报
     async reviewReport(row) {
       try {
-        await this.$prompt('请输入审核意见', '审核工作上报', {
+        const { value } = await this.$prompt('请输入审核意见', '审核工作上报', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          inputPlaceholder: '请输入审核意见（可选）'
+          inputPlaceholder: '请输入审核意见（可选）',
+          inputType: 'textarea'
         })
         
         const res = await reviewWorkReport(row._id, {
           status: '已审核',
-          reviewComment: ''
+          reviewComment: value || ''
         })
         
         if (res.success) {
@@ -315,22 +316,23 @@ export default {
     // 转换为附加维保
     async convertToAdditional(row) {
       try {
-        await this.$prompt('请输入转换原因', '转换为附加维保', {
+        const { value } = await this.$prompt('请输入转换原因', '转换为附加维保', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          inputPlaceholder: '请输入转换原因'
-        }).then(({ value }) => {
-          return convertToAdditionalMaintenance(row._id, {
-            convertReason: value
-          })
-        }).then(res => {
-          if (res.success) {
-            this.$message.success('转换成功')
-            this.loadData()
-          } else {
-            this.$message.error(res.message || '转换失败')
-          }
+          inputPlaceholder: '请输入转换原因',
+          inputType: 'textarea'
         })
+        
+        const res = await convertToAdditionalMaintenance(row._id, {
+          convertReason: value || ''
+        })
+        
+        if (res.success) {
+          this.$message.success('转换成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '转换失败')
+        }
       } catch (error) {
         if (error !== 'cancel') {
           console.error('转换失败:', error)
@@ -369,29 +371,13 @@ export default {
       return new Date(date).toLocaleString('zh-CN')
     },
 
-    // 下载单个报告
-    async downloadReport(row) {
-      try {
-        this.$message.info(`正在下载 ${row.projectName} 的报告...`)
-
-        const res = await downloadWorkReport(row._id)
-
-        // 创建下载链接
-        const blob = new Blob([res], { type: 'application/pdf' })
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `${row.projectName}_工作上报报告.pdf`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-
-        this.$message.success('下载完成')
-      } catch (error) {
-        console.error('下载失败:', error)
-        this.$message.error('下载失败，请重试')
-      }
+    // 下载单个报告（打开报告页面，由浏览器打印/导出PDF）
+    downloadReport(row) {
+      const route = this.$router.resolve({
+        name: 'WorkReportReport',
+        params: { id: row._id }
+      })
+      window.open(route.href, '_blank')
     },
 
     // 编辑报告

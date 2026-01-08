@@ -580,6 +580,27 @@ export const asyncRoutes = [
         meta: { title: '维保任务报告' }
       },
       {
+        path: '/maintenance/work-report-detail/:id',
+        name: 'WorkReportDetail',
+        hidden: true,
+        component: () => import('@/views/maintenance-management/WorkReportDetail.vue'),
+        meta: { title: '工作上报详情' }
+      },
+      {
+        path: '/maintenance/work-report-report/:id',
+        name: 'WorkReportReport',
+        hidden: true,
+        component: () => import('@/views/maintenance-management/WorkReportReport.vue'),
+        meta: { title: '工作上报报告' }
+      },
+      {
+        path: '/maintenance/additional-maintenance-detail/:id',
+        name: 'AdditionalMaintenanceDetail',
+        hidden: true,
+        component: () => import('@/views/maintenance-management/AdditionalMaintenanceDetail.vue'),
+        meta: { title: '附加维保详情' }
+      },
+      {
         path: '/fault-list-detail',
         name: 'FaultListDetail',
         hidden: true,
