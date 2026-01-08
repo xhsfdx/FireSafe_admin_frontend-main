@@ -42,10 +42,12 @@ export default {
       try {
         const res = await getDigitalScreenData()
         if (res && res.data) {
+          // 使用维保面积作为 value，用于地图阴影显示
           this.mapData = res.data.cityStats.map(item => ({
             name: item.city,
-            value: item.ownerCompanyCount,
-            area: (item.totalArea / 10000).toFixed(2) // 转成万平方米
+            value: item.totalArea, // 使用维保面积作为主要值
+            area: (item.totalArea / 10000).toFixed(2), // 转成万平方米，用于显示
+            ownerCount: item.ownerCompanyCount // 业主单位数，用于显示
           }))
           console.log('地图数据 mapData:', this.mapData) // 确认数据是否为空，格式是否正确
         }
@@ -65,8 +67,8 @@ export default {
             const data = params.data || {}
             return [
               params.name,
-              `单位数：${data.value || 0} 家`,
-              `维保面积：${data.area || 0} 万㎡`
+              `维保面积：${data.area || 0} 万㎡`,
+              `业主单位：${data.ownerCount || 0} 家`
             ].join('<br/>')
           }
         },
@@ -86,7 +88,11 @@ export default {
             fontSize: 11
           },
           itemWidth: 15,
-          itemHeight: 100
+          itemHeight: 100,
+          formatter: function(value) {
+            // 显示为万平方米
+            return (value / 10000).toFixed(0) + '万㎡'
+          }
         },
         series: [
           {

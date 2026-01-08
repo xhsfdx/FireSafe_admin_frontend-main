@@ -13,194 +13,235 @@
       <div class="current-time">{{ currentDateTime }}</div>
     </div>
 
+    <!-- 今日关键指标 - 顶部突出显示 -->
+    <div class="today-metrics-bar">
+      <div class="today-metric-item urgent">
+        <div class="today-metric-label">今日打卡</div>
+        <div class="today-metric-value">{{ formatNumber(getTodayData('todayChecked')) }}</div>
+        <div class="today-metric-icon">📋</div>
+      </div>
+      <div class="today-metric-item">
+        <div class="today-metric-label">今日完成</div>
+        <div class="today-metric-value">{{ formatNumber(getTodayData('todayCompleted')) }}</div>
+        <div class="today-metric-icon">✅</div>
+      </div>
+      <div class="today-metric-item">
+        <div class="today-metric-label">今日评价</div>
+        <div class="today-metric-value">{{ formatNumber(getTodayData('todayReviews')) }}</div>
+        <div class="today-metric-icon">⭐</div>
+      </div>
+      <div class="today-metric-item urgent" v-if="getMaintainData('urgent') > 0 || getFaultData('overdueUnresolved') > 0">
+        <div class="today-metric-label">紧急任务</div>
+        <div class="today-metric-value">{{ (getMaintainData('urgent') || 0) + (getFaultData('overdueUnresolved') || 0) }}</div>
+        <div class="today-metric-icon">⚠️</div>
+      </div>
+      <div class="today-metric-item">
+        <div class="today-metric-label">今日故障</div>
+        <div class="today-metric-value">{{ formatNumber(getTodayData('todayFaults')) }}</div>
+        <div class="today-metric-icon">🔧</div>
+      </div>
+    </div>
+
     <!-- Grid Layout -->
     <div class="dashboard-grid">
-      <!-- Top Left: City Enterprise Data & Map -->
+      <!-- Top Left: 例行维保核心指标 -->
       <div class="panel panel-large panel-tl">
         <div class="panel-header">
-          <span class="panel-title">城市维保大数据</span>
+          <span class="panel-title">例行维保核心指标</span>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
-          <div class="big-numbers-row">
-            <div class="big-number-item">
-              <div class="number-label">业主单位总数</div>
-              <div class="big-number">{{ formatNumber(screenData.ownerCompanyTotal || 0) }}</div>
-              <div class="number-unit">家</div>
+          <div class="core-metrics-grid">
+            <div class="core-metric-card">
+              <div class="core-metric-label">待处理</div>
+              <div class="core-metric-value">{{ formatNumber(getMaintainData('pending')) }}</div>
             </div>
-            <div class="big-number-item">
-              <div class="number-label">今日打卡</div>
-              <div class="big-number">{{ formatNumber(screenData.todayChecked || 0) }}</div>
+            <div class="core-metric-card">
+              <div class="core-metric-label">处理中</div>
+              <div class="core-metric-value">{{ formatNumber(getMaintainData('processing')) }}</div>
             </div>
-            <div class="big-number-item">
-              <div class="number-label">今日完成</div>
-              <div class="big-number">{{ formatNumber(screenData.todayCompleted || 0) }}</div>
+            <div class="core-metric-card">
+              <div class="core-metric-label">已完成</div>
+              <div class="core-metric-value">{{ formatNumber(getMaintainData('finished')) }}</div>
             </div>
-            <div class="big-number-item">
-              <div class="number-label">今日评价</div>
-              <div class="big-number">{{ formatNumber(screenData.todayReviews || 0) }}</div>
+            <div class="core-metric-card highlight">
+              <div class="core-metric-label">完成率</div>
+              <div class="core-metric-value">{{ getMaintainData('completionRate') }}%</div>
             </div>
           </div>
+          <div class="urgent-alert" v-if="getMaintainData('urgent') > 0">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-content">
+              <div class="alert-title">逾期任务：{{ getMaintainData('urgent') }} 个</div>
+              <div class="alert-desc">需要紧急处理</div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-title">本月完成情况</div>
+            <div class="progress-bar-large">
+              <div class="progress-fill-large" :style="{ width: getMaintainData('completionRate') + '%' }"></div>
+              <span class="progress-text-large">{{ getMaintainData('completionRate') }}%</span>
+            </div>
+            <div class="progress-stats">
+              <span>本月完成：{{ formatNumber(getMaintainData('thisMonthCompleted')) }}</span>
+              <span class="warning" v-if="getMaintainData('lastMonthOverdue') > 0">
+                上月逾期：{{ formatNumber(getMaintainData('lastMonthOverdue')) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Middle: 四川省维保服务区域地图 -->
+      <div class="panel panel-large panel-tm panel-map">
+        <div class="panel-header">
+          <span class="panel-title">四川省维保服务区域</span>
+          <div class="panel-decoration"></div>
+        </div>
+        <div class="panel-content map-content">
           <MapChart ref="mapChart" class="map-container" />
         </div>
       </div>
 
-      <!-- Top Middle: Central Cityscape with Overlays -->
-      <div class="panel panel-large panel-tm">
-        <div class="panel-header">
-          <span class="panel-title">维保运营大数据</span>
-          <div class="panel-decoration"></div>
-        </div>
-        <div class="panel-content cityscape-bg">
-          <div class="overlay-cards">
-            <div class="overlay-card">
-              <div class="card-title">例行维保大数据</div>
-              <div class="progress-item">
-                <span>本月完成率</span>
-                <div class="progress-bar">
-                  <div class="progress-fill" :style="{ width: screenData.maintainCompletionRate + '%' }"></div>
-                  <span class="progress-text">{{ screenData.maintainCompletionRate }}%</span>
-                </div>
-              </div>
-            </div>
-            <div class="overlay-card">
-              <div class="card-title">故障工单大数据</div>
-              <div class="progress-item">
-                <span>完成率</span>
-                <div class="progress-bar">
-                  <div class="progress-fill" :style="{ width: screenData.faultCompletionRate + '%' }"></div>
-                  <span class="progress-text">{{ screenData.faultCompletionRate }}%</span>
-                </div>
-              </div>
-            </div>
-            <div class="overlay-card">
-              <div class="card-title">设备健康度</div>
-              <div class="progress-item">
-                <span>检测达标率</span>
-                <div class="progress-bar">
-                  <div class="progress-fill" :style="{ width: ((screenData.healthData && screenData.healthData.healthRate) || 100) + '%' }"></div>
-                  <span class="progress-text">{{ (screenData.healthData && screenData.healthData.healthRate) || 100 }}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="data-sources">
-            <div class="source-tag">例行维保系统</div>
-            <div class="source-tag">故障工单系统</div>
-            <div class="source-tag">设备检测系统</div>
-            <div class="source-tag">人员管理系统</div>
-            <div class="source-tag">合同管理系统</div>
-            <div class="source-tag">评价反馈系统</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Top Right: Performance and Trend Analysis -->
+      <!-- Top Right: 故障工单核心指标 -->
       <div class="panel panel-large panel-tr">
         <div class="panel-header">
-          <span class="panel-title">维保趋势分析</span>
+          <span class="panel-title">故障工单核心指标</span>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
-          <div class="metrics-row">
-            <div class="metric-card">
-              <div class="metric-value">{{ formatNumber(screenData.thisMonthInspections || 0) }}</div>
-              <div class="metric-label">本月巡检</div>
-              <div class="metric-change positive">对比上月 {{ screenData.monthOverMonthGrowth || 0 }}%</div>
+          <div class="core-metrics-grid">
+            <div class="core-metric-card">
+              <div class="core-metric-label">待处理</div>
+              <div class="core-metric-value">{{ formatNumber(getFaultData('pending')) }}</div>
             </div>
-            <div class="metric-card">
-              <div class="metric-value">{{ (screenData.healthData && screenData.healthData.healthRate) || 100 }}%</div>
-              <div class="metric-label">本月检测达标率</div>
-              <div class="metric-change positive">对比上月 {{ (screenData.healthData && screenData.healthData.healthMonthOverMonth) || 0 }}%</div>
+            <div class="core-metric-card">
+              <div class="core-metric-label">处理中</div>
+              <div class="core-metric-value">{{ formatNumber(getFaultData('processing')) }}</div>
+            </div>
+            <div class="core-metric-card">
+              <div class="core-metric-label">已完成</div>
+              <div class="core-metric-value">{{ formatNumber(getFaultData('finished')) }}</div>
+            </div>
+            <div class="core-metric-card highlight">
+              <div class="core-metric-label">完成率</div>
+              <div class="core-metric-value">{{ getFaultData('completionRate') }}%</div>
             </div>
           </div>
-          <TrendChart ref="trendChart" :data="screenData.monthlyTrendData || []" />
+          <div class="urgent-alert critical" v-if="getFaultData('overdueUnresolved') > 0">
+            <div class="alert-icon">🚨</div>
+            <div class="alert-content">
+              <div class="alert-title">逾期未解决：{{ getFaultData('overdueUnresolved') }} 个</div>
+              <div class="alert-desc">需要立即处理</div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-title">故障处理情况</div>
+            <div class="progress-bar-large">
+              <div class="progress-fill-large" :style="{ width: getFaultData('completionRate') + '%' }"></div>
+              <span class="progress-text-large">{{ getFaultData('completionRate') }}%</span>
+            </div>
+            <div class="progress-stats">
+              <span>未解决：{{ formatNumber(getFaultData('unresolved')) }}</span>
+              <span class="critical" v-if="getFaultData('overdueUnresolved') > 0">
+                逾期未解决：{{ formatNumber(getFaultData('overdueUnresolved')) }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Bottom Left: Industrial Data & Distribution -->
+      <!-- Bottom Left: 业务规模 & 设备健康度 -->
       <div class="panel panel-large panel-bl">
         <div class="panel-header">
-          <span class="panel-title">维保任务分布</span>
+          <span class="panel-title">业务规模 & 设备健康度</span>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
-          <div class="distribution-stats">
-            <div class="stat-item">
-              <span class="stat-label">库内项目数</span>
-              <span class="stat-value">{{ formatNumber(screenData.ownerCompanyTotal || 0) }}</span>
+          <div class="scale-metrics">
+            <div class="scale-item">
+              <div class="scale-label">业主单位</div>
+              <div class="scale-value">{{ formatNumber(getScaleData('ownerCompanyTotal')) }} 家</div>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">任务类型</span>
-              <span class="stat-value">{{ (screenData.taskTypeDistribution && screenData.taskTypeDistribution.length) || 3 }} 种</span>
+            <div class="scale-item">
+              <div class="scale-label">维保面积</div>
+              <div class="scale-value">{{ formatLargeNumber(getScaleData('warrantyAreaTotal')) }} m²</div>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">活跃项目</span>
-              <span class="stat-value">{{ formatNumber((screenData.maintainFinishedCount || 0) + (screenData.maintainProcessingCount || 0)) }}</span>
+            <div class="scale-item">
+              <div class="scale-label">活跃项目</div>
+              <div class="scale-value">{{ formatNumber(getScaleData('activeProjects')) }} 个</div>
+            </div>
+            <div class="scale-item">
+              <div class="scale-label">附加维保</div>
+              <div class="scale-value">{{ formatNumber(getScaleData('additionalMaintainCount')) }} 个</div>
             </div>
           </div>
-          <DonutChart ref="donutChart" :data="screenData.taskTypeDistribution || []" />
+          <div class="health-section">
+            <div class="health-header">
+              <span>设备健康度</span>
+              <span class="health-rate">{{ getHealthData('healthRate') }}%</span>
+            </div>
+            <div class="progress-bar-large">
+              <div class="progress-fill-large health" :style="{ width: getHealthData('healthRate') + '%' }"></div>
+              <span class="progress-text-large">{{ getHealthData('healthRate') }}%</span>
+            </div>
+            <div class="health-stats">
+              <span>总检查：{{ formatNumber(getHealthData('totalChecks')) }}</span>
+              <span>通过：{{ formatNumber(getHealthData('totalPassed')) }}</span>
+              <span class="warning">异常：{{ formatNumber(getHealthData('totalAbnormal')) }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Bottom Middle: Data Center Assets & Technology Stack -->
+      <!-- Bottom Middle: 月度趋势 -->
       <div class="panel panel-large panel-bm">
         <div class="panel-header">
-          <span class="panel-title">维保数据中心总资产</span>
+          <span class="panel-title">月度趋势分析</span>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
-          <div class="mega-number">
-            <div class="mega-number-value">{{ formatLargeNumber(screenData.warrantyAreaTotal || 0) }}</div>
-            <div class="mega-number-unit">m²</div>
-          </div>
-          <div class="tech-stack">
-            <div class="tech-item">分布式部署</div>
-            <div class="tech-item">MongoDB</div>
-            <div class="tech-item">Node.js</div>
-            <div class="tech-item">Vue.js</div>
-            <div class="tech-item">ECharts</div>
-            <div class="tech-item">微服务</div>
-          </div>
-          <div class="interface-stats">
-            <div class="interface-item">
-              <span class="interface-label">数据接口数</span>
-              <span class="interface-value">{{ (screenData.cityStats && screenData.cityStats.length) || 0 }} 个</span>
-            </div>
-            <div class="interface-item">
-              <span class="interface-label">成功接入</span>
-              <span class="interface-value">{{ formatNumber(screenData.ownerCompanyTotal || 0) }} 家</span>
-            </div>
-            <div class="interface-item">
-              <span class="interface-label">数据入库数</span>
-              <span class="interface-value">{{ formatLargeNumber(screenData.warrantyAreaTotal || 0) }} m²</span>
+          <div class="trend-header">
+            <div class="trend-metric">
+              <div class="trend-label">环比增长</div>
+              <div class="trend-value" :class="getMonthGrowth() >= 0 ? 'positive' : 'negative'">
+                {{ getMonthGrowth() >= 0 ? '+' : '' }}{{ getMonthGrowth() }}%
+              </div>
             </div>
           </div>
+          <TrendChart ref="trendChart" :data="getTrendData()" />
         </div>
       </div>
 
-      <!-- Bottom Right: Competitive Analysis & Specific Metrics -->
+      <!-- Bottom Right: 维保人员排名 -->
       <div class="panel panel-large panel-br">
         <div class="panel-header">
-          <span class="panel-title">综合评分分析</span>
+          <span class="panel-title">维保人员排名 TOP 5</span>
           <div class="panel-decoration"></div>
         </div>
-        <div class="panel-content">
-          <div class="radar-stats">
-            <div class="radar-stat-item">
-              <span class="radar-label">系统</span>
-              <span class="radar-value">{{ screenData.ownerCompanyTotal || 0 }}</span>
+        <div class="panel-content ranking-list">
+          <div 
+            v-for="(maintainer, index) in getTopMaintainers()" 
+            :key="index" 
+            class="ranking-item"
+            :class="{ 'top-three': index < 3 }"
+          >
+            <div class="ranking-number">{{ maintainer.rank }}</div>
+            <div class="ranking-info">
+              <div class="ranking-name">{{ maintainer.staffName }}</div>
+              <div class="ranking-details">
+                <span>任务：{{ maintainer.taskCount }}</span>
+                <span>面积：{{ formatLargeNumber(maintainer.totalArea) }}m²</span>
+                <span>评分：{{ maintainer.avgScore }}</span>
+              </div>
             </div>
-            <div class="radar-stat-item">
-              <span class="radar-label">历史数据</span>
-              <span class="radar-value">{{ formatNumber(screenData.maintainFinishedCount || 0) }}</span>
-            </div>
-            <div class="radar-stat-item">
-              <span class="radar-label">数据入库</span>
-              <span class="radar-value">{{ formatLargeNumber(screenData.warrantyAreaTotal || 0) }}</span>
+            <div class="ranking-badge" v-if="index < 3">
+              {{ index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉' }}
             </div>
           </div>
-          <RadarChart ref="radarChart" :data="screenData.radarData || {}" />
+          <div class="no-ranking" v-if="getTopMaintainers().length === 0">
+            <div class="no-ranking-text">暂无排名数据</div>
+          </div>
         </div>
       </div>
     </div>
@@ -253,20 +294,16 @@
 </template>
 
 <script>
-import MapChart from '@/components/digitalScreen/MapChart.vue'
 import TrendChart from '@/components/digitalScreen/TrendChart.vue'
-import DonutChart from '@/components/digitalScreen/DonutChart.vue'
-import RadarChart from '@/components/digitalScreen/RadarChart.vue'
+import MapChart from '@/components/digitalScreen/MapChart.vue'
 import { getDigitalScreenData } from '@/api/digitalScreen'
 import store from '@/store'
 
 export default {
   name: 'DigitalScreen',
   components: {
-    MapChart,
     TrendChart,
-    DonutChart,
-    RadarChart
+    MapChart
   },
   data() {
     return {
@@ -304,6 +341,94 @@ export default {
     }
   },
   methods: {
+    // 获取今日数据
+    getTodayData(key) {
+      if (this.screenData.important && this.screenData.important.today) {
+        return this.screenData.important.today[key] || 0
+      }
+      // 向后兼容
+      if (key === 'todayChecked') return this.screenData.todayChecked || 0
+      if (key === 'todayCompleted') return this.screenData.todayCompleted || 0
+      if (key === 'todayReviews') return this.screenData.todayReviews || 0
+      if (key === 'todayFaults') return this.screenData.todayFaults || 0
+      return 0
+    },
+    // 获取例行维保数据
+    getMaintainData(key) {
+      if (this.screenData.important && this.screenData.important.maintain) {
+        return this.screenData.important.maintain[key] || 0
+      }
+      // 向后兼容
+      if (key === 'pending') return this.screenData.maintainPendingCount || 0
+      if (key === 'processing') return this.screenData.maintainProcessingCount || 0
+      if (key === 'finished') return this.screenData.maintainFinishedCount || 0
+      if (key === 'completionRate') return this.screenData.maintainCompletionRate || 0
+      if (key === 'thisMonthCompleted') return this.screenData.maintainThisMonthCompleted || 0
+      if (key === 'lastMonthOverdue') return this.screenData.maintainLastMonthOverdue || 0
+      if (key === 'urgent') return this.screenData.maintainLastMonthOverdue || 0
+      return 0
+    },
+    // 获取故障工单数据
+    getFaultData(key) {
+      if (this.screenData.important && this.screenData.important.fault) {
+        return this.screenData.important.fault[key] || 0
+      }
+      // 向后兼容
+      if (key === 'pending') return this.screenData.faultPendingCount || 0
+      if (key === 'processing') return this.screenData.faultProcessingCount || 0
+      if (key === 'finished') return this.screenData.faultFinishedCount || 0
+      if (key === 'completionRate') return this.screenData.faultCompletionRate || 0
+      if (key === 'unresolved') return this.screenData.faultUnresolved || 0
+      if (key === 'overdueUnresolved') return this.screenData.faultOverdueUnresolved || 0
+      return 0
+    },
+    // 获取业务规模数据
+    getScaleData(key) {
+      if (this.screenData.important && this.screenData.important.scale) {
+        return this.screenData.important.scale[key] || 0
+      }
+      // 向后兼容
+      if (key === 'ownerCompanyTotal') return this.screenData.ownerCompanyTotal || 0
+      if (key === 'warrantyAreaTotal') return this.screenData.warrantyAreaTotal || 0
+      if (key === 'activeProjects') return (this.screenData.maintainFinishedCount || 0) + (this.screenData.maintainProcessingCount || 0)
+      if (key === 'additionalMaintainCount') return this.screenData.additionalMaintainCount || 0
+      return 0
+    },
+    // 获取设备健康度数据
+    getHealthData(key) {
+      if (this.screenData.important && this.screenData.important.health) {
+        return this.screenData.important.health[key] || 0
+      }
+      // 向后兼容
+      if (this.screenData.healthData) {
+        if (key === 'healthRate') return this.screenData.healthData.healthRate || 100
+        if (key === 'totalChecks') return this.screenData.healthData.totalChecks || 0
+        if (key === 'totalPassed') return this.screenData.healthData.totalPassed || 0
+        if (key === 'totalAbnormal') return this.screenData.healthData.totalAbnormal || 0
+      }
+      return key === 'healthRate' ? 100 : 0
+    },
+    // 获取月度趋势数据
+    getTrendData() {
+      if (this.screenData.important && this.screenData.important.trend) {
+        return this.screenData.important.trend
+      }
+      return this.screenData.monthlyTrendData || []
+    },
+    // 获取月度环比增长
+    getMonthGrowth() {
+      if (this.screenData.important && this.screenData.important.monthOverMonthGrowth !== undefined) {
+        return parseFloat(this.screenData.important.monthOverMonthGrowth) || 0
+      }
+      return parseFloat(this.screenData.monthOverMonthGrowth) || 0
+    },
+    // 获取维保人员排名
+    getTopMaintainers() {
+      if (this.screenData.important && this.screenData.important.topMaintainers) {
+        return this.screenData.important.topMaintainers
+      }
+      return this.screenData.maintainerStats || []
+    },
     updateDateTime() {
       const now = new Date()
       const year = now.getFullYear()
@@ -388,21 +513,16 @@ export default {
       }
     },
     refreshCharts() {
+      // 刷新趋势图和地图
+      if (this.$refs.trendChart && this.$refs.trendChart.updateChart) {
+        this.$refs.trendChart.updateChart()
+      }
       if (this.$refs.mapChart && this.$refs.mapChart.loadData) {
         this.$refs.mapChart.loadData().then(() => {
           if (this.$refs.mapChart.renderMap) {
             this.$refs.mapChart.renderMap()
           }
         })
-      }
-      if (this.$refs.trendChart && this.$refs.trendChart.updateChart) {
-        this.$refs.trendChart.updateChart()
-      }
-      if (this.$refs.donutChart && this.$refs.donutChart.updateChart) {
-        this.$refs.donutChart.updateChart()
-      }
-      if (this.$refs.radarChart && this.$refs.radarChart.updateChart) {
-        this.$refs.radarChart.updateChart()
       }
     },
     hideLayoutElements() {
@@ -664,6 +784,75 @@ export default {
   letter-spacing: 2px;
 }
 
+/* Today Metrics Bar */
+.today-metrics-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, rgba(0, 20, 40, 0.9) 0%, rgba(0, 40, 80, 0.85) 100%);
+  border-bottom: 2px solid rgba(0, 192, 255, 0.3);
+  margin-bottom: 15px;
+  box-shadow: 0 4px 20px rgba(0, 192, 255, 0.2);
+}
+
+.today-metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  min-width: 120px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.today-metric-item.urgent {
+  border-color: rgba(255, 107, 107, 0.6);
+  background: rgba(255, 107, 107, 0.1);
+  animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); }
+}
+
+.today-metric-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 192, 255, 0.6);
+  box-shadow: 0 5px 20px rgba(0, 192, 255, 0.4);
+}
+
+.today-metric-label {
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.today-metric-value {
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: bold;
+  color: #00f0ff;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+  font-family: 'Orbitron', monospace;
+  margin-bottom: 5px;
+}
+
+.today-metric-item.urgent .today-metric-value {
+  color: #ff6b6b;
+  text-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+}
+
+.today-metric-icon {
+  font-size: 20px;
+  opacity: 0.7;
+}
+
 /* Dashboard Grid */
 .dashboard-grid {
   position: relative;
@@ -673,7 +862,26 @@ export default {
   grid-template-rows: repeat(2, 1fr);
   gap: 15px;
   padding: 15px;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
+}
+
+.panel-map {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.map-content {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
 }
 
 .panel {
@@ -1172,11 +1380,352 @@ export default {
   50% { opacity: 0.7; }
 }
 
+/* Core Metrics Grid */
+.core-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.core-metric-card {
+  text-align: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.core-metric-card:hover {
+  border-color: rgba(0, 192, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.core-metric-card.highlight {
+  background: rgba(0, 192, 255, 0.1);
+  border-color: rgba(0, 192, 255, 0.5);
+}
+
+.core-metric-label {
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.core-metric-value {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: bold;
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  font-family: 'Orbitron', monospace;
+}
+
+/* Urgent Alert */
+.urgent-alert {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  animation: pulse-warning 2s infinite;
+}
+
+.urgent-alert.critical {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: rgba(255, 107, 107, 0.6);
+  animation: pulse-critical 1.5s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.6); }
+}
+
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.8); }
+}
+
+.alert-icon {
+  font-size: 32px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffc107;
+  margin-bottom: 5px;
+}
+
+.urgent-alert.critical .alert-title {
+  color: #ff6b6b;
+}
+
+.alert-desc {
+  font-size: 12px;
+  color: rgba(255, 193, 7, 0.8);
+}
+
+.urgent-alert.critical .alert-desc {
+  color: rgba(255, 107, 107, 0.8);
+}
+
+/* Progress Section */
+.progress-section {
+  margin-top: 20px;
+}
+
+.progress-title {
+  font-size: 14px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-bottom: 10px;
+}
+
+.progress-bar-large {
+  height: 30px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill-large {
+  height: 100%;
+  background: linear-gradient(90deg, #00c0ff, #00f0ff);
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+  transition: width 0.5s ease;
+}
+
+.progress-fill-large.health {
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+}
+
+.progress-text-large {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #00f0ff;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.8);
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+}
+
+.progress-stats .warning {
+  color: #ffc107;
+}
+
+.progress-stats .critical {
+  color: #ff6b6b;
+}
+
+/* Scale Metrics */
+.scale-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.scale-item {
+  text-align: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+}
+
+.scale-label {
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.scale-value {
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: bold;
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+/* Health Section */
+.health-section {
+  margin-top: 20px;
+}
+
+.health-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: rgba(0, 240, 255, 0.8);
+}
+
+.health-rate {
+  font-size: 20px;
+  font-weight: bold;
+  color: #4caf50;
+  text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+}
+
+.health-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-top: 10px;
+}
+
+.health-stats .warning {
+  color: #ffc107;
+}
+
+
+/* Trend Header */
+.trend-header {
+  margin-bottom: 15px;
+}
+
+.trend-metric {
+  text-align: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+}
+
+.trend-label {
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.trend-value {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: bold;
+  font-family: 'Orbitron', monospace;
+}
+
+.trend-value.positive {
+  color: #4caf50;
+  text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+}
+
+.trend-value.negative {
+  color: #ff6b6b;
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+}
+
+/* Ranking List */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.ranking-item:hover {
+  border-color: rgba(0, 192, 255, 0.5);
+  transform: translateX(5px);
+}
+
+.ranking-item.top-three {
+  background: rgba(0, 192, 255, 0.1);
+  border-color: rgba(0, 192, 255, 0.4);
+}
+
+.ranking-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: rgba(0, 240, 255, 0.6);
+  min-width: 40px;
+  text-align: center;
+}
+
+.ranking-item.top-three .ranking-number {
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.ranking-info {
+  flex: 1;
+}
+
+.ranking-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #00f0ff;
+  margin-bottom: 5px;
+}
+
+.ranking-details {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: rgba(0, 240, 255, 0.7);
+}
+
+.ranking-badge {
+  font-size: 32px;
+}
+
+.no-ranking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(0, 240, 255, 0.6);
+}
+
+.no-ranking-text {
+  font-size: 14px;
+}
+
 /* Responsive */
 @media (max-width: 1920px) {
   .dashboard-grid {
     gap: 12px;
     padding: 12px;
+  }
+  
+  .today-metrics-bar {
+    padding: 12px 20px;
+  }
+  
+  .today-metric-item {
+    min-width: 100px;
+    padding: 12px 20px;
   }
 }
 
@@ -1184,10 +1733,24 @@ export default {
   .dashboard-grid {
     gap: 10px;
     padding: 10px;
+    height: calc(100vh - 180px);
   }
   
-  .big-numbers-row {
+  .today-metrics-bar {
+    padding: 10px 15px;
+  }
+  
+  .today-metric-item {
+    min-width: 90px;
+    padding: 10px 15px;
+  }
+  
+  .core-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .scale-metrics {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1197,8 +1760,23 @@ export default {
     grid-template-rows: repeat(3, 1fr);
   }
   
-  .panel-tm {
+  .panel-map {
     grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  
+  .today-metrics-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .today-metric-item {
+    min-width: 80px;
+    padding: 8px 12px;
+  }
+  
+  .core-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
