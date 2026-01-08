@@ -541,28 +541,12 @@ export default {
       })
     },
     viewReport(row) {
-      // 检查是否有报告URL
-      if (row.reportUrl) {
-        window.open(row.reportUrl, '_blank')
-      } else {
-        // 如果没有报告URL，显示提示信息
-        this.$alert(`
-          <div style="text-align: center; padding: 20px;">
-            <i class="el-icon-document" style="font-size: 48px; color: #409eff; margin-bottom: 16px;"></i>
-            <h3>报告文件</h3>
-            <p style="color: #606266; margin: 16px 0;">
-              该任务的维保报告尚未上传或生成。
-            </p>
-            <p style="color: #909399; font-size: 14px;">
-              请联系相关维保人员上传报告文件。
-            </p>
-          </div>
-        `, '查看报告', {
-          dangerouslyUseHTMLString: true,
-          confirmButtonText: '确定',
-          showClose: false
-        })
-      }
+      // 直接跳转到打印友好的报告页面，由浏览器打印/导出 PDF
+      const route = this.$router.resolve({
+        name: 'TaskReport',
+        params: { id: row._id }
+      })
+      window.open(route.href, '_blank')
     },
     deleteTask(row) {
       this.onDelete(row)

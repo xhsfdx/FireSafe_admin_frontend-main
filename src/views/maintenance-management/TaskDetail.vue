@@ -60,6 +60,15 @@
           >
             评价
           </el-button>
+          <el-button
+            v-if="canGenerateReport"
+            type="success"
+            icon="el-icon-document"
+            :loading="reportLoading"
+            @click="generateReport"
+          >
+            生成报告
+          </el-button>
         </div>
       </div>
     </div>
@@ -129,6 +138,31 @@
             :status="step.status"
           />
         </el-steps>
+      </div>
+    </div>
+
+    <!-- 现场照片卡片 -->
+    <div v-if="taskInfo.onsitePhotos && taskInfo.onsitePhotos.length > 0" class="info-card">
+      <div class="card-header">
+        <h3 class="card-title">现场照片</h3>
+      </div>
+      <div class="photos-grid">
+        <div
+          v-for="(photo, index) in taskInfo.onsitePhotos"
+          :key="index"
+          class="photo-item"
+        >
+          <el-image
+            :src="photo"
+            :preview-src-list="taskInfo.onsitePhotos"
+            fit="cover"
+            class="photo-image"
+          >
+            <div slot="error" class="image-slot">
+              <i class="el-icon-picture-outline" />
+            </div>
+          </el-image>
+        </div>
       </div>
     </div>
 
@@ -324,7 +358,8 @@ import {
   assignMaintainers,
   updateMaintainTask,
   submitForReview,
-  completeReview
+  completeReview,
+  generateMaintainTaskReport
 } from '@/api/maintainTask'
 
 export default {
@@ -334,6 +369,7 @@ export default {
       taskId: null,
       loading: false,
       actionLoading: false,
+      reportLoading: false,
       // 任务信息
       taskInfo: {
         time: '',
@@ -395,6 +431,12 @@ export default {
     canRate() {
       if (!this.taskInfo.status) return false
       return this.taskInfo.status === '已完成'
+    },
+
+    // 是否可以生成报告（任务已完成或已评价时）
+    canGenerateReport() {
+      if (!this.taskInfo.status) return false
+      return ['已完成', '已评价'].includes(this.taskInfo.status)
     }
   },
 
@@ -561,7 +603,8 @@ export default {
         unchecked: Math.max(0, uncheckedCount || 0), // 确保是数字且不为负数
         checked: checkedCount || 0,
         faults: abnormalCount || 0,
-        replace: data.replacedCount || 0
+        replace: data.replacedCount || 0,
+        onsitePhotos: data.onsitePhotos || [] // 现场照片
       }
     },
     // 获取状态索引
@@ -967,6 +1010,19 @@ export default {
         name: 'FaultListDetail',
         query: { taskId: this.taskId }
       })
+    },
+
+    // 生成报告：跳转到打印友好的报告页面，由浏览器打印/导出 PDF
+    generateReport() {
+      if (!this.taskId) {
+        this.$message.error('任务ID不存在')
+        return
+      }
+      const route = this.$router.resolve({
+        name: 'TaskReport',
+        params: { id: this.taskId }
+      })
+      window.open(route.href, '_blank')
     },
 
     // 获取当前日期时间
@@ -1704,6 +1760,43 @@ export default {
   .detection-tree {
     flex: none;
   }
+}
+
+/* 现场照片样式 */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.photo-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.photo-item:hover {
+  transform: translateY(-2px);
+}
+
+.photo-image {
+  width: 100%;
+  height: 150px;
+  cursor: pointer;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  color: #909399;
+  font-size: 24px;
 }
 
 @media (max-width: 768px) {

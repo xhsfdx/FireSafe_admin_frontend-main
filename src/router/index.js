@@ -547,6 +547,13 @@ export const asyncRoutes = [
         meta: { title: '故障工单详情' }
       },
       {
+        path: '/maintenance/fault-report/:id',
+        name: 'FaultReport',
+        hidden: true,
+        component: () => import('@/views/maintenance-management/FaultReport.vue'),
+        meta: { title: '故障工单报告' }
+      },
+      {
         path: 'support',
         name: 'AdditionalSupport',
         component: () => import('@/views/maintenance-management/AdditionalSupport.vue'),
@@ -564,6 +571,13 @@ export const asyncRoutes = [
         hidden: true,
         component: () => import('@/views/maintenance-management/TaskDetail.vue'),
         meta: { title: '维保任务详情' }
+      },
+      {
+        path: '/maintenance/task-report/:id',
+        name: 'TaskReport',
+        hidden: true,
+        component: () => import('@/views/maintenance-management/TaskReport.vue'),
+        meta: { title: '维保任务报告' }
       },
       {
         path: '/fault-list-detail',

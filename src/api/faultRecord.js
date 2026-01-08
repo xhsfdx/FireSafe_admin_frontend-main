@@ -60,3 +60,21 @@ export function createFaultFromTask(data) {
     data
   })
 }
+
+// 从故障记录创建维护任务
+export function createTaskFromFault(id, data) {
+  return request({
+    url: `/faultRecord/${id}/create-task`,
+    method: 'post',
+    data
+  })
+}
+
+// 生成故障工单报告（PDF）
+export function generateFaultReport(id) {
+  return request({
+    url: `/faultRecord/${id}/generate-report`,
+    method: 'get',
+    responseType: 'blob' // 重要：指定响应类型为 blob，用于下载 PDF
+  })
+}

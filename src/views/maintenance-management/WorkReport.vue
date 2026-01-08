@@ -10,8 +10,17 @@
       />
       <el-select v-model="filters.type" placeholder="选择上报类型" style="width: 180px; margin-right: 10px" clearable>
         <el-option label="全部" value="" />
-        <el-option label="类型一" value="类型一" />
-        <el-option label="类型二" value="类型二" />
+        <el-option label="故障处理" value="故障处理" />
+        <el-option label="维保抽查" value="维保抽查" />
+        <el-option label="培训演练" value="培训演练" />
+        <el-option label="其他事项" value="其他事项" />
+      </el-select>
+      <el-select v-model="filters.status" placeholder="选择状态" style="width: 150px; margin-right: 10px" clearable>
+        <el-option label="全部" value="" />
+        <el-option label="已上报" value="已上报" />
+        <el-option label="已审核" value="已审核" />
+        <el-option label="已转换为附加维保" value="已转换为附加维保" />
+        <el-option label="已完成" value="已完成" />
       </el-select>
       <el-date-picker
         v-model="filters.dateRange"
@@ -42,32 +51,34 @@
         <el-table-column type="selection" width="48" align="center" />
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="projectName" label="项目名称" align="center" min-width="200" />
-        <el-table-column prop="orgName" label="业主单位名称" align="center" min-width="150" />
-        <el-table-column prop="type" label="上报类型" align="center" width="120">
+        <el-table-column prop="ownerUnitName" label="业主单位名称" align="center" min-width="150" />
+        <el-table-column prop="reportType" label="上报类型" align="center" width="120">
           <template slot-scope="{ row }">
-            <el-tag :type="getTypeTagType(row.type)" size="small">
-              {{ row.type }}
+            <el-tag :type="getTypeTagType(row.reportType)" size="small">
+              {{ row.reportType }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="reportTime" label="上报时间" align="center" width="160">
+        <el-table-column prop="createdAt" label="上报时间" align="center" width="160">
           <template slot-scope="{ row }">
-            {{ formatDateTime(row.reportTime) }}
+            {{ formatDateTime(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="处理状态" align="center" width="120">
+        <el-table-column prop="status" label="处理状态" align="center" width="150">
           <template slot-scope="{ row }">
             <el-tag :type="getStatusTagType(row.status)" size="small">
               {{ row.status }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="280" align="center" fixed="right">
           <template slot-scope="{ row }">
             <div class="action-buttons">
               <el-button size="mini" type="primary" class="action-btn" @click="viewDetail(row)">详情</el-button>
               <el-button size="mini" type="success" class="action-btn" @click="downloadReport(row)">下载</el-button>
-              <el-button size="mini" type="warning" class="action-btn" @click="editReport(row)">编辑</el-button>
+              <el-button v-if="row.status === '已上报'" size="mini" type="warning" class="action-btn" @click="reviewReport(row)">审核</el-button>
+              <el-button v-if="row.status === '已审核' && !row.convertedToAdditionalMaintenance" size="mini" type="info" class="action-btn" @click="convertToAdditional(row)">转附加维保</el-button>
+              <el-button size="mini" type="danger" class="action-btn" @click="deleteReport(row)">删除</el-button>
             </div>
           </template>
         </el-table-column>
@@ -108,7 +119,7 @@
 </template>
 
 <script>
-import { getWorkReports, downloadWorkReport, batchDownloadWorkReports } from '@/api/workReport'
+import { getWorkReports, downloadWorkReport, batchDownloadWorkReports, reviewWorkReport, convertToAdditionalMaintenance, deleteWorkReport } from '@/api/workReport'
 
 export default {
   name: 'ReportDownloadPage',
@@ -117,6 +128,7 @@ export default {
       filters: {
         projectName: '',
         type: '',
+        status: '',
         dateRange: []
       },
       tableData: [],
@@ -153,7 +165,12 @@ export default {
           limit: this.pagination.limit
         }
         if (this.filters.projectName) params.projectName = this.filters.projectName
-        if (this.filters.type) params.type = this.filters.type
+        if (this.filters.type) params.reportType = this.filters.type
+        if (this.filters.status) params.status = this.filters.status
+        if (this.filters.dateRange && this.filters.dateRange.length === 2) {
+          params.startDate = this.filters.dateRange[0]
+          params.endDate = this.filters.dateRange[1]
+        }
 
         console.log('请求参数:', params)
         console.log('当前token:', this.$store.getters.token)
@@ -161,30 +178,23 @@ export default {
         console.log('工作上报API响应:', res)
         console.log('原始数据:', res.data)
         if (res.success) {
-          // 处理数据结构，确保数据正确显示
-          const rawData = res.data?.list || res.data || []
-          console.log('原始数据数组:', rawData)
-          if (rawData.length > 0) {
-            console.log('第一个数据项的ownerName:', rawData[0].ownerName)
-            console.log('第一个数据项的所有字段:', Object.keys(rawData[0]))
-          }
+          // 处理数据结构
+          const rawData = res.data || []
           this.tableData = rawData.map(item => ({
             ...item,
             projectName: item.projectName || item.project?.name || '未关联项目',
-            orgName: item.ownerName || item.orgName || item.organization?.name || '未设置',
-            type: item.planType || item.type || '月',
-            reportTime: item.createdAt || item.reportTime || new Date().toISOString(),
-            status: item.status || '已派发'
+            ownerUnitName: item.ownerUnitName || item.ownerUnit?.name || '未设置',
+            reportType: item.reportType || '其他事项',
+            createdAt: item.createdAt || new Date().toISOString(),
+            status: item.status || '已上报'
           }))
-          console.log('处理后的表格数据:', this.tableData)
-          if (this.tableData.length > 0) {
-            console.log('处理后第一个数据项的orgName:', this.tableData[0].orgName)
-          }
 
           if (res.pagination) {
             this.pagination.total = res.pagination.total
             this.pagination.page = res.pagination.page
             this.pagination.limit = res.pagination.limit
+          } else {
+            this.pagination.total = rawData.length
           }
         } else {
           this.tableData = []
@@ -255,10 +265,10 @@ export default {
     // 获取类型标签样式
     getTypeTagType(type) {
       const typeMap = {
-        '例行维保': 'primary',
-        '故障维修': 'danger',
-        '紧急处理': 'warning',
-        '日常检查': 'success'
+        '故障处理': 'danger',
+        '维保抽查': 'warning',
+        '培训演练': 'success',
+        '其他事项': 'info'
       }
       return typeMap[type] || 'info'
     },
@@ -266,12 +276,91 @@ export default {
     // 获取状态标签样式
     getStatusTagType(status) {
       const statusMap = {
-        '待处理': 'info',
-        '处理中': 'warning',
-        '已完成': 'success',
-        '已关闭': 'info'
+        '已上报': 'info',
+        '已审核': 'success',
+        '已转换为附加维保': 'warning',
+        '已完成': 'success'
       }
       return statusMap[status] || 'info'
+    },
+    
+    // 审核工作上报
+    async reviewReport(row) {
+      try {
+        await this.$prompt('请输入审核意见', '审核工作上报', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '请输入审核意见（可选）'
+        })
+        
+        const res = await reviewWorkReport(row._id, {
+          status: '已审核',
+          reviewComment: ''
+        })
+        
+        if (res.success) {
+          this.$message.success('审核成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '审核失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('审核失败:', error)
+          this.$message.error('审核失败，请重试')
+        }
+      }
+    },
+    
+    // 转换为附加维保
+    async convertToAdditional(row) {
+      try {
+        await this.$prompt('请输入转换原因', '转换为附加维保', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '请输入转换原因'
+        }).then(({ value }) => {
+          return convertToAdditionalMaintenance(row._id, {
+            convertReason: value
+          })
+        }).then(res => {
+          if (res.success) {
+            this.$message.success('转换成功')
+            this.loadData()
+          } else {
+            this.$message.error(res.message || '转换失败')
+          }
+        })
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('转换失败:', error)
+          this.$message.error('转换失败，请重试')
+        }
+      }
+    },
+    
+    // 删除工作上报
+    async deleteReport(row) {
+      try {
+        await this.$confirm('确定要删除该工作上报吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        
+        const res = await deleteWorkReport(row._id)
+        if (res.success) {
+          this.$message.success('删除成功')
+          this.loadData()
+        } else {
+          this.$message.error(res.message || '删除失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除失败:', error)
+          this.$message.error('删除失败，请重试')
+        }
+      }
     },
 
     // 格式化日期时间

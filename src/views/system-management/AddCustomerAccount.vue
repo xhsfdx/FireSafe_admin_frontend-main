@@ -9,9 +9,9 @@
       <el-row :gutter="20">
         <!-- 左列 -->
         <el-col :span="12">
-          <!-- 业主单位 -->
+          <!-- 业主单位（支持多选） -->
           <el-form-item label="业主单位" prop="company">
-            <el-select v-model="form.company" placeholder="请选择业主单位" filterable :loading="loadingCompanies" clearable>
+            <el-select v-model="form.company" placeholder="请选择业主单位（可多选）" filterable :loading="loadingCompanies" clearable multiple>
               <el-option
                 v-for="item in companyOptions"
                 :key="item.value"
@@ -39,14 +39,6 @@
 
         <!-- 右列 -->
         <el-col :span="12">
-          <!-- 用户角色 -->
-          <el-form-item label="用户角色" prop="role">
-            <el-select v-model="form.role" placeholder="请选择用户角色">
-              <el-option label="社会单位管理员" value="社会单位管理员" />
-              <el-option label="社会单位人员" value="社会单位人员" />
-            </el-select>
-          </el-form-item>
-
           <!-- 输入密码 -->
           <el-form-item label="输入密码" prop="password">
             <el-input v-model="form.password" type="password" placeholder="请输入密码" />
@@ -78,13 +70,12 @@ export default {
     return {
       // 表单数据
       form: {
-        company: '',
+        company: [], // 改为数组，支持多个业主单位
         name: '',
         username: '',
         phone: '',
-        role: '',
         password: '',
-        confirmPassword: ''
+        confirmpassword: ''
       },
       // 业主单位选项
       companyOptions: [],
@@ -92,14 +83,16 @@ export default {
       loadingCompanies: false,
       // 表单验证规则
       rules: {
-        company: [{ required: true, message: '请选择业主单位', trigger: 'change' }],
+        company: [
+          { required: true, message: '请至少选择一个业主单位', trigger: 'change' },
+          { type: 'array', min: 1, message: '请至少选择一个业主单位', trigger: 'change' }
+        ],
         name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         phone: [
           { required: true, message: '请输入电话号码', trigger: 'blur' },
           { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
         ],
-        role: [{ required: true, message: '请选择用户角色', trigger: 'change' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         confirmpassword: [
           { required: true, message: '请确认密码', trigger: 'blur' },
@@ -149,12 +142,12 @@ export default {
           try {
             // 提交数据
             const data = {
-              organization: this.form.company, // 组织 ID 或名称
+              organization: this.form.company, // ownerCompany 字符串
               mobile: this.form.phone,
               name: this.form.name,
               username: this.form.username,
-              password: this.form.password,
-              role: this.form.role
+              password: this.form.password
+              // role 固定为 "customer"，不需要前端传递
             }
 
             console.log('提交数据:', data)

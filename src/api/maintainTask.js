@@ -118,3 +118,12 @@ export function completeReview(id) {
     method: 'post'
   })
 }
+
+// 生成维护任务报告（PDF）
+export function generateMaintainTaskReport(id) {
+  return request({
+    url: `/maintainTask/${id}/generate-report`,
+    method: 'get',
+    responseType: 'blob' // 重要：指定响应类型为 blob，用于下载 PDF
+  })
+}

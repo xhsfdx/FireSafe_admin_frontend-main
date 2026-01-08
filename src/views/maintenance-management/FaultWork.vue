@@ -182,7 +182,11 @@
         >
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="projectName" label="项目名称" align="center" />
-          <el-table-column prop="reportTime" label="上报时间" align="center" />
+          <el-table-column prop="reportTime" label="上报时间" align="center" width="160">
+            <template slot-scope="{ row }">
+              <span>{{ formatDateTime(row.reportTime) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="source" label="工单来源" align="center" />
           <el-table-column prop="reporter" label="上报人员" align="center" />
           <el-table-column label="工单时效" align="center">
@@ -271,14 +275,11 @@
 </template>
 
 <script>
+// 故障工单数据来自 faultRecord，而不是 faultworkorder
 import {
-  getFaultOrders,
-  deleteFaultOrder,
-  acceptFaultOrder,
-  assignFaultOrder,
-  markAsResolved,
-  rateFaultOrder
-} from '@/api/faultOrder'
+  getFaultRecords,
+  deleteFaultRecord
+} from '@/api/faultRecord'
 
 export default {
   name: 'WorkOrderPage',
@@ -327,34 +328,59 @@ export default {
           limit: this.pagination.limit
         }
         if (this.filters.projectName) params.projectName = this.filters.projectName
-        if (this.filters.owner) params.owner = this.filters.owner
+        // 后端暂未支持按 owner 直接筛选，这里只传递可用的查询项
         if (this.filters.reporter) params.reporter = this.filters.reporter
         if (this.filters.source) params.source = this.filters.source
         if (this.filters.status) params.status = this.filters.status
-        if (this.filters.timeliness) params.timeliness = this.filters.timeliness
+        // timeliness 前端根据 expectedCompletionTime 自行计算
 
-        const res = await getFaultOrders(params)
-        console.log('故障工单API响应:', res)
+        const res = await getFaultRecords(params)
+        console.log('故障记录 API 响应:', res)
         if (res.success) {
-          // 检查数据结构，可能是 res.data.list 或 res.data
-          const data = res.data?.list || res.data || []
+          const data = res.data || []
 
-          // 处理数据，确保状态和时效正确显示
-          this.tableData = data.map(item => ({
-            ...item,
-            status: this.getMainStatus(item),
-            timeliness: this.calculateTimeliness(item),
-            owner: this.getCurrentOwner(item)
-          }))
+          // 将 faultRecord 映射为表格需要的字段
+          this.tableData = data.map(item => {
+            const projectName =
+              item.project ||
+              (item.task && (item.task.projectName || item.task.project)) ||
+              ''
+            const reporterName =
+              (item.reporter && item.reporter.name) ||
+              item.reporterName ||
+              ''
+            const ownerName =
+              (item.owner && item.owner.name) ||
+              item.ownerName ||
+              ''
+            const statusText =
+              item.status || (item.resolved ? '已完成' : '待处理')
+
+            return {
+              ...item,
+              projectName,
+              reportTime: item.createdAt,
+              source: item.source || '例行转故障',
+              reporter: reporterName,
+              status: statusText,
+              timeliness: this.calculateTimeliness(item),
+              owner: ownerName || '未分配'
+            }
+          })
 
           this.filteredData = this.tableData
-          console.log('故障工单表格数据:', this.tableData)
+          console.log('故障工单表格数据(来自 faultRecord):', this.tableData)
           console.log('故障工单总数:', this.filteredData.length)
 
-          if (res.pagination) {
+          // 更新分页信息
+          if (res.pagination && typeof res.pagination.total === 'number') {
             this.pagination.total = res.pagination.total
-            this.pagination.page = res.pagination.page
-            this.pagination.limit = res.pagination.limit
+            this.pagination.page = res.pagination.page || this.pagination.page
+            this.pagination.limit = res.pagination.limit || this.pagination.limit
+          } else if (typeof res.total === 'number') {
+            this.pagination.total = res.total
+          } else {
+            this.pagination.total = this.tableData.length
           }
         } else {
           this.tableData = []
@@ -401,14 +427,17 @@ export default {
       })
     },
     viewFaultOrderReport(row) {
-      // 你可以让 row 里提前配置 reportUrl，也可以写死
-      const url = row.reportUrl || '/FaultOrderReports/高坪汽车站消防维保服务故障维修记录表668939350289752064.pdf'
-      window.open(url, '_blank')
+      // 跳转到故障报告页面
+      const route = this.$router.resolve({
+        name: 'FaultReport',
+        params: { id: row._id }
+      })
+      window.open(route.href, '_blank')
     },
     async onDelete(row) {
       try {
         await this.$confirm(`确定删除「${row.projectName}」的故障记录吗？`, '提示', { type: 'warning' })
-        const res = await deleteFaultOrder(row._id)
+        const res = await deleteFaultRecord(row._id)
         if (res.success) {
           this.$message.success('删除成功')
           this.loadData()
@@ -424,6 +453,19 @@ export default {
     },
 
     // 获取时效类型
+    // 格式化日期时间
+    formatDateTime(dateTime) {
+      if (!dateTime) return '-'
+      const date = new Date(dateTime)
+      if (isNaN(date.getTime())) return '-'
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${minutes}`
+    },
+
     getTimelinessType(timeliness) {
       switch (timeliness) {
         case '正常':
@@ -505,70 +547,20 @@ export default {
 
     // 获取当前所属人
     getCurrentOwner(item) {
-      // 优先显示分配的人员
-      if (item.assignedTo && item.assignedTo.length > 0) {
-        if (typeof item.assignedTo[0] === 'string') {
-          return item.assignedTo[0] // 如果是字符串ID，直接返回
-        }
-        return item.assignedTo[0].name || '已分配' // 如果是对象，返回name
+      // 对于 faultRecord，owner 即当前负责人
+      if (item.owner && item.owner.name) {
+        return item.owner.name
       }
-
-      // 其次显示接单人员
-      if (item.acceptedBy) {
-        if (typeof item.acceptedBy === 'string') {
-          return item.acceptedBy // 如果是字符串ID，直接返回
-        }
-        return item.acceptedBy.name || '已接单' // 如果是对象，返回name
+      if (typeof item.owner === 'string') {
+        return item.owner
       }
-
       return '未分配'
     },
 
     // 获取可用操作
     getAvailableActions(row) {
-      const actions = []
-      const status = row.status || '待处理'
-
-      switch (status) {
-        case '待处理':
-          actions.push(
-            { command: 'accept', label: '接单', disabled: false },
-            { command: 'assign', label: '分配', disabled: false }
-          )
-          break
-        case '已接单':
-          actions.push(
-            { command: 'assign', label: '分配', disabled: false },
-            { command: 'communicate', label: '沟通', disabled: false },
-            { command: 'signin', label: '签到', disabled: false }
-          )
-          break
-        case '已分配':
-          actions.push(
-            { command: 'communicate', label: '沟通', disabled: false },
-            { command: 'signin', label: '签到', disabled: false }
-          )
-          break
-        case '已沟通':
-        case '已签到':
-        case '处理中':
-          actions.push(
-            { command: 'resolve', label: '解决', disabled: false }
-          )
-          break
-        case '已解决':
-          actions.push(
-            { command: 'rate', label: '评价', disabled: false }
-          )
-          break
-        case '已评价':
-          actions.push(
-            { command: 'close', label: '关闭', disabled: false }
-          )
-          break
-      }
-
-      return actions
+      // 当前仅展示 faultRecord 和删除，不提供复杂流转按钮
+      return []
     },
 
     // 处理操作命令

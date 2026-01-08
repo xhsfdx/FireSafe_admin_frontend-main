@@ -17,7 +17,14 @@
         <el-row :gutter="50">
           <el-col :span="12">
             <el-form-item label="业主单位" prop="organization">
-              <el-input v-model="form.organization" placeholder="请输入业主单位" />
+              <el-select v-model="form.organization" placeholder="请选择业主单位（可多选）" filterable multiple clearable>
+                <el-option
+                  v-for="item in companyOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
             </el-form-item>
             <el-form-item label="姓名" prop="name">
               <el-input v-model="form.name" placeholder="请输入姓名" />
@@ -64,14 +71,14 @@
 </template>
 
 <script>
-import { getcustomerDetail, Updatecustomer } from '@/api/customer'
+import { getcustomerDetail, Updatecustomer, getAllOrganizations } from '@/api/customer'
 
 export default {
   name: 'EditCustomerAccount',
   data() {
     return {
       form: {
-        organization: '',
+        organization: [], // 改为数组，支持多个业主单位
         name: '',
         username: '',
         phone: '',
@@ -83,8 +90,12 @@ export default {
         remark: ''
       },
       originForm: {},
+      companyOptions: [], // 业主单位选项
       rules: {
-        organization: [{ required: true, message: '请输入业主单位', trigger: 'blur' }],
+        organization: [
+          { required: true, message: '请至少选择一个业主单位', trigger: 'change' },
+          { type: 'array', min: 1, message: '请至少选择一个业主单位', trigger: 'change' }
+        ],
         name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         phone: [
@@ -110,9 +121,23 @@ export default {
     }
   },
   created() {
+    this.loadCompanies()
     this.loadData()
   },
   methods: {
+    async loadCompanies() {
+      try {
+        const res = await getAllOrganizations()
+        if (res.code === 200 && res.data) {
+          this.companyOptions = res.data.map(companyName => ({
+            label: companyName,
+            value: companyName
+          }))
+        }
+      } catch (err) {
+        console.error('加载业主单位列表失败:', err)
+      }
+    },
     async loadData() {
       try {
         const id = this.$route.query.id
@@ -129,8 +154,12 @@ export default {
           const data = res.data
 
           // 填充 this.form（保留响应式）
+          // organization 可能是数组或字符串（兼容旧数据）
+          const organization = data.organization || []
+          const organizationArray = Array.isArray(organization) ? organization : (organization ? [organization] : [])
+          
           Object.assign(this.form, {
-            organization: data.organization || '',
+            organization: organizationArray,
             name: data.name || '',
             username: data.username || '',
             phone: data.mobile || '',
