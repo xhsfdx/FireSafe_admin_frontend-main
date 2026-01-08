@@ -7,6 +7,14 @@ export function getcustomers() {
   })
 }
 
+// 获取所有业主单位（组织）列表
+export function getAllOrganizations() {
+  return request({
+    url: '/customer/company-names',
+    method: 'get'
+  })
+}
+
 export function getcustomerDetail(id) {
   return request({
     url: `/customer/${id}`,

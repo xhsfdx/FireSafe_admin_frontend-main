@@ -1,269 +1,206 @@
 <template>
   <div class="checkin-region-page">
-    <!-- 查询栏 -->
-    <div class="search-bar">
-      <div class="search-filters">
-        <el-select v-model="filters.unit" placeholder="请选择单位" class="filter-select">
-          <el-option v-for="item in units" :key="item" :label="item" :value="item" />
-        </el-select>
-      </div>
-      <div class="search-actions">
-        <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
-        <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-      </div>
-    </div>
-
     <!-- 表格区域 -->
     <div class="main-content">
       <el-table
         v-loading="loading"
-        :data="pagedData"
+        :data="projectList"
         border
         :header-cell-style="{ fontWeight: 'bold', fontSize: '15px' }"
-        empty-text="暂无数据"
+        empty-text="暂无项目数据"
         header-cell-class-name="table-header"
       >
         <el-table-column type="index" label="序号" width="80" align="center" />
-        <el-table-column prop="unitName" label="单位名称" align="center" />
-        <el-table-column prop="range" label="打卡范围（公里）" align="center" />
-        <el-table-column prop="purpose" label="打卡用途" align="center" />
-        <el-table-column label="操作" width="120" align="center">
+        <el-table-column prop="name" label="项目名称" align="center" />
+        <el-table-column prop="address" label="项目地址" align="center" show-overflow-tooltip />
+        <el-table-column label="签到范围（公里）" align="center" width="200">
           <template slot-scope="{ row }">
-            <el-link type="primary" @click="viewDetail(row)">详情</el-link>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <el-button 
+                :disabled="getCheckinRange(row) <= 1" 
+                size="mini"
+                @click="adjustProjectRange(row, -1)"
+              >-</el-button>
+              <el-input
+                v-model.number="row.checkinRange"
+                type="number"
+                min="1"
+                max="20"
+                style="width:80px;"
+                @blur="saveProjectRange(row)"
+                @keyup.enter.native="saveProjectRange(row)"
+              />
+              <el-button 
+                :disabled="getCheckinRange(row) >= 20" 
+                size="mini"
+                @click="adjustProjectRange(row, 1)"
+              >+</el-button>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" align="center" width="100">
+          <template slot-scope="{ row }">
+            <el-tag v-if="row.checkinRegionId" type="success" size="small">已设置</el-tag>
+            <el-tag v-else type="info" size="small">未设置</el-tag>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <!-- 底部统计和分页 -->
+    <!-- 底部统计 -->
     <div class="footer-bar">
-      <span>共查询到 {{ filteredData.length }} 条</span>
-      <el-pagination
-        small
-        background
-        layout="prev, pager, next"
-        :page-size="pageSize"
-        :current-page.sync="currentPage"
-        :total="filteredData.length"
-        :page-size-text="'条/页'"
-        :total-text="'共 {total} 条'"
-        :go-to-text="'前往'"
-        :jump-text="'页'"
-        @current-change="handlePageChange"
-      />
+      <span>共 {{ projectList.length }} 个项目</span>
     </div>
-
-    <!-- 打卡区域编辑弹窗 -->
-    <el-dialog
-      :visible.sync="dialogVisible"
-      width="480px"
-      :close-on-click-modal="false"
-      center
-      top="60px"
-      custom-class="edit-region-dialog"
-    >
-      <span slot="title" style="font-size:22px;font-weight: bold;">
-        打卡范围编辑
-      </span>
-      <div class="form-area">
-        <el-form :model="dialogData" label-width="90px" label-position="top">
-          <el-form-item label="单位名称">
-            <el-input v-model="dialogData.unitName" readonly />
-          </el-form-item>
-          <el-form-item label="* 定位半径(公里)">
-            <div class="range-row">
-              <el-button :disabled="dialogData.range <= 1" @click="adjustRange(-1)">-</el-button>
-              <el-input
-                v-model.number="dialogData.range"
-                type="number"
-                min="1"
-                max="20"
-                style="width:80px;margin:0 8px;"
-                :readonly="true"
-              />
-              <el-button :disabled="dialogData.range >= 20" @click="adjustRange(1)">+</el-button>
-            </div>
-          </el-form-item>
-          <div class="map-img-wrap">
-            <!-- 使用 vue-amap 高德地图组件 -->
-            <el-amap
-              :center="mapCenter"
-              :zoom="zoom"
-              style="width:100%;height:260px"
-            >
-              <el-amap-circle
-                :center="mapCenter"
-                :radius="dialogData.range * 1000"
-                stroke-color="#409EFF"
-                fill-color="#79bbff88"
-              />
-              <el-amap-marker :position="mapCenter" />
-            </el-amap>
-          </div>
-        </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="saveEdit">保存</el-button>
-        <el-button @click="dialogVisible = false">取消</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getCheckinRegions, updateCheckinRegion, getAllUnits } from '@/api/checkinRegion'
+import { getCheckinRegions, updateCheckinRegion, createCheckinRegion } from '@/api/checkinRegion'
+import { getProjects } from '@/api/project'
 
 export default {
   name: 'CheckInRegion',
   data() {
     return {
-      filters: { unit: '' },
-      units: [],
-      rawData: [],
-      filteredData: [],
-      pagedData: [],
-      currentPage: 1,
-      pageSize: 10,
       loading: false,
-      // 弹窗相关
-      dialogVisible: false,
-      dialogData: {
-        unitName: '',
-        range: 2,
-        purpose: '外出维保打卡',
-        coordinates: {
-          lng: 106.110698,
-          lat: 30.799492
-        },
-        address: ''
-      },
-      dialogIndex: -1, // 标记当前编辑的行
-      // 地图相关
-      mapCenter: [106.110698, 30.799492], // 默认南充
-      zoom: 14
+      projectList: [], // 项目列表
+      checkinRegionsMap: {} // 项目ID -> 签到区域映射
     }
   },
-  watch: {
-    currentPage() { this.updatePagedData() }
-  },
   created() {
-    this.loadData()
-    this.loadUnits()
+    this.loadProjects()
+    this.loadCheckinRegions()
   },
   methods: {
-    // 加载数据
-    async loadData() {
+    // 加载项目列表
+    async loadProjects() {
       this.loading = true
       try {
-        const params = {
-          page: this.currentPage,
-          limit: this.pageSize
-        }
-
-        if (this.filters.unit) {
-          params.unitName = this.filters.unit
-        }
-
-        console.log('请求参数:', params)
-        console.log('当前token:', this.$store.getters.token)
-        const res = await getCheckinRegions(params)
-        console.log('打卡区域API响应:', res)
-        if (res.success) {
-          this.rawData = res.data || []
-          this.filteredData = this.rawData
-          this.updatePagedData()
-          console.log('加载的数据:', this.rawData)
-        } else {
-          this.$message.error(res.message || '加载数据失败')
-        }
+        const response = await getProjects({ page: 1, limit: 1000 })
+        const projects = response.data?.list || []
+        
+        // 合并签到范围信息
+        this.projectList = projects.map(project => {
+          const region = this.checkinRegionsMap[project._id]
+          return {
+            ...project,
+            checkinRange: region ? region.range : 2, // 默认2公里
+            checkinRegionId: region ? region._id : null
+          }
+        })
       } catch (error) {
-        console.error('加载数据失败:', error)
-        this.$message.error('加载数据失败')
+        console.error('加载项目列表失败:', error)
+        this.$message.error('加载项目列表失败')
       } finally {
         this.loading = false
       }
     },
 
-    // 加载单位列表
-    async loadUnits() {
+    // 加载签到区域列表
+    async loadCheckinRegions() {
       try {
-        console.log('加载单位列表...')
-        const res = await getAllUnits()
-        console.log('单位列表API响应:', res)
+        const res = await getCheckinRegions({ page: 1, limit: 1000 })
         if (res.success) {
-          this.units = res.data || []
-          console.log('加载的单位列表:', this.units)
+          // 构建项目ID到签到区域的映射
+          const map = {}
+          res.data.forEach(region => {
+            if (region.projectId) {
+              const projectId = region.projectId._id || region.projectId
+              map[projectId] = region
+            }
+          })
+          this.checkinRegionsMap = map
+          
+          // 重新加载项目列表以合并签到范围
+          if (this.projectList.length > 0) {
+            this.projectList = this.projectList.map(project => {
+              const region = this.checkinRegionsMap[project._id]
+              return {
+                ...project,
+                checkinRange: region ? region.range : 2,
+                checkinRegionId: region ? region._id : null
+              }
+            })
+          } else {
+            // 如果项目列表还没加载，先加载项目
+            await this.loadProjects()
+          }
         }
       } catch (error) {
-        console.error('加载单位列表失败:', error)
+        console.error('加载签到区域失败:', error)
       }
     },
 
-    onSearch() {
-      this.currentPage = 1
-      this.loadData()
+    // 获取项目的签到范围
+    getCheckinRange(project) {
+      return project.checkinRange || 2
     },
 
-    onReset() {
-      this.filters.unit = ''
-      this.currentPage = 1
-      this.loadData()
+    // 调整项目签到范围
+    adjustProjectRange(project, delta) {
+      let newRange = (project.checkinRange || 2) + delta
+      if (newRange < 1) newRange = 1
+      if (newRange > 20) newRange = 20
+      project.checkinRange = newRange
+      this.saveProjectRange(project)
     },
 
-    updatePagedData() {
-      const start = (this.currentPage - 1) * this.pageSize
-      this.pagedData = this.filteredData.slice(start, start + this.pageSize)
-    },
-
-    handlePageChange(page) {
-      this.currentPage = page
-      this.loadData()
-    },
-
-    viewDetail(row) {
-      this.dialogIndex = this.rawData.findIndex(item => item._id === row._id)
-      this.dialogData = {
-        ...row,
-        coordinates: row.coordinates || { lng: 106.110698, lat: 30.799492 }
+    // 保存项目签到范围
+    async saveProjectRange(project) {
+      // 验证范围
+      if (project.checkinRange < 1) {
+        project.checkinRange = 1
+      }
+      if (project.checkinRange > 20) {
+        project.checkinRange = 20
       }
 
-      // 设置地图中心点
-      if (row.coordinates && row.coordinates.lng && row.coordinates.lat) {
-        this.mapCenter = [row.coordinates.lng, row.coordinates.lat]
-      } else {
-        this.mapCenter = [106.110698, 30.799492] // 默认南充
-      }
-      this.dialogVisible = true
-    },
+      try {
+        // 检查项目是否有位置信息
+        if (!project.position || !project.position.lng || !project.position.lat) {
+          this.$message.warning(`项目"${project.name}"未设置位置信息，无法设置签到范围`)
+          return
+        }
 
-    adjustRange(delta) {
-      let val = this.dialogData.range + delta
-      if (val < 1) val = 1
-      if (val > 20) val = 20
-      this.dialogData.range = val
-    },
+        const regionData = {
+          unitName: project.name,
+          range: project.checkinRange,
+          purpose: '外出维保打卡',
+          coordinates: {
+            lng: project.position.lng,
+            lat: project.position.lat
+          },
+          address: project.address || '',
+          projectId: project._id
+        }
 
-    async saveEdit() {
-      if (this.dialogIndex > -1) {
-        try {
-          const updateData = {
-            range: this.dialogData.range,
-            coordinates: this.dialogData.coordinates,
-            address: this.dialogData.address || ''
-          }
-
-          const res = await updateCheckinRegion(this.dialogData._id, updateData)
+        if (project.checkinRegionId) {
+          // 更新现有签到区域
+          const res = await updateCheckinRegion(project.checkinRegionId, {
+            range: project.checkinRange
+          })
           if (res.success) {
             this.$message.success('保存成功')
-            this.dialogVisible = false
-            this.loadData() // 重新加载数据
+            // 更新本地映射
+            this.checkinRegionsMap[project._id].range = project.checkinRange
           } else {
             this.$message.error(res.message || '保存失败')
           }
-        } catch (error) {
-          console.error('保存失败:', error)
-          this.$message.error('保存失败')
+        } else {
+          // 创建新签到区域
+          const res = await createCheckinRegion(regionData)
+          if (res.success) {
+            this.$message.success('保存成功')
+            // 更新本地数据
+            project.checkinRegionId = res.data._id
+            this.checkinRegionsMap[project._id] = res.data
+          } else {
+            this.$message.error(res.message || '保存失败')
+          }
         }
+      } catch (error) {
+        console.error('保存签到范围失败:', error)
+        this.$message.error('保存失败')
       }
     }
   }

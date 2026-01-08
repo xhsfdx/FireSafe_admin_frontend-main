@@ -43,6 +43,15 @@
             完成
           </el-button>
           <el-button
+            v-if="canReview"
+            type="success"
+            icon="el-icon-check"
+            :loading="actionLoading"
+            @click="reviewTask"
+          >
+            审核通过
+          </el-button>
+          <el-button
             v-if="canRate"
             type="info"
             icon="el-icon-star-on"
@@ -59,38 +68,47 @@
     <div class="stats-section">
       <div class="stat-card stat-total">
         <div class="stat-icon">
-          <i class="el-icon-s-data" />
+          <i class="el-icon-pie-chart" />
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ taskInfo.total || 0 }}</div>
+          <div class="stat-num">{{ taskInfo.total || 0 }}</div>
           <div class="stat-label">检测总数</div>
         </div>
       </div>
-      <div class="stat-card stat-completed">
-        <div class="stat-icon">
-          <i class="el-icon-circle-check" />
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ taskInfo.checked || 0 }}</div>
-          <div class="stat-label">已检数</div>
-        </div>
-      </div>
-      <div class="stat-card stat-pending">
+      <div class="stat-card stat-unchecked">
         <div class="stat-icon">
           <i class="el-icon-view" />
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ taskInfo.unchecked || 0 }}</div>
+          <div class="stat-num">{{ taskInfo.unchecked || 0 }}</div>
           <div class="stat-label">未检数</div>
         </div>
       </div>
-      <div class="stat-card stat-overdue">
+      <div class="stat-card stat-checked">
+        <div class="stat-icon">
+          <i class="el-icon-check" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-num">{{ taskInfo.checked || 0 }}</div>
+          <div class="stat-label">已检数</div>
+        </div>
+      </div>
+      <div class="stat-card stat-faults">
         <div class="stat-icon">
           <i class="el-icon-s-tools" />
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ taskInfo.faults || 0 }}</div>
+          <div class="stat-num">{{ taskInfo.faults || 0 }}</div>
           <div class="stat-label">故障记录</div>
+        </div>
+      </div>
+      <div class="stat-card stat-replace">
+        <div class="stat-icon">
+          <i class="el-icon-refresh" />
+        </div>
+        <div class="stat-content">
+          <div class="stat-num">{{ taskInfo.replace || 0 }}</div>
+          <div class="stat-label">更换设备</div>
         </div>
       </div>
     </div>
@@ -103,12 +121,13 @@
       </div>
       <div class="timeline-container">
         <el-steps :active="taskInfo.statusIndex" align-center class="custom-steps">
-          <el-step title="已派发" description="2025-09-01 01:10:04" />
-          <el-step title="已到达" />
-          <el-step title="开始处置" />
-          <el-step title="处置完成提交审批" />
-          <el-step title="完成维保" />
-          <el-step title="已评价" />
+          <el-step
+            v-for="(step, index) in progressSteps"
+            :key="index"
+            :title="step.name"
+            :description="step.description"
+            :status="step.status"
+          />
         </el-steps>
       </div>
     </div>
@@ -194,7 +213,7 @@
             <i class="el-icon-view" />
           </div>
           <div class="stat-content">
-            <div class="stat-num">{{ taskInfo.unchecked || 1 }}</div>
+            <div class="stat-num">{{ taskInfo.unchecked || 0 }}</div>
             <div class="stat-label">未检数</div>
           </div>
         </div>
@@ -303,7 +322,9 @@ import {
   getMaintainTask,
   updateTaskStatus,
   assignMaintainers,
-  updateMaintainTask
+  updateMaintainTask,
+  submitForReview,
+  completeReview
 } from '@/api/maintainTask'
 
 export default {
@@ -339,7 +360,9 @@ export default {
       // 默认右表内容
       tableData: [],
       // 任务详情数据
-      taskData: null
+      taskData: null,
+      // 进度步骤数据
+      progressSteps: []
     }
   },
 
@@ -360,6 +383,12 @@ export default {
     canComplete() {
       if (!this.taskInfo.status) return false
       return ['已到达', '处理中'].includes(this.taskInfo.status)
+    },
+
+    // 是否可以审核（审核通过）
+    canReview() {
+      if (!this.taskInfo.status) return false
+      return this.taskInfo.status === '已提交'
     },
 
     // 是否可以评价
@@ -403,6 +432,7 @@ export default {
           console.log('details数组长度:', res.data.details ? res.data.details.length : 0)
           console.log('第一个detail项:', res.data.details && res.data.details[0])
           this.formatTaskInfo(res.data)
+          this.formatProgressSteps(res.data)
           this.buildTreeData(res.data)
         } else {
           this.$message.error(res.message || '获取任务详情失败')
@@ -413,11 +443,105 @@ export default {
       }
       this.loading = false
     },
+    // 格式化进度步骤
+    formatProgressSteps(data) {
+      if (!data.progress || !Array.isArray(data.progress)) {
+        // 如果没有 progress 数据，使用默认步骤
+        this.progressSteps = [
+          { name: '已派发', description: '', status: 'wait' },
+          { name: '已到达', description: '', status: 'wait' },
+          { name: '处理中', description: '', status: 'wait' },
+          { name: '已提交', description: '', status: 'wait' },
+          { name: '已完成', description: '', status: 'wait' },
+          { name: '已评价', description: '', status: 'wait' }
+        ]
+        return
+      }
+
+      // 格式化时间戳
+      const formatTimestamp = (timestamp) => {
+        if (!timestamp) return ''
+        const date = new Date(timestamp)
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        const hours = String(date.getHours()).padStart(2, '0')
+        const minutes = String(date.getMinutes()).padStart(2, '0')
+        const seconds = String(date.getSeconds()).padStart(2, '0')
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+      }
+
+      this.progressSteps = data.progress.map((step, index) => {
+        const isDone = step.status === 'done'
+        const hasTimestamp = step.timestamp && isDone
+        
+        return {
+          name: step.name,
+          description: hasTimestamp ? formatTimestamp(step.timestamp) : '',
+          status: isDone ? 'finish' : 'wait'
+        }
+      })
+    },
+
     // 格式化任务信息
     formatTaskInfo(data) {
       const maintainers = data.maintainPersons?.maintainers || []
       const leader = data.maintainPersons?.leader
       const technical = data.maintainPersons?.technical
+
+      // 从 details 数组直接计算统计数据（更准确）
+      let totalCheckCount = 0
+      let passedCount = 0
+      let abnormalCount = 0
+      let uncheckedCount = 0
+
+      if (data.details && Array.isArray(data.details) && data.details.length > 0) {
+        // details 可能是 ObjectId 引用或完整对象
+        const firstDetail = data.details[0]
+        if (typeof firstDetail === 'object' && firstDetail.result !== undefined) {
+          // details 包含完整数据，直接计算
+          data.details.forEach(item => {
+            totalCheckCount++
+            if (item.result === '正常') {
+              passedCount++
+            } else if (item.result === '异常') {
+              abnormalCount++
+            } else if (item.result === '未检') {
+              uncheckedCount++
+            }
+          })
+        } else {
+          // details 只是 ObjectId 引用，使用后端统计字段
+          totalCheckCount = data.totalCheckCount || 0
+          passedCount = data.passedCount || 0
+          abnormalCount = data.abnormalCount || 0
+          uncheckedCount = totalCheckCount - passedCount - abnormalCount
+        }
+      } else {
+        // 没有 details，使用后端统计字段
+        totalCheckCount = data.totalCheckCount || 0
+        passedCount = data.passedCount || 0
+        abnormalCount = data.abnormalCount || 0
+        uncheckedCount = totalCheckCount - passedCount - abnormalCount
+      }
+
+      const checkedCount = passedCount + abnormalCount
+
+      // 获取业主单位名称：优先使用 ownerName，其次使用 contract.clientCompany，最后使用 project 相关信息
+      const ownerName = data.ownerName || 
+                       data.contract?.clientCompany || 
+                       data.project?.ownerCompany || 
+                       data.project?.name || 
+                       '未知业主单位'
+
+      console.log('统计数据计算:', {
+        totalCheckCount,
+        passedCount,
+        abnormalCount,
+        uncheckedCount,
+        checkedCount,
+        detailsLength: data.details?.length || 0
+      })
 
       this.taskInfo = {
         time: data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '',
@@ -425,7 +549,7 @@ export default {
         projectName: data.projectName || '锦绣新城消防系统维护保养服务项目',
         planType: data.planType || '月',
         taskName: this.getTaskDisplayName(data),
-        owner: data.project?.ownerCompany || '2647',
+        owner: ownerName,
         status: data.status || '已派发',
         score: data.rating || 0,
         worker: maintainers.length > 0 ? maintainers[0].name : '',
@@ -433,10 +557,10 @@ export default {
         method: '系统维保',
         maintenance: data.maintainResult || '暂无',
         comment: data.ratingComment || '',
-        total: data.totalCheckCount || 0,
-        unchecked: (data.totalCheckCount || 0) - (data.passedCount || 0),
-        checked: data.passedCount || 0,
-        faults: data.abnormalCount || 0,
+        total: totalCheckCount || 0,
+        unchecked: Math.max(0, uncheckedCount || 0), // 确保是数字且不为负数
+        checked: checkedCount || 0,
+        faults: abnormalCount || 0,
         replace: data.replacedCount || 0
       }
     },
@@ -767,6 +891,33 @@ export default {
       } finally {
         this.actionLoading = false
       }
+    },
+
+    // 审核任务（审核通过，从"已提交"变为"已完成"）
+    async reviewTask() {
+      this.$confirm('确认审核通过此任务？审核通过后任务状态将变为"已完成"', '审核确认', {
+        confirmButtonText: '确认通过',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        this.actionLoading = true
+        try {
+          const res = await submitForReview(this.taskId)
+          if (res.success) {
+            this.$message.success(res.message || '审核通过，任务已完成')
+            this.loadData()
+          } else {
+            this.$message.error(res.message || '审核失败')
+          }
+        } catch (error) {
+          console.error('审核失败:', error)
+          this.$message.error('审核失败: ' + (error.message || '未知错误'))
+        } finally {
+          this.actionLoading = false
+        }
+      }).catch(() => {
+        // 用户取消
+      })
     },
 
     // 评价任务

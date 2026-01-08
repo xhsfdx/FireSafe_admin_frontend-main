@@ -102,3 +102,19 @@ export function getWechatMaintainByProjectId(projectId) {
     method: 'get'
   })
 }
+
+// 提交审核（从"已提交"状态审核通过，变为"已完成"）
+export function submitForReview(id) {
+  return request({
+    url: `/Maintain/${id}/submit-review`,
+    method: 'post'
+  })
+}
+
+// 完成评价（从"已完成"状态评价，变为"已评价"）
+export function completeReview(id) {
+  return request({
+    url: `/Maintain/${id}/complete-review`,
+    method: 'post'
+  })
+}

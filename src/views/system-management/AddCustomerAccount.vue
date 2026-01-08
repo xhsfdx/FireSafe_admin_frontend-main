@@ -11,11 +11,11 @@
         <el-col :span="12">
           <!-- 业主单位 -->
           <el-form-item label="业主单位" prop="company">
-            <el-select v-model="form.company" placeholder="请选择业主单位" filterable :loading="loadingCompanies">
+            <el-select v-model="form.company" placeholder="请选择业主单位" filterable :loading="loadingCompanies" clearable>
               <el-option
                 v-for="item in companyOptions"
                 :key="item.value"
-                :label="item.lable"
+                :label="item.label"
                 :value="item.value"
               />
             </el-select>
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { getcustomers, Createcustomer } from '@/api/customer'
+import { getAllOrganizations, Createcustomer } from '@/api/customer'
 export default {
   name: 'AddCustomerForm',
   data() {
@@ -113,31 +113,34 @@ export default {
   },
   methods: {
     async loadData() {
+      this.loadingCompanies = true
       try {
-        const res = await getcustomers()
-        console.log('客户数据响应:', res)
+        const res = await getAllOrganizations()
+        console.log('组织数据响应:', res)
 
         if (res.code === 200 && res.data) {
-          const rawData = res.data || []
+          const companyNames = res.data || []
 
-          // 动态生成 orgList
-          const orgs = [...new Set(rawData.map(item => item.organization).filter(org => org))]
-
-          this.companyOptions = orgs.map(item => ({
-            lable: item,
-            value: item
+          // 格式化选项（现在 data 是字符串数组）
+          this.companyOptions = companyNames.map(companyName => ({
+            label: companyName,
+            value: companyName // 直接使用 ownerCompany 字符串
           }))
 
-          this.form.company = orgs[0] || ''
-
-          console.log('公司选项:', this.companyOptions)
-          this.$message.success('数据加载成功')
+          console.log('组织选项:', this.companyOptions)
+          if (this.companyOptions.length > 0) {
+            this.$message.success('数据加载成功')
+          } else {
+            this.$message.warning('暂无业主单位，请先创建组织')
+          }
         } else {
           this.$message.error(res.msg || '加载数据失败')
         }
       } catch (err) {
         console.error('加载数据失败:', err)
-        this.$message.error('加载数据失败')
+        this.$message.error('加载数据失败: ' + (err.message || '未知错误'))
+      } finally {
+        this.loadingCompanies = false
       }
     },
     async onSubmit() {
@@ -146,7 +149,7 @@ export default {
           try {
             // 提交数据
             const data = {
-              organization: this.form.company,
+              organization: this.form.company, // 组织 ID 或名称
               mobile: this.form.phone,
               name: this.form.name,
               username: this.form.username,
@@ -162,12 +165,14 @@ export default {
               this.$message.success(res.msg || '创建用户成功')
               // 重置表单
               this.$refs.form.resetFields()
+              // 重新加载组织列表（以防有新增）
+              await this.loadData()
             } else {
               this.$message.error(res.msg || '创建用户失败')
             }
           } catch (error) {
             console.error('创建用户失败:', error)
-            this.$message.error('创建用户失败')
+            this.$message.error('创建用户失败: ' + (error.response?.data?.msg || error.message || '未知错误'))
           }
         } else {
           console.log('表单验证失败')

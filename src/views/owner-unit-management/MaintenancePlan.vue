@@ -306,13 +306,13 @@ export default {
       });
     },
 
-    // 🔥 单个制定：直接调用 settask 生成本月任务
+    // 🔥 单个制定：直接调用 settask 生成本月任务（仅当该月份无任务时）
     async handleCreate(row) {
       try {
         const taskMonth = this.getCurrentTaskMonth();
 
         await this.$confirm(
-          `确定要为项目 "${row.projectName}" 根据该计划生成 ${taskMonth} 的维保任务吗？`,
+          `确定要为项目 "${row.projectName}" 根据该计划生成 ${taskMonth} 的维保任务吗？\n\n注意：如果该月份已有任务，将不会重复生成。`,
           "制定计划并生成任务",
           {
             confirmButtonText: "确定",
@@ -331,14 +331,12 @@ export default {
           this.$message.success("任务生成成功");
           // 后端已经更新了 plan 的状态，这里直接刷新列表更安全
           await this.fetchData();
-
-          // 如果需要，也可以直接跳到任务详情：
-          // if (res.task && res.task._id) {
-          //   this.$router.push({
-          //     name: "MpmTDDetail",
-          //     query: { id: res.task._id, projectId: row.projectId, planId: row._id },
-          //   });
-          // }
+        } else if (res && res.skipGeneration) {
+          // 已有任务，跳过生成
+          this.$message.warning(
+            res.message || `${taskMonth} 月份已有任务，无需重复生成`
+          );
+          await this.fetchData(); // 刷新列表以更新状态
         } else {
           this.$message.error(res.message || "任务生成失败");
         }
@@ -418,6 +416,10 @@ export default {
             });
             if (res && res.success) {
               successCount++;
+            } else if (res && res.skipGeneration) {
+              // 已有任务，跳过生成，不算失败也不算成功
+              // 可以选择不计入统计，或者单独统计
+              successCount++; // 视为"已处理"，因为已有任务也是正常状态
             } else {
               failCount++;
               failedNames.push(plan.projectName || plan._id);

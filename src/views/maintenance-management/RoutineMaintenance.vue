@@ -220,11 +220,11 @@
               <div class="status-info">
                 <div class="status-item">
                   <div class="status-indicator" :class="getStatusIndicatorClass(row.taskStatus)" />
-                  <span class="status-text">{{ row.taskStatus || '已派发' }}</span>
+                  <span class="status-text">{{ (row.taskStatus !== undefined && row.taskStatus !== null && row.taskStatus !== '') ? row.taskStatus : '已派发' }}</span>
                 </div>
                 <div class="timeliness-item">
                   <div class="timeliness-indicator" :class="getTimelinessIndicatorClass(row.timeliness)" />
-                  <span class="timeliness-text">{{ row.timeliness || '正常' }}</span>
+                  <span class="timeliness-text">{{ (row.timeliness !== undefined && row.timeliness !== null && row.timeliness !== '') ? row.timeliness : '正常' }}</span>
                 </div>
               </div>
             </template>
@@ -397,6 +397,29 @@ export default {
               console.log('Fixed taskMonth to:', taskMonth)
             }
 
+            // 规范化状态值，确保与后端模型一致
+            // 后端返回的字段是 taskStatus，如果没有则使用 status
+            const validStatuses = ['已派发', '已到达', '处理中', '已提交', '已完成', '已评价']
+            let normalizedStatus = item.taskStatus || item.status
+            // 检查状态是否存在且有效
+            if (!normalizedStatus || normalizedStatus === '' || !validStatuses.includes(normalizedStatus)) {
+              if (normalizedStatus && normalizedStatus !== '') {
+                console.warn(`无效的状态值: ${normalizedStatus}，使用默认值: 已派发`)
+              }
+              normalizedStatus = '已派发'
+            }
+
+            // 时效状态：优先使用后端返回的 timeliness，如果没有则计算
+            let normalizedTimeliness = item.timeliness
+            if (!normalizedTimeliness || normalizedTimeliness === '') {
+              // 如果后端没有返回 timeliness，则计算
+              normalizedTimeliness = this.calculateTimeliness(item) || '正常'
+            }
+            // 确保时效状态存在且有效
+            if (!normalizedTimeliness || normalizedTimeliness === '') {
+              normalizedTimeliness = '正常'
+            }
+
             const processedItem = {
               ...item,
               // 处理任务月份显示
@@ -406,10 +429,10 @@ export default {
               // 处理人员信息
               principal: item.projectManager || leader?.name || '未分配',
               worker: maintainers.length > 0 ? maintainers[0].name : (leader?.name || '未分配'),
-              // 确保状态正确显示
-              taskStatus: item.status || '已派发',
-              // 计算时效状态
-              timeliness: this.calculateTimeliness(item)
+              // 确保状态正确显示（规范化后的状态）
+              taskStatus: normalizedStatus,
+              // 时效状态（优先使用后端返回的，确保存在）
+              timeliness: normalizedTimeliness
             }
 
             console.log('Processed item:', processedItem)

@@ -59,3 +59,11 @@ export function getAllUnits() {
     method: 'get'
   })
 }
+
+// 根据项目ID获取签到范围
+export function getCheckinRegionByProjectId(projectId) {
+  return request({
+    url: `/checkin-regions/project/${projectId}`,
+    method: 'get'
+  })
+}
