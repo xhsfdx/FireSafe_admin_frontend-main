@@ -18,27 +18,37 @@
       <div class="today-metric-item urgent">
         <div class="today-metric-label">今日打卡</div>
         <div class="today-metric-value">{{ formatNumber(getTodayData('todayChecked')) }}</div>
-        <div class="today-metric-icon">📋</div>
+        <div class="today-metric-icon">
+          <i class="el-icon-date"></i>
+        </div>
       </div>
       <div class="today-metric-item">
         <div class="today-metric-label">今日完成</div>
         <div class="today-metric-value">{{ formatNumber(getTodayData('todayCompleted')) }}</div>
-        <div class="today-metric-icon">✅</div>
+        <div class="today-metric-icon">
+          <i class="el-icon-circle-check"></i>
+        </div>
       </div>
       <div class="today-metric-item">
         <div class="today-metric-label">今日评价</div>
         <div class="today-metric-value">{{ formatNumber(getTodayData('todayReviews')) }}</div>
-        <div class="today-metric-icon">⭐</div>
+        <div class="today-metric-icon">
+          <i class="el-icon-star-on"></i>
+        </div>
       </div>
       <div class="today-metric-item urgent" v-if="getMaintainData('urgent') > 0 || getFaultData('overdueUnresolved') > 0">
         <div class="today-metric-label">紧急任务</div>
         <div class="today-metric-value">{{ (getMaintainData('urgent') || 0) + (getFaultData('overdueUnresolved') || 0) }}</div>
-        <div class="today-metric-icon">⚠️</div>
+        <div class="today-metric-icon">
+          <i class="el-icon-warning-outline"></i>
+        </div>
       </div>
       <div class="today-metric-item">
         <div class="today-metric-label">今日故障</div>
         <div class="today-metric-value">{{ formatNumber(getTodayData('todayFaults')) }}</div>
-        <div class="today-metric-icon">🔧</div>
+        <div class="today-metric-icon">
+          <i class="el-icon-setting"></i>
+        </div>
       </div>
     </div>
 
@@ -70,7 +80,9 @@
             </div>
           </div>
           <div class="urgent-alert" v-if="getMaintainData('urgent') > 0">
-            <div class="alert-icon">⚠️</div>
+            <div class="alert-icon">
+              <i class="el-icon-warning-outline"></i>
+            </div>
             <div class="alert-content">
               <div class="alert-title">逾期任务：{{ getMaintainData('urgent') }} 个</div>
               <div class="alert-desc">需要紧急处理</div>
@@ -129,7 +141,9 @@
             </div>
           </div>
           <div class="urgent-alert critical" v-if="getFaultData('overdueUnresolved') > 0">
-            <div class="alert-icon">🚨</div>
+            <div class="alert-icon">
+              <i class="el-icon-warning"></i>
+            </div>
             <div class="alert-content">
               <div class="alert-title">逾期未解决：{{ getFaultData('overdueUnresolved') }} 个</div>
               <div class="alert-desc">需要立即处理</div>
@@ -236,7 +250,9 @@
               </div>
             </div>
             <div class="ranking-badge" v-if="index < 3">
-              {{ index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉' }}
+              <span class="ranking-medal" :class="{'gold': index === 0, 'silver': index === 1, 'bronze': index === 2}">
+                {{ index === 0 ? 'NO.1' : index === 1 ? 'NO.2' : 'NO.3' }}
+              </span>
             </div>
           </div>
           <div class="no-ranking" v-if="getTopMaintainers().length === 0">
@@ -851,6 +867,10 @@ export default {
 .today-metric-icon {
   font-size: 20px;
   opacity: 0.7;
+}
+
+.today-metric-icon i {
+  font-size: 20px;
 }
 
 /* Dashboard Grid */
@@ -1698,6 +1718,36 @@ export default {
 
 .ranking-badge {
   font-size: 32px;
+}
+
+.ranking-medal {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: rgba(0, 192, 255, 0.12);
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  color: #00f0ff;
+}
+
+.ranking-medal.gold {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.6);
+  color: #ffd700;
+}
+
+.ranking-medal.silver {
+  background: rgba(192, 192, 192, 0.15);
+  border-color: rgba(192, 192, 192, 0.6);
+  color: #e0e0e0;
+}
+
+.ranking-medal.bronze {
+  background: rgba(205, 127, 50, 0.15);
+  border-color: rgba(205, 127, 50, 0.6);
+  color: #ffb074;
 }
 
 .no-ranking {
