@@ -533,12 +533,18 @@ export default {
       if (this.$refs.trendChart && this.$refs.trendChart.updateChart) {
         this.$refs.trendChart.updateChart()
       }
-      if (this.$refs.mapChart && this.$refs.mapChart.loadData) {
-        this.$refs.mapChart.loadData().then(() => {
-          if (this.$refs.mapChart.renderMap) {
-            this.$refs.mapChart.renderMap()
-          }
-        })
+      if (this.$refs.mapChart) {
+        // 先调整大小，再加载数据和渲染
+        if (this.$refs.mapChart.handleResize) {
+          this.$refs.mapChart.handleResize()
+        }
+        if (this.$refs.mapChart.loadData) {
+          this.$refs.mapChart.loadData().then(() => {
+            if (this.$refs.mapChart.renderMap) {
+              this.$refs.mapChart.renderMap()
+            }
+          })
+        }
       }
     },
     hideLayoutElements() {
@@ -765,64 +771,64 @@ export default {
   100% { transform: translate(100px, 100px); }
 }
 
-/* Main Title */
+/* Main Title - Optimized for 65" TV */
 .main-title {
   position: relative;
   z-index: 10;
   text-align: center;
-  padding: 20px 0;
+  padding: 2.5vh 0;
   background: linear-gradient(180deg, rgba(0, 20, 40, 0.8) 0%, transparent 100%);
 }
 
 .title-text {
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(48px, 5.5vw, 96px);
   font-weight: bold;
   color: #00f0ff;
   text-shadow: 
-    0 0 20px rgba(0, 240, 255, 0.8),
-    0 0 40px rgba(0, 240, 255, 0.6),
-    0 0 60px rgba(0, 240, 255, 0.4);
-  letter-spacing: 4px;
-  margin-bottom: 5px;
+    0 0 30px rgba(0, 240, 255, 0.8),
+    0 0 60px rgba(0, 240, 255, 0.6),
+    0 0 90px rgba(0, 240, 255, 0.4);
+  letter-spacing: 6px;
+  margin-bottom: 1vh;
 }
 
 .title-subtitle {
-  font-size: clamp(12px, 1.5vw, 18px);
+  font-size: clamp(20px, 2.2vw, 36px);
   color: rgba(0, 240, 255, 0.7);
-  letter-spacing: 2px;
-  margin-bottom: 10px;
+  letter-spacing: 3px;
+  margin-bottom: 1.5vh;
 }
 
 .current-time {
-  font-size: clamp(14px, 1.8vw, 20px);
+  font-size: clamp(24px, 2.5vw, 42px);
   color: #00f0ff;
   font-family: 'Orbitron', monospace;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
-/* Today Metrics Bar */
+/* Today Metrics Bar - Optimized for 65" TV */
 .today-metrics-bar {
   position: relative;
   z-index: 10;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 15px 30px;
+  padding: 2vh 3vw;
   background: linear-gradient(135deg, rgba(0, 20, 40, 0.9) 0%, rgba(0, 40, 80, 0.85) 100%);
-  border-bottom: 2px solid rgba(0, 192, 255, 0.3);
-  margin-bottom: 15px;
-  box-shadow: 0 4px 20px rgba(0, 192, 255, 0.2);
+  border-bottom: 3px solid rgba(0, 192, 255, 0.3);
+  margin-bottom: 2vh;
+  box-shadow: 0 6px 30px rgba(0, 192, 255, 0.2);
 }
 
 .today-metric-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 25px;
+  padding: 2vh 2.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(0, 192, 255, 0.3);
-  min-width: 120px;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 192, 255, 0.3);
+  min-width: 180px;
   transition: all 0.3s ease;
   position: relative;
 }
@@ -845,44 +851,45 @@ export default {
 }
 
 .today-metric-label {
-  font-size: 12px;
+  font-size: clamp(18px, 1.8vw, 28px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 8px;
+  margin-bottom: 1vh;
+  font-weight: 500;
 }
 
 .today-metric-value {
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: clamp(42px, 4.5vw, 72px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+  text-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
   font-family: 'Orbitron', monospace;
-  margin-bottom: 5px;
+  margin-bottom: 0.8vh;
 }
 
 .today-metric-item.urgent .today-metric-value {
   color: #ff6b6b;
-  text-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+  text-shadow: 0 0 25px rgba(255, 107, 107, 0.8);
 }
 
 .today-metric-icon {
-  font-size: 20px;
+  font-size: clamp(32px, 3vw, 48px);
   opacity: 0.7;
 }
 
 .today-metric-icon i {
-  font-size: 20px;
+  font-size: clamp(32px, 3vw, 48px);
 }
 
-/* Dashboard Grid */
+/* Dashboard Grid - Optimized for 65" TV */
 .dashboard-grid {
   position: relative;
   z-index: 5;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 15px;
-  padding: 15px;
-  height: calc(100vh - 200px);
+  gap: 2vh 2vw;
+  padding: 2vh 2vw;
+  height: calc(100vh - 25vh);
 }
 
 .panel-map {
@@ -892,16 +899,23 @@ export default {
 
 .map-content {
   padding: 0;
+  margin: 0;
   height: 100%;
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
+  overflow: hidden;
 }
 
 .map-container {
   width: 100%;
   height: 100%;
   min-height: 400px;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .panel {
@@ -925,20 +939,26 @@ export default {
 }
 
 .panel-header {
-  padding: 12px 20px;
-  border-bottom: 1px solid rgba(0, 192, 255, 0.3);
+  padding: 1.8vh 2vw;
+  border-bottom: 2px solid rgba(0, 192, 255, 0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(90deg, rgba(0, 192, 255, 0.1) 0%, transparent 100%);
 }
 
+/* Reduce header height for map panel to give more space to canvas */
+.panel-map .panel-header {
+  padding: 1vh 1.5vw;
+  min-height: auto;
+}
+
 .panel-title {
-  font-size: clamp(16px, 1.8vw, 20px);
+  font-size: clamp(28px, 2.8vw, 48px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  letter-spacing: 3px;
 }
 
 .panel-decoration {
@@ -949,9 +969,16 @@ export default {
 }
 
 .panel-content {
-  padding: 20px;
-  height: calc(100% - 50px);
+  padding: 2.5vh 2vw;
+  height: calc(100% - 8vh);
   overflow: auto;
+}
+
+/* Special styling for map panel to minimize padding and maximize height */
+.panel-map .panel-content {
+  padding: 0.3vh 0.3vw;
+  overflow: hidden;
+  height: calc(100% - 6vh); /* 减少 header 占用的高度，增加内容区域 */
 }
 
 /* Big Numbers */
@@ -1250,28 +1277,28 @@ export default {
   color: #00f0ff;
 }
 
-/* Navigation Menu */
+/* Navigation Menu - Optimized for 65" TV */
 .nav-menu-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 2vh;
+  right: 2vw;
   z-index: 10002;
 }
 
 .nav-menu-button {
   background: linear-gradient(135deg, rgba(0, 192, 255, 0.9) 0%, rgba(0, 136, 204, 0.9) 100%);
   color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 1.5vh 2vw;
+  border-radius: 12px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
-    0 0 20px rgba(0, 192, 255, 0.6),
-    inset 0 0 10px rgba(255, 255, 255, 0.1);
+    0 0 30px rgba(0, 192, 255, 0.6),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 1vw;
+  font-size: clamp(20px, 2vw, 32px);
   font-weight: bold;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -1292,39 +1319,39 @@ export default {
 }
 
 .nav-menu-button i {
-  font-size: 18px;
+  font-size: clamp(24px, 2.4vw, 40px);
 }
 
 .nav-text {
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .nav-menu-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 1.5vh);
   right: 0;
   background: linear-gradient(135deg, rgba(0, 20, 40, 0.95) 0%, rgba(0, 40, 80, 0.95) 100%);
-  border: 2px solid rgba(0, 192, 255, 0.5);
-  border-radius: 8px;
+  border: 3px solid rgba(0, 192, 255, 0.5);
+  border-radius: 12px;
   box-shadow: 
-    0 0 30px rgba(0, 192, 255, 0.6),
-    inset 0 0 20px rgba(0, 192, 255, 0.1);
+    0 0 40px rgba(0, 192, 255, 0.6),
+    inset 0 0 30px rgba(0, 192, 255, 0.1);
   backdrop-filter: blur(15px);
-  min-width: 200px;
-  padding: 8px 0;
+  min-width: 280px;
+  padding: 1vh 0;
   overflow: hidden;
 }
 
 .nav-menu-item {
-  padding: 12px 20px;
+  padding: 1.8vh 2.5vw;
   color: #00f0ff;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
+  gap: 1.5vw;
+  font-size: clamp(18px, 1.8vw, 28px);
   transition: all 0.2s ease;
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
 }
 
 .nav-menu-item:hover {
@@ -1335,8 +1362,8 @@ export default {
 }
 
 .nav-menu-item i {
-  font-size: 16px;
-  width: 20px;
+  font-size: clamp(20px, 2vw, 32px);
+  width: 30px;
   text-align: center;
 }
 
@@ -1379,19 +1406,20 @@ export default {
   transform: translateY(-10px);
 }
 
-/* Fullscreen Countdown */
+/* Fullscreen Countdown - Optimized for 65" TV */
 .fullscreen-countdown {
   position: fixed;
-  top: 20px;
-  right: 80px;
+  top: 2vh;
+  right: 10vw;
   background: rgba(0, 0, 0, 0.8);
   color: #00ffff;
-  padding: 10px 20px;
-  border-radius: 5px;
-  border: 1px solid #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  padding: 1.5vh 2.5vw;
+  border-radius: 8px;
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
   z-index: 10000;
   font-family: 'Orbitron', sans-serif;
+  font-size: clamp(20px, 2vw, 32px);
   animation: pulse 1s infinite;
 }
 
@@ -1400,26 +1428,26 @@ export default {
   50% { opacity: 0.7; }
 }
 
-/* Core Metrics Grid */
+/* Core Metrics Grid - Optimized for 65" TV */
 .core-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 1.5vh 1.5vw;
+  margin-bottom: 2.5vh;
 }
 
 .core-metric-card {
   text-align: center;
-  padding: 15px;
+  padding: 2vh 1.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 12px;
+  border: 2px solid rgba(0, 192, 255, 0.2);
   transition: all 0.3s ease;
 }
 
 .core-metric-card:hover {
   border-color: rgba(0, 192, 255, 0.5);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .core-metric-card.highlight {
@@ -1428,29 +1456,30 @@ export default {
 }
 
 .core-metric-label {
-  font-size: 12px;
+  font-size: clamp(18px, 1.8vw, 28px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 8px;
+  margin-bottom: 1vh;
+  font-weight: 500;
 }
 
 .core-metric-value {
-  font-size: clamp(20px, 2.5vw, 28px);
+  font-size: clamp(36px, 3.8vw, 64px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
   font-family: 'Orbitron', monospace;
 }
 
-/* Urgent Alert */
+/* Urgent Alert - Optimized for 65" TV */
 .urgent-alert {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
+  gap: 2vw;
+  padding: 2vh 2vw;
   background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.5);
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border: 2px solid rgba(255, 193, 7, 0.5);
+  border-radius: 12px;
+  margin-bottom: 2.5vh;
   animation: pulse-warning 2s infinite;
 }
 
@@ -1461,17 +1490,21 @@ export default {
 }
 
 @keyframes pulse-warning {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 193, 7, 0.6); }
 }
 
 @keyframes pulse-critical {
-  0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.8); }
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.4); }
+  50% { box-shadow: 0 0 60px rgba(255, 107, 107, 0.8); }
 }
 
 .alert-icon {
-  font-size: 32px;
+  font-size: clamp(48px, 4vw, 72px);
+}
+
+.alert-icon i {
+  font-size: clamp(48px, 4vw, 72px);
 }
 
 .alert-content {
@@ -1479,10 +1512,10 @@ export default {
 }
 
 .alert-title {
-  font-size: 16px;
+  font-size: clamp(24px, 2.5vw, 40px);
   font-weight: bold;
   color: #ffc107;
-  margin-bottom: 5px;
+  margin-bottom: 0.8vh;
 }
 
 .urgent-alert.critical .alert-title {
@@ -1490,7 +1523,7 @@ export default {
 }
 
 .alert-desc {
-  font-size: 12px;
+  font-size: clamp(18px, 1.8vw, 28px);
   color: rgba(255, 193, 7, 0.8);
 }
 
@@ -1498,32 +1531,33 @@ export default {
   color: rgba(255, 107, 107, 0.8);
 }
 
-/* Progress Section */
+/* Progress Section - Optimized for 65" TV */
 .progress-section {
-  margin-top: 20px;
+  margin-top: 2.5vh;
 }
 
 .progress-title {
-  font-size: 14px;
+  font-size: clamp(20px, 2vw, 32px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 10px;
+  margin-bottom: 1.5vh;
+  font-weight: 500;
 }
 
 .progress-bar-large {
-  height: 30px;
+  height: clamp(40px, 4vh, 60px);
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 15px;
-  border: 1px solid rgba(0, 192, 255, 0.3);
+  border-radius: 20px;
+  border: 2px solid rgba(0, 192, 255, 0.3);
   position: relative;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 1.5vh;
 }
 
 .progress-fill-large {
   height: 100%;
   background: linear-gradient(90deg, #00c0ff, #00f0ff);
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
   transition: width 0.5s ease;
 }
 
@@ -1533,19 +1567,19 @@ export default {
 
 .progress-text-large {
   position: absolute;
-  right: 12px;
+  right: 1.5vw;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 14px;
+  font-size: clamp(20px, 2vw, 32px);
   color: #00f0ff;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(0, 240, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
 }
 
 .progress-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: clamp(16px, 1.6vw, 24px);
   color: rgba(0, 240, 255, 0.8);
 }
 
@@ -1557,62 +1591,64 @@ export default {
   color: #ff6b6b;
 }
 
-/* Scale Metrics */
+/* Scale Metrics - Optimized for 65" TV */
 .scale-metrics {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 2vh 2vw;
+  margin-bottom: 2.5vh;
 }
 
 .scale-item {
   text-align: center;
-  padding: 15px;
+  padding: 2vh 1.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 12px;
+  border: 2px solid rgba(0, 192, 255, 0.2);
 }
 
 .scale-label {
-  font-size: 12px;
+  font-size: clamp(18px, 1.8vw, 28px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 8px;
+  margin-bottom: 1vh;
+  font-weight: 500;
 }
 
 .scale-value {
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: clamp(32px, 3.2vw, 52px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
 }
 
-/* Health Section */
+/* Health Section - Optimized for 65" TV */
 .health-section {
-  margin-top: 20px;
+  margin-top: 2.5vh;
 }
 
 .health-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin-bottom: 1.5vh;
+  font-size: clamp(20px, 2vw, 32px);
   color: rgba(0, 240, 255, 0.8);
+  font-weight: 500;
 }
 
 .health-rate {
-  font-size: 20px;
+  font-size: clamp(32px, 3.2vw, 52px);
   font-weight: bold;
   color: #4caf50;
-  text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+  text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
 }
 
 .health-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: clamp(16px, 1.6vw, 24px);
   color: rgba(0, 240, 255, 0.8);
-  margin-top: 10px;
+  margin-top: 1.5vh;
 }
 
 .health-stats .warning {
@@ -1620,46 +1656,47 @@ export default {
 }
 
 
-/* Trend Header */
+/* Trend Header - Optimized for 65" TV */
 .trend-header {
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
 }
 
 .trend-metric {
   text-align: center;
-  padding: 15px;
+  padding: 2vh 1.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 12px;
+  border: 2px solid rgba(0, 192, 255, 0.2);
 }
 
 .trend-label {
-  font-size: 12px;
+  font-size: clamp(18px, 1.8vw, 28px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 8px;
+  margin-bottom: 1vh;
+  font-weight: 500;
 }
 
 .trend-value {
-  font-size: clamp(20px, 2.5vw, 28px);
+  font-size: clamp(36px, 3.8vw, 64px);
   font-weight: bold;
   font-family: 'Orbitron', monospace;
 }
 
 .trend-value.positive {
   color: #4caf50;
-  text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+  text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
 }
 
 .trend-value.negative {
   color: #ff6b6b;
-  text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+  text-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
 }
 
-/* Ranking List */
+/* Ranking List - Optimized for 65" TV */
 .ranking-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1.5vh;
   height: 100%;
   overflow-y: auto;
 }
@@ -1667,17 +1704,17 @@ export default {
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
+  gap: 2vw;
+  padding: 2vh 1.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 192, 255, 0.2);
-  border-radius: 8px;
+  border: 2px solid rgba(0, 192, 255, 0.2);
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .ranking-item:hover {
   border-color: rgba(0, 192, 255, 0.5);
-  transform: translateX(5px);
+  transform: translateX(8px);
 }
 
 .ranking-item.top-three {
@@ -1686,16 +1723,16 @@ export default {
 }
 
 .ranking-number {
-  font-size: 24px;
+  font-size: clamp(36px, 3.5vw, 56px);
   font-weight: bold;
   color: rgba(0, 240, 255, 0.6);
-  min-width: 40px;
+  min-width: 60px;
   text-align: center;
 }
 
 .ranking-item.top-three .ranking-number {
   color: #00f0ff;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
 }
 
 .ranking-info {
@@ -1703,32 +1740,32 @@ export default {
 }
 
 .ranking-name {
-  font-size: 16px;
+  font-size: clamp(24px, 2.4vw, 40px);
   font-weight: bold;
   color: #00f0ff;
-  margin-bottom: 5px;
+  margin-bottom: 0.8vh;
 }
 
 .ranking-details {
   display: flex;
-  gap: 15px;
-  font-size: 12px;
+  gap: 2vw;
+  font-size: clamp(16px, 1.6vw, 24px);
   color: rgba(0, 240, 255, 0.7);
 }
 
 .ranking-badge {
-  font-size: 32px;
+  font-size: clamp(48px, 4vw, 72px);
 }
 
 .ranking-medal {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: clamp(18px, 1.8vw, 28px);
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   background: rgba(0, 192, 255, 0.12);
-  border: 1px solid rgba(0, 192, 255, 0.3);
+  border: 2px solid rgba(0, 192, 255, 0.3);
   color: #00f0ff;
 }
 
@@ -1759,7 +1796,7 @@ export default {
 }
 
 .no-ranking-text {
-  font-size: 14px;
+  font-size: clamp(20px, 2vw, 32px);
 }
 
 /* Responsive */

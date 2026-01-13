@@ -166,10 +166,12 @@ export default {
         return
       }
       
-      // 检查是否有员工ID
+      // 检查是否有员工ID（创建账号功能只适用于已存在的员工）
       const id = this.$route.params.id
       if (!id) {
-        this.$message.error('缺少员工ID，无法创建账号')
+        this.$message.error('缺少员工ID，无法创建账号。请先添加员工，然后再为其创建账号。')
+        // 跳转回员工列表页面
+        this.$router.push({ name: 'PersonList' })
         return
       }
       

@@ -1,7 +1,7 @@
 <template>
   <div class="edit-person-info">
     <div class="page-header">
-      <h3>编辑机构人员</h3>
+      <h3>{{ $route.params.id ? '编辑机构人员' : '添加机构人员' }}</h3>
       <el-button type="primary" @click="save">保存</el-button>
     </div>
 

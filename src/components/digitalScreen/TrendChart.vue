@@ -56,39 +56,58 @@ export default {
       const option = {
         backgroundColor: 'transparent',
         grid: {
-          left: '10%',
-          right: '10%',
-          top: '15%',
-          bottom: '15%',
+          left: '12%',
+          right: '12%',
+          top: '18%',
+          bottom: '18%',
           containLabel: true
         },
         tooltip: {
           trigger: 'axis',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
           borderColor: '#00ffff',
-          borderWidth: 1,
-          textStyle: { color: '#00ffff' },
+          borderWidth: 2,
+          textStyle: { 
+            color: '#00ffff',
+            fontSize: 20
+          },
+          padding: [12, 16],
           axisPointer: {
-            type: 'cross'
+            type: 'cross',
+            lineStyle: {
+              width: 2,
+              color: '#00ffff'
+            }
           }
         },
         legend: {
           data: ['完成数量', '故障数量', '完成率', '成交率'],
           textStyle: {
             color: '#00ffff',
-            fontSize: 12
+            fontSize: 22
           },
-          top: 10
+          top: 15,
+          itemGap: 25,
+          itemWidth: 20,
+          itemHeight: 14
         },
         xAxis: {
           type: 'category',
           data: months,
           axisLine: {
-            lineStyle: { color: '#00ffff' }
+            lineStyle: { 
+              color: '#00ffff',
+              width: 2
+            }
           },
           axisLabel: {
             color: '#00ffff',
-            fontSize: 11
+            fontSize: 18,
+            margin: 12
+          },
+          nameTextStyle: {
+            color: '#00ffff',
+            fontSize: 20
           }
         },
         yAxis: [
@@ -97,15 +116,26 @@ export default {
             name: '数量',
             position: 'left',
             axisLine: {
-              lineStyle: { color: '#00ffff' }
+              lineStyle: { 
+                color: '#00ffff',
+                width: 2
+              }
             },
             axisLabel: {
               color: '#00ffff',
-              fontSize: 11,
-              formatter: '{value}'
+              fontSize: 18,
+              formatter: '{value}',
+              margin: 12
+            },
+            nameTextStyle: {
+              color: '#00ffff',
+              fontSize: 20
             },
             splitLine: {
-              lineStyle: { color: 'rgba(0, 255, 255, 0.1)' }
+              lineStyle: { 
+                color: 'rgba(0, 255, 255, 0.15)',
+                width: 1
+              }
             }
           },
           {
@@ -113,12 +143,20 @@ export default {
             name: '百分比',
             position: 'right',
             axisLine: {
-              lineStyle: { color: '#00ff00' }
+              lineStyle: { 
+                color: '#00ff00',
+                width: 2
+              }
             },
             axisLabel: {
               color: '#00ff00',
-              fontSize: 11,
-              formatter: '{value}%'
+              fontSize: 18,
+              formatter: '{value}%',
+              margin: 12
+            },
+            nameTextStyle: {
+              color: '#00ff00',
+              fontSize: 20
             },
             splitLine: {
               show: false
@@ -137,7 +175,10 @@ export default {
                 { offset: 1, color: '#0088cc' }
               ])
             },
-            barWidth: '30%'
+            barWidth: '40%',
+            label: {
+              show: false
+            }
           },
           {
             name: '故障数量',
@@ -150,7 +191,10 @@ export default {
                 { offset: 1, color: '#ff794b' }
               ])
             },
-            barWidth: '30%'
+            barWidth: '40%',
+            label: {
+              show: false
+            }
           },
           {
             name: '完成率',
@@ -160,16 +204,21 @@ export default {
             smooth: true,
             lineStyle: {
               color: '#00ff00',
-              width: 2
+              width: 4
             },
             itemStyle: {
-              color: '#00ff00'
+              color: '#00ff00',
+              borderWidth: 2
             },
+            symbolSize: 8,
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(0, 255, 0, 0.3)' },
                 { offset: 1, color: 'rgba(0, 255, 0, 0.05)' }
               ])
+            },
+            label: {
+              show: false
             }
           },
           {
@@ -180,10 +229,15 @@ export default {
             smooth: true,
             lineStyle: {
               color: '#ff00ff',
-              width: 2
+              width: 4
             },
             itemStyle: {
-              color: '#ff00ff'
+              color: '#ff00ff',
+              borderWidth: 2
+            },
+            symbolSize: 8,
+            label: {
+              show: false
             }
           }
         ]

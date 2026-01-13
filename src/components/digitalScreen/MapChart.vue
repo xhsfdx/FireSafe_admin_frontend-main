@@ -20,16 +20,23 @@ export default {
   },
   async mounted() {
     echarts.registerMap('四川', sichuan)
-    this.$nextTick(() => {
-      const container = document.getElementById('map-container') || this.$el.querySelector('.map-container')
-      if (container) {
-        this.chart = echarts.init(container)
-        this.loadData().then(() => {
-          this.renderMap()
+    // 等待 DOM 完全渲染后再初始化
+    await this.$nextTick()
+    // 再等待一帧确保容器尺寸已确定
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    
+    const container = document.getElementById('map-container') || this.$el.querySelector('.map-container')
+    if (container) {
+      this.chart = echarts.init(container)
+      this.loadData().then(() => {
+        this.renderMap()
+        // 渲染后立即调整大小
+        this.$nextTick(() => {
+          this.handleResize()
         })
-        window.addEventListener('resize', this.handleResize)
-      }
-    })
+      })
+      window.addEventListener('resize', this.handleResize)
+    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
@@ -41,54 +48,110 @@ export default {
     async loadData() {
       try {
         const res = await getDigitalScreenData()
-        if (res && res.data) {
-          // 使用维保面积作为 value，用于地图阴影显示
-          this.mapData = res.data.cityStats.map(item => ({
-            name: item.city,
-            value: item.totalArea, // 使用维保面积作为主要值
-            area: (item.totalArea / 10000).toFixed(2), // 转成万平方米，用于显示
-            ownerCount: item.ownerCompanyCount // 业主单位数，用于显示
-          }))
+        if (res && res.data && res.data.cityStats) {
+          // 计算最大面积值，用于计算发光强度
+          const areaValues = res.data.cityStats.map(item => item.totalArea || 0)
+          const maxArea = Math.max(...areaValues, 1)
+          
+          // 使用维保面积作为 value，并为每个区域计算发光效果
+          this.mapData = res.data.cityStats.map(item => {
+            const area = item.totalArea || 0
+            // 计算发光强度（0-1之间），面积越大，发光越强
+            const intensity = maxArea > 0 ? Math.min(area / maxArea, 1) : 0
+            // 根据强度计算阴影模糊半径（20-80之间）
+            const shadowBlur = 20 + (intensity * 60)
+            // 根据强度计算阴影透明度（0.3-1之间）
+            const shadowOpacity = 0.3 + (intensity * 0.7)
+            // 根据强度计算边框宽度（2-5之间）
+            const borderWidth = 2 + (intensity * 3)
+            
+            return {
+              name: item.city,
+              value: area, // 使用维保面积作为主要值
+              area: area ? (area / 10000).toFixed(2) : '0.00', // 转成万平方米，用于显示
+              ownerCount: item.ownerCompanyCount || 0, // 业主单位数，用于显示
+              // 为每个区域设置动态发光效果
+              itemStyle: {
+                areaColor: {
+                  type: 'linear',
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [
+                    { offset: 0, color: `rgba(0, 68, 102, ${0.6 + intensity * 0.4})` },
+                    { offset: 1, color: `rgba(0, 17, 34, ${0.4 + intensity * 0.3})` }
+                  ]
+                },
+                borderColor: `rgba(0, 192, 255, ${0.5 + intensity * 0.5})`,
+                borderWidth: borderWidth,
+                shadowColor: `rgba(0, 255, 255, ${shadowOpacity})`,
+                shadowBlur: shadowBlur,
+                shadowOffsetX: 0,
+                shadowOffsetY: 0
+              }
+            }
+          })
           console.log('地图数据 mapData:', this.mapData) // 确认数据是否为空，格式是否正确
+          console.log('城市统计数据:', res.data.cityStats)
+        } else {
+          console.warn('地图数据为空或格式不正确:', res)
+          this.mapData = []
         }
       } catch (error) {
         console.error('加载地图数据失败:', error)
+        this.mapData = []
       }
     },
     renderMap() {
+      if (!this.chart || !this.mapData || this.mapData.length === 0) {
+        console.warn('地图数据为空，无法渲染')
+        return
+      }
+      
+      // 计算最大和最小面积值，用于 visualMap
+      const areaValues = this.mapData.map(d => d.value || 0).filter(v => v > 0)
+      const maxArea = Math.max(...areaValues, 1)
+      const minArea = Math.min(...areaValues, 0)
+      
       const option = {
         tooltip: {
           trigger: 'item',
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          backgroundColor: 'rgba(0,0,0,0.9)',
           borderColor: '#00ffff',
-          borderWidth: 1,
-          textStyle: { color: '#00ffff' },
+          borderWidth: 2,
+          textStyle: { 
+            color: '#00ffff',
+            fontSize: 20
+          },
+          padding: [12, 16],
           formatter: params => {
             const data = params.data || {}
             return [
-              params.name,
-              `维保面积：${data.area || 0} 万㎡`,
-              `业主单位：${data.ownerCount || 0} 家`
-            ].join('<br/>')
+              `<div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">${params.name}</div>`,
+              `<div style="font-size: 18px; margin: 4px 0;">维保面积：${data.area || '0.00'} 万㎡</div>`,
+              `<div style="font-size: 18px; margin: 4px 0;">业主单位：${data.ownerCount || 0} 家</div>`
+            ].join('')
           }
         },
         visualMap: {
           show: true,
           left: 'left',
-          bottom: '20px',
-          min: 0,
-          max: Math.max(...this.mapData.map(d => d.value || 0), 1),
+          bottom: '30px',
+          min: minArea,
+          max: maxArea,
           text: ['高', '低'],
           calculable: true,
           inRange: {
-            color: ['#00c0ff', '#0088cc', '#004466', '#001f3f']
+            color: ['#001f3f', '#004466', '#0088cc', '#00c0ff', '#00f0ff'] // 从深到浅的蓝色渐变
           },
           textStyle: {
             color: '#00ffff',
-            fontSize: 11
+            fontSize: 20
           },
-          itemWidth: 15,
-          itemHeight: 100,
+          itemWidth: 25,
+          itemHeight: 150,
+          itemGap: 8,
           formatter: function(value) {
             // 显示为万平方米
             return (value / 10000).toFixed(0) + '万㎡'
@@ -100,11 +163,20 @@ export default {
             type: 'map',
             map: '四川',
             roam: false,
+            // 使用 layoutCenter 和 layoutSize 控制地图在容器中的位置和大小
+            layoutCenter: ['50%', '50%'],
+            layoutSize: '98%', // 地图占据容器的98%空间，最大化显示
+            // 确保地图使用容器的全部可用空间
+            aspectScale: 0.75, // 调整地图的宽高比，使其更好地适应容器
             label: {
               show: true,
               color: '#00ffff',
-              fontSize: 12
+              fontSize: 18,
+              fontWeight: 'bold',
+              textShadowBlur: 8,
+              textShadowColor: 'rgba(0, 240, 255, 0.8)'
             },
+            // 默认样式（会被 data 中的 itemStyle 覆盖）
             itemStyle: {
               areaColor: {
                 type: 'linear',
@@ -118,9 +190,9 @@ export default {
                 ]
               },
               borderColor: '#00c0ff',
-              borderWidth: 2,
-              shadowColor: '#00ffff',
-              shadowBlur: 30,
+              borderWidth: 3,
+              shadowColor: 'rgba(0, 255, 255, 0.4)',
+              shadowBlur: 40,
               shadowOffsetX: 0,
               shadowOffsetY: 0
             },
@@ -128,28 +200,52 @@ export default {
               label: { 
                 show: true, 
                 color: '#ffff00',
-                fontSize: 14,
+                fontSize: 24,
                 fontWeight: 'bold',
-                textShadowBlur: 10,
+                textShadowBlur: 15,
                 textShadowColor: '#ffff00'
               },
               itemStyle: { 
                 areaColor: '#0077aa', 
                 shadowColor: '#00ffff', 
-                shadowBlur: 50,
+                shadowBlur: 80, // 悬停时更强的发光
                 borderColor: '#00ffff',
-                borderWidth: 3
+                borderWidth: 5
               }
             },
             data: this.mapData
           }
         ]
       }
-      this.chart.setOption(option)
+      this.chart.setOption(option, true)
+      
+      // 设置完 option 后立即调整大小，确保地图占据最大空间
+      this.$nextTick(() => {
+        // 多次调用 resize 确保图表正确调整大小
+        setTimeout(() => {
+          if (this.chart) {
+            this.chart.resize({
+              width: 'auto',
+              height: 'auto'
+            })
+          }
+        }, 50)
+        setTimeout(() => {
+          if (this.chart) {
+            this.chart.resize()
+          }
+        }, 200)
+      })
     },
     handleResize() {
       if (this.chart) {
-        this.chart.resize()
+        // 使用 setTimeout 确保在 DOM 更新后执行
+        setTimeout(() => {
+          this.chart.resize({
+            width: 'auto',
+            height: 'auto'
+          })
+        }, 100)
       }
     }
   }
@@ -273,29 +369,55 @@ export default {
 .map-chart {
   width: 100%;
   height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
+  margin: 0;
+  padding: 0;
+  position: relative;
 }
 
 .map-container {
   width: 100%;
   height: 100%;
-  min-height: 300px;
+  min-height: 500px;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  position: relative;
 }
 
-/* Responsive styles */
+/* Ensure the ECharts canvas takes full space */
+.map-container > div {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  position: relative !important;
+}
+
+.map-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  display: block !important;
+}
+
+/* Responsive styles - Optimized for 65" TV */
+@media (max-width: 1920px) {
+  .map-chart {
+    width: 30vw;
+  }
+}
+
 @media (max-width: 1440px) {
   .map-chart {
-    width: 36%;
-    min-width: 350px;
-  }
-  
-  .map-container {
-    max-width: 500px;
+    width: 30vw;
+    min-width: 400px;
   }
 }
 
@@ -303,32 +425,21 @@ export default {
   .map-chart {
     width: 100%;
     min-width: auto;
-    order: -1;
   }
   
   .map-container {
-    max-width: 100%;
     min-height: 350px;
   }
 }
 
 @media (max-width: 768px) {
   .map-chart {
+    width: 100%;
     padding: 10px;
   }
   
   .map-container {
     min-height: 300px;
-  }
-}
-
-@media (max-width: 480px) {
-  .map-chart {
-    padding: 8px;
-  }
-  
-  .map-container {
-    min-height: 250px;
   }
 }
 

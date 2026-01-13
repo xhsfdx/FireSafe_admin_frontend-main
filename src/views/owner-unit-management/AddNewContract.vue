@@ -25,7 +25,7 @@
               </div>
             </el-form-item>
             <el-form-item label="合同时间" required>
-              <div style="display: flex; align-items: center;">
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <el-form-item prop="dateStart" style="margin-bottom: 0;">
                   <el-date-picker v-model="form.dateStart" type="date" placeholder="开始日期" style="width: 160px" />
                 </el-form-item>
@@ -33,6 +33,21 @@
                 <el-form-item prop="dateEnd" style="margin-bottom: 0;">
                   <el-date-picker v-model="form.dateEnd" type="date" placeholder="结束日期" style="width: 160px" />
                 </el-form-item>
+                <span style="margin: 0 8px; color: #909399;">或</span>
+                <el-input 
+                  v-model="dateRangeInput" 
+                  placeholder="直接输入: 2025-01-09,2026-03-04" 
+                  style="width: 280px;"
+                  @blur="handleDateRangeInput"
+                  @keyup.enter="handleDateRangeInput"
+                >
+                  <template slot="prepend">
+                    <i class="el-icon-date"></i>
+                  </template>
+                </el-input>
+              </div>
+              <div style="font-size: 12px; color: #909399; margin-top: 4px;">
+                提示：可直接输入时间范围，格式：开始日期,结束日期（如：2025-01-09,2026-03-04）
               </div>
             </el-form-item>
             <el-form-item label="合同名称" prop="contractName" required>
@@ -254,7 +269,8 @@ export default {
       checkedMaintList: [],
       fileUrls: '',
       fileList: [], // 显示的文件列表
-      treeCheckAll: false
+      treeCheckAll: false,
+      dateRangeInput: '' // 时间范围直接输入
     }
   },
   mounted() {
@@ -496,6 +512,100 @@ export default {
     },
     removeRow(idx) {
       this.buildingList.splice(idx, 1)
+    },
+    // 处理时间范围直接输入
+    handleDateRangeInput() {
+      if (!this.dateRangeInput || !this.dateRangeInput.trim()) {
+        return
+      }
+      
+      const input = this.dateRangeInput.trim()
+      // 支持多种分隔符：逗号、空格、横线等
+      const separators = [',', '，', ' ', '-', '~', '至']
+      let dates = []
+      
+      for (const sep of separators) {
+        if (input.includes(sep)) {
+          dates = input.split(sep).map(d => d.trim()).filter(d => d)
+          break
+        }
+      }
+      
+      // 如果没有找到分隔符，尝试按长度分割（假设格式为 YYYY-MM-DD）
+      if (dates.length === 0) {
+        // 尝试匹配两个日期
+        const datePattern = /(\d{4}-\d{1,2}-\d{1,2})/g
+        const matches = input.match(datePattern)
+        if (matches && matches.length >= 2) {
+          dates = [matches[0], matches[1]]
+        } else if (matches && matches.length === 1) {
+          // 只有一个日期，可能是格式错误
+          this.$message.warning('请输入完整的日期范围，格式：开始日期,结束日期')
+          return
+        }
+      }
+      
+      if (dates.length !== 2) {
+        this.$message.warning('日期格式不正确，请使用格式：开始日期,结束日期（如：2025-01-09,2026-03-04）')
+        return
+      }
+      
+      // 解析日期
+      const parseDate = (dateStr) => {
+        // 支持多种日期格式
+        const formats = [
+          /^(\d{4})-(\d{1,2})-(\d{1,2})$/,  // YYYY-MM-DD
+          /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/, // YYYY/MM/DD
+          /^(\d{4})\.(\d{1,2})\.(\d{1,2})$/, // YYYY.MM.DD
+        ]
+        
+        for (const format of formats) {
+          const match = dateStr.match(format)
+          if (match) {
+            const year = parseInt(match[1], 10)
+            const month = parseInt(match[2], 10) - 1 // 月份从0开始
+            const day = parseInt(match[3], 10)
+            const date = new Date(year, month, day)
+            
+            // 验证日期有效性
+            if (date.getFullYear() === year && 
+                date.getMonth() === month && 
+                date.getDate() === day) {
+              return date
+            }
+          }
+        }
+        
+        // 尝试直接解析
+        const date = new Date(dateStr)
+        if (!isNaN(date.getTime())) {
+          return date
+        }
+        
+        return null
+      }
+      
+      const startDate = parseDate(dates[0])
+      const endDate = parseDate(dates[1])
+      
+      if (!startDate || !endDate) {
+        this.$message.warning('日期格式不正确，请使用格式：YYYY-MM-DD,YYYY-MM-DD')
+        return
+      }
+      
+      if (startDate > endDate) {
+        this.$message.warning('开始日期不能晚于结束日期')
+        return
+      }
+      
+      // 设置日期
+      this.form.dateStart = startDate
+      this.form.dateEnd = endDate
+      
+      // 清空输入框
+      this.dateRangeInput = ''
+      
+      this.$message.success('日期已自动填充')
     }
   }
 }
