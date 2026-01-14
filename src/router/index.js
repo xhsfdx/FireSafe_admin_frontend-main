@@ -316,7 +316,9 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ProjectList.vue'),
         meta: {
           title: '单位项目管理',
-          roles: ['superadmin', 'admin', 'editor']
+          roles: ['superadmin', 'admin', 'editor'],
+          // 页面级权限 key，用于细粒度控制
+          permissionKey: 'owner.project'
         }
       },
       {
@@ -331,7 +333,8 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/PaymentManagement.vue'),
         meta: {
           title: '结款管理',
-          roles: ['superadmin', 'admin', 'editor']
+          roles: ['superadmin', 'admin', 'editor'],
+          permissionKey: 'owner.payment'
         }
       },
       {
@@ -638,13 +641,21 @@ export const asyncRoutes = [
         path: 'checkin',
         name: 'CheckinArea',
         component: () => import('@/views/system-management/CheckinAreaSettings.vue'),
-        meta: { title: '打卡区域设置', icon: 'el-icon-location-outline' }
+        meta: {
+          title: '打卡区域设置',
+          icon: 'el-icon-location-outline',
+          permissionKey: 'system.checkin'
+        }
       },
       {
         path: 'self-project',
         name: 'SelfBuiltProject',
         component: () => import('@/views/system-management/Self-builtMaintenance.vue'),
-        meta: { title: '自建维保项目', icon: 'el-icon-folder' }
+        meta: {
+          title: '自建维保项目',
+          icon: 'el-icon-folder',
+          permissionKey: 'system.self-project'
+        }
       },
       {
         path: 'manual',
@@ -657,6 +668,18 @@ export const asyncRoutes = [
         name: 'OwnerAccount',
         component: () => import('@/views/system-management/OwnerUnitAccount.vue'),
         meta: { title: '业主单位账号', icon: 'el-icon-user' }
+      },
+      {
+        path: 'admin-permission',
+        name: 'AdminPermission',
+        component: () => import('@/views/system-management/AdminPermission.vue'),
+        meta: {
+          title: '管理员权限配置',
+          icon: 'el-icon-lock',
+          // 只有超级管理员可以看到这个页面
+          roles: ['superadmin'],
+          permissionKey: 'system.admin-permission'
+        }
       },
       {
         path: '/system-management/add-self-built-maintenance-project',

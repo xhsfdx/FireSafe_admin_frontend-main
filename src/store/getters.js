@@ -10,6 +10,8 @@ const getters = {
   mobile: state => state.user.mobile,
   introduction: state => state.user.introduction,
   roles: state => state.user.roles,
+  // 页面级权限 key 数组，供权限管理页面使用
+  pagePermissions: state => state.user.pagePermissions,
   permission_routes: state => state.permission.routes,
   errorLogs: state => state.errorLog.logs
 }

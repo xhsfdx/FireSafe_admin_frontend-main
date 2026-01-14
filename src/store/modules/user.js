@@ -8,7 +8,9 @@ const state = {
   mobile: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  // 页面级权限 key 数组，例如 ['owner.project', 'system.checkin']
+  pagePermissions: []
 }
 
 const mutations = {
@@ -27,8 +29,11 @@ const mutations = {
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_ROLES: (state, role) => {
-    state.roles = role
+  SET_ROLES: (state, roles) => {
+    state.roles = roles
+  },
+  SET_PAGE_PERMISSIONS: (state, permissions) => {
+    state.pagePermissions = permissions || []
   }
 }
 
@@ -58,7 +63,7 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, mobile } = data
+        const { roles, name, mobile, pagePermissions } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -67,6 +72,7 @@ const actions = {
         console.log(roles)
 
         commit('SET_ROLES', roles)
+        commit('SET_PAGE_PERMISSIONS', pagePermissions)
         commit('SET_NAME', name)
         commit('SET_MOBILE', mobile)
         commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
