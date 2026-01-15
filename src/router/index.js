@@ -682,6 +682,28 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'upload-manager',
+        name: 'UploadManager',
+        component: () => import('@/views/system-management/UploadManager.vue'),
+        meta: {
+          title: '上传文件管理',
+          icon: 'el-icon-folder-opened',
+          roles: ['superadmin'],
+          permissionKey: 'system.upload-manager'
+        }
+      },
+      {
+        path: 'ai-config',
+        name: 'AIConfig',
+        component: () => import('@/views/system-management/AIConfig.vue'),
+        meta: {
+          title: 'AI 配置',
+          icon: 'el-icon-chat-line-round',
+          roles: ['superadmin'],
+          permissionKey: 'system.ai-config'
+        }
+      },
+      {
         path: '/system-management/add-self-built-maintenance-project',
         name: 'AddSelfBuiltMaintenanceProject',
         hidden: true,

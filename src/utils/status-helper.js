@@ -76,13 +76,42 @@ export function getRemainDays(endDate) {
 }
 
 /**
- * 格式化金额
+ * 判断当前登录用户是否为“普通 admin”（只能看管理后台，不能看金额）
+ * 规则：角色包含 admin 且不包含 superadmin
+ */
+export function shouldMaskMoney() {
+  try {
+    const raw = localStorage.getItem('fs_roles')
+    if (!raw) return false
+    const roles = JSON.parse(raw)
+    if (!Array.isArray(roles)) return false
+    const hasAdmin = roles.includes('admin')
+    const hasSuperAdmin = roles.includes('superadmin')
+    return hasAdmin && !hasSuperAdmin
+  } catch (e) {
+    return false
+  }
+}
+
+/**
+ * 格式化金额（对普通 admin 进行脱敏）
  * @param {Number} amount - 金额
  * @param {String} prefix - 前缀，默认'￥'
  */
 export function formatAmount(amount, prefix = '￥') {
+  if (shouldMaskMoney()) return '**'
   if (!amount && amount !== 0) return `${prefix}0`
-  return `${prefix}${amount.toLocaleString()}`
+  const num = Number(amount) || 0
+  return `${prefix}${num.toLocaleString()}`
+}
+
+/**
+ * 通用金额文本脱敏：传入已经格式好的字符串
+ * @param {String} text
+ */
+export function maskMoneyText(text) {
+  if (shouldMaskMoney()) return '**'
+  return text
 }
 
 /**

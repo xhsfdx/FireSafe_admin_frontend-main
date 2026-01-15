@@ -72,6 +72,12 @@ const actions = {
         console.log(roles)
 
         commit('SET_ROLES', roles)
+        try {
+          // 将当前用户角色持久化，便于通用工具函数进行金额脱敏判断
+          localStorage.setItem('fs_roles', JSON.stringify(roles || []))
+        } catch (e) {
+          // ignore
+        }
         commit('SET_PAGE_PERMISSIONS', pagePermissions)
         commit('SET_NAME', name)
         commit('SET_MOBILE', mobile)
@@ -109,6 +115,11 @@ const actions = {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
+      try {
+        localStorage.removeItem('fs_roles')
+      } catch (e) {
+        // ignore
+      }
       removeToken()
       resolve()
     })

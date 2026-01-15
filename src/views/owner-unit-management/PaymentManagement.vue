@@ -55,12 +55,12 @@
       <el-table-column prop="contractAmount" label="合同金额" align="center" />
       <el-table-column prop="paidAmount" label="已结金额" align="center">
         <template slot-scope="{ row }">
-          <span style="color:#67c23a">￥{{ row.paidAmount ? row.paidAmount.toLocaleString() : '0' }}</span>
+          <span style="color:#67c23a">{{ displayCurrency(row.paidAmount) }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="unpaidAmount" label="未结金额" align="center">
         <template slot-scope="{ row }">
-          <span style="color:#f56c6c">￥{{ row.unpaidAmount ? row.unpaidAmount.toLocaleString() : '0' }}</span>
+          <span style="color:#f56c6c">{{ displayCurrency(row.unpaidAmount) }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="paymentStatus" label="结款状态" align="center">
@@ -158,15 +158,15 @@
         <div class="summary-content">
           <div class="summary-item">
             <span class="label">合同总金额：</span>
-            <span class="value total">￥{{ (currentContract && currentContract.contractAmount) || (currentContract && currentContract.amount) || '0' }}</span>
+            <span class="value total">{{ displayCurrency((currentContract && currentContract.amount) || 0) }}</span>
           </div>
           <div class="summary-item">
             <span class="label">总结款金额：</span>
-            <span class="value paid">￥{{ totalPaidAmount.toLocaleString() }}</span>
+            <span class="value paid">{{ displayCurrency(totalPaidAmount) }}</span>
           </div>
           <div class="summary-item">
             <span class="label">未结款金额：</span>
-            <span class="value unpaid">￥{{ currentContract && currentContract.amount ? (currentContract.amount - totalPaidAmount).toLocaleString() : '0' }}</span>
+            <span class="value unpaid">{{ displayCurrency(currentContract && currentContract.amount ? (currentContract.amount - totalPaidAmount) : 0) }}</span>
           </div>
           <div class="summary-item">
             <span class="label">结款进度：</span>
@@ -276,18 +276,18 @@
     <el-dialog title="金额统计图表" :visible.sync="chartDialogVisible" width="900px" :modal="false">
       <div class="chart-container">
         <div class="chart-summary">
-          <div class="summary-item">
-            <div class="summary-label">合同总金额</div>
-            <div class="summary-value total">￥{{ chartData.totalAmount.toLocaleString() }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">已结金额</div>
-            <div class="summary-value paid">￥{{ chartData.totalPaidAmount.toLocaleString() }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">未结金额</div>
-            <div class="summary-value unpaid">￥{{ chartData.totalUnpaidAmount.toLocaleString() }}</div>
-          </div>
+            <div class="summary-item">
+          <div class="summary-label">合同总金额</div>
+          <div class="summary-value total">{{ displayCurrency(chartData.totalAmount) }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">已结金额</div>
+          <div class="summary-value paid">{{ displayCurrency(chartData.totalPaidAmount) }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">未结金额</div>
+          <div class="summary-value unpaid">{{ displayCurrency(chartData.totalUnpaidAmount) }}</div>
+        </div>
         </div>
         <div class="chart-content">
           <div id="paymentChart" style="width: 100%; height: 400px;" />
@@ -302,6 +302,7 @@
 
 <script>
 import { getPaymentList, updatePaymentStatus, getPaymentStats } from '@/api/payment'
+import { shouldMaskMoney } from '@/utils/status-helper'
 
 export default {
   name: 'PaymentManagement',
@@ -374,6 +375,14 @@ export default {
     this.loadData()
   },
   methods: {
+    // 根据当前角色决定是否脱敏金额
+    displayCurrency(value) {
+      if (shouldMaskMoney()) {
+        return '**'
+      }
+      const num = Number(value) || 0
+      return `￥${num.toLocaleString()}`
+    },
     // 加载数据
     async loadData() {
       this.loading = true
@@ -561,7 +570,7 @@ export default {
 
         // 检查是否超过合同总金额
         if (newTotalPaidAmount > totalAmount) {
-          this.$message.warning(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount.toLocaleString()} 元`)
+          this.$message.warning(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount} 元`)
           return
         }
 
@@ -755,7 +764,7 @@ export default {
 
           // 检查是否超过合同总金额
           if (newTotalPaidAmount > totalAmount) {
-            throw new Error(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount.toLocaleString()} 元`)
+            throw new Error(`本次结款金额过大，总金额不能超过合同金额 ${totalAmount} 元`)
           }
 
           // 计算新的结款状态
