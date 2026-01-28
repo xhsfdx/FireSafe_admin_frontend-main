@@ -43,6 +43,7 @@
       <el-button icon="el-icon-refresh" @click="handleReset"> 重置 </el-button>
 
       <el-button
+        v-if="$canEdit"
         type="success"
         icon="el-icon-check"
         class="green-btn"
@@ -63,7 +64,7 @@
       element-loading-text="加载中..."
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="50" align="center" />
+      <el-table-column v-if="$canEdit" type="selection" width="50" align="center" />
       <el-table-column
         type="index"
         label="序号"
@@ -118,20 +119,22 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" align="center" width="260">
+      <el-table-column label="操作" align="center" :width="$canEdit ? 260 : 180">
         <template slot-scope="{ row }">
           <!-- 未制定：直接调用 settask 生成本月任务 -->
           <template v-if="row.planDefinedStatus === '未制定'">
-            <el-link type="success" @click="handleCreate(row)">
+            <el-link v-if="$canEdit" type="success" @click="handleCreate(row)">
               制定本月任务
             </el-link>
             <el-link
+              v-if="$canEdit"
               type="danger"
               style="margin-left: 8px"
               @click="handleDelete(row)"
             >
               删除
             </el-link>
+            <span v-if="!$canEdit" style="color: #909399;">待制定</span>
           </template>
 
           <!-- 已制定：查看详情 / 任务列表 -->
@@ -146,7 +149,7 @@
             >
               任务详情
             </el-link>
-            <el-link type="danger" @click="handleDelete(row)">删除</el-link>
+            <el-link v-if="$canEdit" type="danger" @click="handleDelete(row)">删除</el-link>
           </template>
         </template>
       </el-table-column>
@@ -181,9 +184,11 @@ import {
   deleteMaintenancePlan, // 🔥 使用真实 settask API
 } from "@/api/maintainPlan";
 import { generateTasksFromPlan } from "@/api/maintainTask";
+import roleMixin from "@/mixins/roleMixin";
 
 export default {
   name: "PlanListPage",
+  mixins: [roleMixin],
   data() {
     return {
       filters: {

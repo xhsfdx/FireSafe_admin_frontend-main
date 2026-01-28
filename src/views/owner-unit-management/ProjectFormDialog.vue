@@ -10,7 +10,7 @@
             <el-autocomplete
               v-model="form.address"
               :fetch-suggestions="querySearchAsync"
-              placeholder="请输入地址"
+              placeholder="请输入地址搜索，选择后自动定位"
               class="address-input"
               :debounce="300"
               value-key="value"
@@ -21,8 +21,13 @@
               @blur="onAddressBlur"
             >
               <template slot-scope="{ item }">
-                <div class="address-suggestion">
-                  <div class="address-name" :title="item.name">{{ item.name }}</div>
+                <div class="address-suggestion" :class="{ 'has-location': item.location && item.location.lng }">
+                  <div class="address-name-row">
+                    <span class="address-name" :title="item.name">{{ item.name }}</span>
+                    <span v-if="item.location && item.location.lng" class="gps-tag">
+                      <i class="el-icon-location" /> GPS
+                    </span>
+                  </div>
                   <div class="address-detail" :title="item.address">{{ item.address }}</div>
                 </div>
               </template>
@@ -40,7 +45,7 @@
           </div>
         </el-form-item>
         <el-form-item label="项目定位" required>
-          <div style="border:1px solid #e0e0e0; border-radius:6px; height:250px;width: 280px; margin-bottom:12px;overflow:hidden; position: relative;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; height:250px;width: 280px; margin-bottom:8px;overflow:hidden; position: relative;">
             <div id="mapContainer" style="width:100%; height:100%; background-color: #f5f7fa;" />
             <div v-if="!mapLoaded" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #f5f7fa; color: #999; font-size: 14px; text-align: center; padding: 20px;">
               <div>
@@ -49,6 +54,16 @@
                 <div style="font-size: 12px; margin-top: 5px;">请稍候</div>
               </div>
             </div>
+          </div>
+          <div class="map-tips">
+            <span v-if="form.location && form.location.lng">
+              <i class="el-icon-success" style="color: #67c23a;" /> 
+              坐标: {{ form.location.lng.toFixed(6) }}, {{ form.location.lat.toFixed(6) }}
+            </span>
+            <span v-else style="color: #909399;">
+              <i class="el-icon-info" /> 点击地图或搜索地址设置定位
+            </span>
+            <span class="drag-hint">（可拖动标记微调位置）</span>
           </div>
         </el-form-item>
         <el-form-item label="项目区域" prop="area" required>
@@ -583,63 +598,100 @@ export default {
       console.log('AMap对象:', AMap)
       console.log('AMap.Geocoder:', AMap.Geocoder)
       console.log('AMap.PlaceSearch:', AMap.PlaceSearch)
-      console.log('AMap.AutoComplete:', AMap.AutoComplete)
+      console.log('AMap.Autocomplete:', AMap.Autocomplete)
 
-      try {
-        // 初始化地理编码服务
-        if (AMap.Geocoder) {
-          this.geocoder = new AMap.Geocoder({
-            city: '全国', // 设置为全国，避免城市限制
-            radius: 1000 // 搜索半径
-          })
-          console.log('✅ 地理编码服务初始化成功:', this.geocoder)
-        } else {
-          console.error('❌ AMap.Geocoder 不存在')
+      // 需要加载的插件列表
+      const pluginsToLoad = ['AMap.Geocoder', 'AMap.PlaceSearch', 'AMap.Autocomplete']
+
+      // 使用 AMap.plugin 动态加载插件
+      AMap.plugin(pluginsToLoad, () => {
+        console.log('✅ 插件加载完成')
+
+        try {
+          // 初始化地理编码服务
+          if (AMap.Geocoder) {
+            this.geocoder = new AMap.Geocoder({
+              city: '全国', // 设置为全国，避免城市限制
+              radius: 1000 // 搜索半径
+            })
+            console.log('✅ 地理编码服务初始化成功:', this.geocoder)
+          } else {
+            console.error('❌ AMap.Geocoder 不存在，尝试使用 window.AMap.Geocoder')
+            if (window.AMap && window.AMap.Geocoder) {
+              this.geocoder = new window.AMap.Geocoder({
+                city: '全国',
+                radius: 1000
+              })
+              console.log('✅ 使用 window.AMap.Geocoder 初始化成功')
+            }
+          }
+
+          // 初始化地点搜索服务
+          if (AMap.PlaceSearch) {
+            this.placeSearch = new AMap.PlaceSearch({
+              pageSize: 10,
+              pageIndex: 1,
+              city: '全国' // 设置为全国
+            })
+            console.log('✅ 地点搜索服务初始化成功:', this.placeSearch)
+          } else {
+            console.error('❌ AMap.PlaceSearch 不存在')
+            if (window.AMap && window.AMap.PlaceSearch) {
+              this.placeSearch = new window.AMap.PlaceSearch({
+                pageSize: 10,
+                pageIndex: 1,
+                city: '全国'
+              })
+              console.log('✅ 使用 window.AMap.PlaceSearch 初始化成功')
+            }
+          }
+
+          // 初始化自动补全服务
+          if (AMap.Autocomplete) {
+            this.autoComplete = new AMap.Autocomplete({
+              city: '全国', // 设置为全国
+              type: 'all', // 搜索所有类型的地点
+              citylimit: false // 不限制城市
+            })
+            console.log('✅ 自动补全服务初始化成功:', this.autoComplete)
+          } else {
+            console.error('❌ AMap.Autocomplete 不存在')
+            if (window.AMap && window.AMap.Autocomplete) {
+              this.autoComplete = new window.AMap.Autocomplete({
+                city: '全国',
+                type: 'all',
+                citylimit: false
+              })
+              console.log('✅ 使用 window.AMap.Autocomplete 初始化成功')
+            }
+          }
+
+          // 显示服务初始化完成提示
+          if (this.geocoder || this.placeSearch || this.autoComplete) {
+            console.log('✅ 地图服务初始化完成')
+          } else {
+            console.warn('⚠️ 部分地图服务初始化失败，地址搜索功能可能受限')
+          }
+        } catch (error) {
+          console.error('❌ 地图服务初始化失败:', error)
         }
+      })
 
-        // 初始化地点搜索服务
-        if (AMap.PlaceSearch) {
-          this.placeSearch = new AMap.PlaceSearch({
-            pageSize: 10,
-            pageIndex: 1,
-            city: '全国' // 设置为全国
-          })
-          console.log('✅ 地点搜索服务初始化成功:', this.placeSearch)
-        } else {
-          console.error('❌ AMap.PlaceSearch 不存在')
-        }
+      // 添加地图点击事件（不依赖插件）
+      this.map.on('click', (e) => {
+        console.log('地图点击位置:', e.lnglat)
+        // 保存坐标到表单
+        this.form.location = { lng: e.lnglat.lng, lat: e.lnglat.lat }
+        console.log('✅ 已保存点击位置到表单:', this.form.location)
+        this.setMarker(e.lnglat)
+        this.reverseGeocode(e.lnglat)
+      })
 
-        // 初始化自动补全服务
-        if (AMap.Autocomplete) {
-          this.autoComplete = new AMap.Autocomplete({
-            city: '全国', // 设置为全国
-            type: 'all', // 搜索所有类型的地点
-            citylimit: false // 不限制城市
-          })
-          console.log('✅ 自动补全服务初始化成功:', this.autoComplete)
-        } else {
-          console.error('❌ AMap.Autocomplete 不存在')
-        }
+      console.log('✅ 地图点击事件绑定成功')
 
-        // 添加地图点击事件
-        this.map.on('click', (e) => {
-          console.log('地图点击位置:', e.lnglat)
-          this.setMarker(e.lnglat)
-          this.reverseGeocode(e.lnglat)
-        })
-
-        console.log('✅ 地图点击事件绑定成功')
-
-        // 如果有传入的数据，初始化表单
-        if (this.formData) {
-          this.initFormData()
-        }
-
-        // 显示服务初始化完成提示
-        this.$message.success('地图服务初始化完成')
-      } catch (error) {
-        console.error('❌ 地图服务初始化失败:', error)
-        // 地图服务初始化失败，不显示提示
+      // 如果有传入的数据，初始化表单
+      if (this.formData) {
+        this.initFormData()
       }
     },
 
@@ -1199,13 +1251,37 @@ export default {
 
         console.log('创建标记，位置:', markerPosition)
 
+        // 创建可拖动的标记
         this.marker = new AMap.Marker({
           position: markerPosition,
-          map: this.map
+          map: this.map,
+          draggable: true,  // 启用拖动
+          cursor: 'move',   // 鼠标样式
+          animation: 'AMAP_ANIMATION_DROP'  // 下落动画
+        })
+
+        // 监听拖动结束事件 - 自动更新地址
+        this.marker.on('dragend', (e) => {
+          const newPosition = e.lnglat
+          console.log('📍 标记拖动结束，新位置:', newPosition)
+          
+          // 更新表单坐标
+          this.form.location = { lng: newPosition.lng, lat: newPosition.lat }
+          console.log('✅ 已更新表单坐标:', this.form.location)
+          
+          // 逆地理编码获取新地址
+          this.reverseGeocode(newPosition)
+        })
+
+        // 监听拖动过程（可选，用于实时显示坐标）
+        this.marker.on('dragging', (e) => {
+          // 实时更新坐标显示（不触发地理编码，避免频繁请求）
+          const pos = e.lnglat
+          this.form.location = { lng: pos.lng, lat: pos.lat }
         })
 
         this.map.setCenter(markerPosition)
-        console.log('标记设置成功')
+        console.log('✅ 可拖动标记设置成功，拖动标记可更新地址')
       } catch (error) {
         console.error('设置标记失败:', error)
       }
@@ -1214,6 +1290,15 @@ export default {
     // 逆地理编码
     reverseGeocode(position) {
       if (!this.geocoder) return
+
+      // 确保坐标已保存到表单
+      if (position && position.lng && position.lat) {
+        this.form.location = { lng: position.lng, lat: position.lat }
+        console.log('✅ 逆地理编码时保存坐标:', this.form.location)
+      } else if (Array.isArray(position) && position.length === 2) {
+        this.form.location = { lng: position[0], lat: position[1] }
+        console.log('✅ 逆地理编码时保存坐标(数组格式):', this.form.location)
+      }
 
       this.geocoder.getAddress(position, (status, result) => {
         if (status === 'complete' && result.regeocode) {
@@ -1487,7 +1572,26 @@ export default {
     onSave() {
       this.$refs.projectForm.validate(valid => {
         if (valid) {
-          this.$emit('save', this.form)
+          // 检查是否设置了有效的定位
+          if (!this.form.location || !this.form.location.lng || !this.form.location.lat) {
+            this.$confirm('尚未设置项目定位，是否继续保存？', '提示', {
+              confirmButtonText: '继续保存',
+              cancelButtonText: '去设置定位',
+              type: 'warning'
+            }).then(() => {
+              this.$emit('save', this.form)
+            }).catch(() => {
+              // 用户选择去设置定位，滚动到地图位置
+              const mapContainer = document.getElementById('mapContainer')
+              if (mapContainer) {
+                mapContainer.scrollIntoView({ behavior: 'smooth' })
+              }
+              this.$message.info('请在地图上点击设置项目定位，或输入地址后点击定位按钮')
+            })
+          } else {
+            console.log('✅ 保存项目，定位信息:', this.form.location)
+            this.$emit('save', this.form)
+          }
         }
       })
     }
@@ -1511,6 +1615,20 @@ export default {
   color: #909399;
   font-size: 14px;
   background-color: #f5f7fa;
+}
+
+.map-tips {
+  font-size: 12px;
+  color: #606266;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drag-hint {
+  color: #909399;
+  font-size: 11px;
 }
 
 .upload-tips {
@@ -1567,21 +1685,54 @@ export default {
   word-wrap: break-word;
   word-break: break-all;
   border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.address-suggestion:hover {
+  background-color: #f5f7fa;
+}
+
+.address-suggestion.has-location {
+  border-left: 3px solid #67c23a;
 }
 
 .address-suggestion:last-child {
   border-bottom: none;
 }
 
+.address-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
 .address-name {
   font-size: 14px;
   color: #333;
   font-weight: 500;
-  margin-bottom: 6px;
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+.gps-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: #67c23a;
+  color: white;
+  font-size: 11px;
+  border-radius: 10px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.gps-tag i {
+  margin-right: 3px;
+  font-size: 10px;
 }
 
 .address-detail {
@@ -1595,6 +1746,7 @@ export default {
   display: block;
   min-height: 16px;
 }
+
 .logo-uploader {
   border: 2px dashed #d8e2f0;
   border-radius: 8px;

@@ -39,9 +39,19 @@
             <span v-else class="not-configured">未配置</span>
           </template>
         </el-table-column>
-        <el-table-column label="现场维保人员" prop="onSiteStaff">
+        <el-table-column label="现场维保人员" prop="onSiteStaff" min-width="200">
           <template slot-scope="scope">
-            <span v-if="scope.row.onSiteStaff" class="configured">{{ scope.row.onSiteStaff }}</span>
+            <div v-if="scope.row.onSiteStaff" class="maintainers-tags">
+              <el-tag
+                v-for="(name, index) in getMaintainersList(scope.row.onSiteStaff)"
+                :key="index"
+                size="small"
+                type="success"
+                class="maintainer-tag"
+              >
+                {{ name }}
+              </el-tag>
+            </div>
             <span v-else class="not-configured">未配置</span>
           </template>
         </el-table-column>
@@ -185,6 +195,23 @@ export default {
     this.loadStaffList()
   },
   methods: {
+    // 将维保人员字符串或数组转换为数组显示
+    getMaintainersList(onSiteStaff) {
+      if (!onSiteStaff) return []
+      // 如果是数组，直接返回
+      if (Array.isArray(onSiteStaff)) {
+        return onSiteStaff.map(item => {
+          if (typeof item === 'string') return item
+          return item.name || item
+        }).filter(Boolean)
+      }
+      // 如果是字符串，按'、'分割
+      if (typeof onSiteStaff === 'string') {
+        return onSiteStaff.split('、').filter(Boolean)
+      }
+      return []
+    },
+
     async loadStaffList() {
       try {
         // DispatchStaff组件会自己从后端加载数据，这里不需要重复加载
@@ -458,5 +485,15 @@ export default {
 .el-table .not-configured {
   color: #f56c6c; /* 红色，表示未配置 */
   font-weight: bold;
+}
+
+/* 维保人员标签样式 */
+.maintainers-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.maintainer-tag {
+  margin: 2px;
 }
 </style>

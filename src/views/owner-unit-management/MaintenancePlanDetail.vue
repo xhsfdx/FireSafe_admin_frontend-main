@@ -15,9 +15,25 @@
         <el-col :span="6"><div><span>计划状态：</span><span class="plan-status">{{ plan.planDefinedStatus }}</span></div></el-col>
       </el-row>
       <el-row :gutter="30" class="plan-info-row">
-        <el-col :span="6"><div><span>维保技术负责人：</span>{{ (plan.maintainPersons.technical && plan.maintainPersons.technical.name) || '未分配' }}</div></el-col>
-        <el-col :span="6"><div><span>维保项目负责人：</span>{{ plan.maintainPersons.leader.name }}</div></el-col>
-        <el-col :span="6"><div><span>现场维保人员：</span>{{ plan.maintainPersons.maintainers && plan.maintainPersons.maintainers.length > 0 ? plan.maintainPersons.maintainers.map(m => m.name).join('、') : '未分配' }}</div></el-col>
+        <el-col :span="6"><div><span>维保技术负责人：</span><span :class="{ 'configured': plan.maintainPersons.technical, 'not-configured': !plan.maintainPersons.technical }">{{ (plan.maintainPersons.technical && plan.maintainPersons.technical.name) || '未分配' }}</span></div></el-col>
+        <el-col :span="6"><div><span>维保项目负责人：</span><span :class="{ 'configured': plan.maintainPersons.leader, 'not-configured': !plan.maintainPersons.leader }">{{ (plan.maintainPersons.leader && plan.maintainPersons.leader.name) || '未分配' }}</span></div></el-col>
+        <el-col :span="12">
+          <div class="maintainers-row">
+            <span>现场维保人员：</span>
+            <div v-if="plan.maintainPersons.maintainers && plan.maintainPersons.maintainers.length > 0" class="maintainers-tags">
+              <el-tag
+                v-for="(m, index) in plan.maintainPersons.maintainers"
+                :key="index"
+                size="small"
+                type="success"
+                class="maintainer-tag"
+              >
+                {{ m.name || m }}
+              </el-tag>
+            </div>
+            <span v-else class="not-configured">未分配</span>
+          </div>
+        </el-col>
       </el-row>
     </div>
     <!-- 维保内容 -->
@@ -172,5 +188,33 @@ export default {
 
 .emph {
   color: #ea4335;
+}
+
+/* 状态样式 */
+.configured {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.not-configured {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+/* 维保人员标签样式 */
+.maintainers-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.maintainers-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.maintainer-tag {
+  margin: 2px;
 }
 </style>

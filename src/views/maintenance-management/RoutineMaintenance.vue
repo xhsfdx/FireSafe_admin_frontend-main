@@ -230,7 +230,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="220" align="center" fixed="right">
+          <el-table-column label="操作" :width="$canEdit ? 220 : 140" align="center" fixed="right">
             <template slot-scope="{ row }">
               <div class="action-buttons">
                 <el-button
@@ -244,7 +244,7 @@
                 </el-button>
 
                 <el-button
-                  v-if="row.taskStatus === '已派发' || row.taskStatus === '处理中'"
+                  v-if="$canEdit && (row.taskStatus === '已派发' || row.taskStatus === '处理中')"
                   size="mini"
                   type="warning"
                   icon="el-icon-s-custom"
@@ -266,6 +266,7 @@
                 </el-button>
 
                 <el-button
+                  v-if="$canEdit"
                   size="mini"
                   type="danger"
                   icon="el-icon-delete"
@@ -316,9 +317,11 @@
 
 <script>
 import { getMaintainTasks, deleteMaintainTask } from '@/api/maintainTask'
+import roleMixin from '@/mixins/roleMixin'
 
 export default {
   name: 'RoutineMaintenancePage',
+  mixins: [roleMixin],
   data() {
     return {
       filters: {

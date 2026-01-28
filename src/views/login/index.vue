@@ -28,10 +28,6 @@
 
           <el-button type="primary" style="width: 100%;" @click="handleLogin">登录</el-button>
 
-          <div class="create-account">
-            <a href="#">创建账号 ></a>
-          </div>
-
           <!-- <div class="version">当前版本：V1.0.02_20240126_Release</div> -->
         </el-form>
       </div>
@@ -162,9 +158,11 @@ export default {
         margin-bottom: 20px;
 
         .logo {
-          width: 80px;
-          height: 80px;
+          width: 100%;
+          max-width: 320px;
+          height: auto;
           margin-bottom: 10px;
+          object-fit: contain;
         }
 
         .title {
@@ -181,16 +179,6 @@ export default {
 
       .form {
         margin-top: 20px;
-      }
-
-      .create-account {
-        margin-top: 10px;
-        text-align: right;
-
-        a {
-          color: #409eff;
-          font-size: 14px;
-        }
       }
 
       .version {

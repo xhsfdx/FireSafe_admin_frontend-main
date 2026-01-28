@@ -132,18 +132,22 @@ export default {
             })),
             checkedMaintList: item.maintainItems || [],
             projectList: [{
+              index: 1,  // 添加序号
               ownerName: item.ownerCompany || '',
               name: item.projectName || '',
               address: item.projectAddress || '',
               area: item.projectDistrict || '',
               linkman: item.contactPerson || '',
               phone: item.contactPhone || '',
-              leader: item?.leader.name || '',
-              technical: item?.technical.name || '',
-              maintainers: item?.maintainers || '',
-              maintainPersons: { technical: item.technical || null,
-              leader: item.leader || null,
-              maintainers: item.maintainers.map(item => item.id) || [] }
+              leader: item?.leader?.name || '',
+              technical: item?.technical?.name || '',
+              maintainers: item?.maintainers || [],
+              maintainPersons: { 
+                technical: item.technical || null,
+                leader: item.leader || null,
+                maintainers: (item.maintainers || []).map(m => m._id || m.id || m) 
+              },
+              location: item.projectPosition || { lng: null, lat: null }  // 添加位置信息
             }],
             dispatchStaffList: []
           }

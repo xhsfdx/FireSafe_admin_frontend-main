@@ -1,5 +1,5 @@
 module.exports = {
-  title: '不凡消防维保系统',
+  title: '不凡消防技术服务管理系统',
 
   /**
    * @type {boolean} true | false

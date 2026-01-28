@@ -73,9 +73,22 @@
           <div class="detail-label">维保项目负责人</div>
           <div class="detail-value">{{ taskDetail.projectManager || 'ljh' }}</div>
         </div>
-        <div class="detail-item">
+        <div class="detail-item maintainer-detail-item">
           <div class="detail-label">现场维保人员</div>
-          <div class="detail-value">{{ taskDetail.maintainer || '陈xx' }}</div>
+          <div class="detail-value">
+            <div v-if="getMaintainersList(taskDetail.maintainers).length > 0" class="maintainers-tags">
+              <el-tag
+                v-for="(name, index) in getMaintainersList(taskDetail.maintainers)"
+                :key="index"
+                size="small"
+                type="success"
+                class="maintainer-tag"
+              >
+                {{ name }}
+              </el-tag>
+            </div>
+            <span v-else class="not-configured">未分配</span>
+          </div>
         </div>
         <div class="detail-item">
           <div class="detail-label">维保方式</div>
@@ -279,6 +292,19 @@ export default {
   },
 
   methods: {
+    // 获取维保人员名称
+    getPersonName(person) {
+      if (!person) return '未分配'
+      if (typeof person === 'string') return person
+      return person.name || person.userName || '未知'
+    },
+
+    // 将维保人员数组转换为名称列表
+    getMaintainersList(maintainers) {
+      if (!maintainers || !Array.isArray(maintainers)) return []
+      return maintainers.map(m => this.getPersonName(m)).filter(name => name && name !== '未知' && name !== '未分配')
+    },
+
     // 更新当前时间
     updateCurrentTime() {
       const now = new Date()
@@ -434,7 +460,8 @@ export default {
         taskName: planData.planName || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}计划`,
         ownerName: planData.ownerName || planData.owner?.name || '未知业主',
         status: planData.planStatus || '计划已制定',
-        maintainer: getMaintainersText(planData.maintainPersons?.maintainers) || '未分配',
+        maintainers: planData.maintainPersons?.maintainers || [], // 存储维保人员数组
+        maintainer: getMaintainersText(planData.maintainPersons?.maintainers) || '未分配', // 保留兼容
         projectManager: getPersonName(planData.maintainPersons?.leader) || '未分配',
         maintenanceMethod: planData.maintenanceMethod || planData.contract?.warrantyMethod || '系统维保',
         rating: planData.rating || planData.score || 0,
@@ -501,7 +528,8 @@ export default {
           taskName: data.taskName || data.name || `${data.taskMonth || '未知'}任务`,
           ownerName: data.ownerName || data.owner?.name || '未知业主',
           status: data.status || '待处理',
-          maintainer: getMaintainersText(data.maintainPersons?.maintainers) || '未分配',
+          maintainers: data.maintainPersons?.maintainers || [], // 存储维保人员数组
+          maintainer: getMaintainersText(data.maintainPersons?.maintainers) || '未分配', // 保留兼容
           projectManager: getPersonName(data.maintainPersons?.leader) || '未分配',
           maintenanceMethod: data.maintenanceMethod || data.contract?.warrantyMethod || '系统维保',
           rating: data.rating || data.score || 0,
@@ -1218,5 +1246,28 @@ export default {
     flex: 1;
     min-width: 80px;
   }
+}
+
+/* 状态样式 */
+.not-configured {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+/* 维保人员标签样式 */
+.maintainers-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.maintainer-tag {
+  margin: 2px;
+}
+
+.maintainer-detail-item .detail-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 </style>

@@ -134,7 +134,7 @@ export default {
               companyname: item.ownerName,
               address: item.address,
               district: item.area,
-              position: item.location ? `${item.location.lng},${item.location.lat}` : '', // 使用地图坐标
+              position: (item.location && item.location.lng && item.location.lat) ? `${item.location.lng},${item.location.lat}` : '', // 使用地图坐标，确保坐标有效
               ownerCompany: item.ownerName,
               contactPerson: item.linkman,
               contactPhone: item.phone,

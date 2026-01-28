@@ -44,8 +44,14 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/digital-screen/digitalScreen', // 改成数字大屏路径
+    redirect: '/dashboard', // 改为统一首页，根据角色再跳转
     children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
+        name: 'Dashboard',
+        meta: { title: '首页' }
+      },
       {
         path: 'digital-screen/digitalScreen',
         component: () => import('@/views/digital-screen/digitalScreen.vue'),
@@ -82,7 +88,8 @@ export const asyncRoutes = [
     hidden: true, // 不显示在侧边栏
     name: 'digitalScreen',
     meta: {
-      title: ''
+      title: '',
+      roles: ['superadmin', 'admin'] // 业主不能访问数字大屏相关路由
     },
     children: [
       {
@@ -193,7 +200,8 @@ export const asyncRoutes = [
     name: 'Screen',
     meta: {
       title: '数字大屏',
-      icon: 'el-icon-monitor'
+      icon: 'el-icon-monitor',
+      roles: ['superadmin', 'admin'] // 业主不能访问数字大屏
     },
     children: [
       {
@@ -201,7 +209,8 @@ export const asyncRoutes = [
         name: 'DigitalScreenMain',
         component: () => import('@/views/digital-screen/digitalScreen.vue'),
         meta: {
-          title: '数字可视化大屏'
+          title: '数字可视化大屏',
+          roles: ['superadmin', 'admin']
         }
       }
     ]
@@ -215,7 +224,8 @@ export const asyncRoutes = [
     name: 'Agency',
     meta: {
       title: '服务机构管理',
-      icon: 'el-icon-office-building'
+      icon: 'el-icon-office-building',
+      roles: ['superadmin', 'admin'] // 业主不能访问服务机构管理
     },
 
     children: [
@@ -307,7 +317,11 @@ export const asyncRoutes = [
     redirect: '/owner/plan',
     alwaysShow: true,
     name: 'OwnerUnitManagement',
-    meta: { title: '项目管理', icon: 'el-icon-folder-opened' },
+    meta: { 
+      title: '项目管理', 
+      icon: 'el-icon-folder-opened',
+      roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问
+    },
     children: [
       // 已有的
       {
@@ -316,16 +330,17 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ProjectList.vue'),
         meta: {
           title: '单位项目管理',
-          roles: ['superadmin', 'admin', 'editor'],
-          // 页面级权限 key，用于细粒度控制
-          permissionKey: 'owner.project'
+          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以访问，但只能看到自己的项目
         }
       },
       {
         path: 'point',
         name: 'MaintenancePoint',
         component: () => import('@/views/owner-unit-management/MaintenancePoint.vue'),
-        meta: { title: '维保点位管理' }
+        meta: { 
+          title: '维保点位管理',
+          roles: ['superadmin', 'admin', 'owner', 'customer']
+        }
       },
       {
         path: 'payment',
@@ -333,15 +348,17 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/PaymentManagement.vue'),
         meta: {
           title: '结款管理',
-          roles: ['superadmin', 'admin', 'editor'],
-          permissionKey: 'owner.payment'
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问，但只能看到自己的项目
         }
       },
       {
         path: 'plan',
         name: 'MaintenancePlan',
         component: () => import('@/views/owner-unit-management/MaintenancePlan.vue'),
-        meta: { title: '维保计划管理' }
+        meta: { 
+          title: '维保计划管理',
+          roles: ['superadmin', 'admin', 'owner', 'customer']
+        }
       },
       // 维保点位管理相关子路由
       {
@@ -349,28 +366,40 @@ export const asyncRoutes = [
         name: 'MaintenancePointDetail',
         hidden: true,
         component: () => import('@/views/owner-unit-management/MaintenancePointDetail.vue'),
-        meta: { title: '维保点位详情' }
+        meta: { 
+          title: '维保点位详情',
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+        }
       },
       {
         path: 'add-point',
         name: 'AddMaintenancePoint',
         hidden: true,
         component: () => import('@/views/owner-unit-management/AddMaintenancePoint.vue'),
-        meta: { title: '添加点位' }
+        meta: { 
+          title: '添加点位',
+          roles: ['superadmin', 'admin'] // 仅管理员
+        }
       },
       {
         path: 'point-basic-info/:pointId',
         name: 'MaintenancePointBasicInfo',
         hidden: true,
         component: () => import('@/views/owner-unit-management/MaintenancePointBasicInfo.vue'),
-        meta: { title: '点位基础信息' }
+        meta: { 
+          title: '点位基础信息',
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+        }
       },
       {
         path: 'point-maintenance-content/:pointId',
         name: 'MaintenancePointMaintenanceContent',
         hidden: true,
         component: () => import('@/views/owner-unit-management/MaintenancePointContent.vue'),
-        meta: { title: '点位维保内容' }
+        meta: { 
+          title: '点位维保内容',
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+        }
       },
 
       // 🔧 补全缺失页面
@@ -379,28 +408,40 @@ export const asyncRoutes = [
         name: 'AddNewContractInfo',
         hidden: true,
         component: () => import('@/views/owner-unit-management/AddNewContract.vue'),
-        meta: { title: '新增合同信息' }
+        meta: { 
+          title: '新增合同信息',
+          roles: ['superadmin', 'admin'] // 仅管理员
+        }
       },
       {
         path: 'new-project-info',
         name: 'AddNewProjectInfo',
         hidden: true,
         component: () => import('@/views/owner-unit-management/AddNewProject.vue'),
-        meta: { title: '新增项目信息' }
+        meta: { 
+          title: '新增项目信息',
+          roles: ['superadmin', 'admin'] // 仅管理员
+        }
       },
       {
         path: 'contract-info',
         name: 'ContractInfo',
         hidden: true,
         component: () => import('@/views/owner-unit-management/ContractInfo.vue'),
-        meta: { title: '合同信息' }
+        meta: { 
+          title: '合同信息',
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+        }
       },
       {
         path: 'project-info',
         name: 'ProjectInfo',
         hidden: true,
         component: () => import('@/views/owner-unit-management/ProjectInfo.vue'),
-        meta: { title: '项目信息详情' }
+        meta: { 
+          title: '项目信息详情',
+          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+        }
       },
       {
         path: 'renewal-contract-info',
@@ -432,7 +473,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/UnitDetail.vue'),
         meta: {
           title: '项目详情',
-          roles: ['superadmin', 'admin', 'editor']
+          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以查看项目详情
         }
       },
       {
@@ -452,7 +493,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ViewContractDetail.vue'),
         meta: {
           title: '合同完整详情',
-          roles: ['superadmin', 'admin', 'editor']
+          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以查看
         }
       },
 
@@ -527,7 +568,8 @@ export const asyncRoutes = [
     name: 'MaintenanceServiceManagement',
     meta: {
       title: '维护业务管理',
-      icon: 'el-icon-s-order'
+      icon: 'el-icon-s-order',
+      roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问
     },
     children: [
       {
@@ -634,7 +676,8 @@ export const asyncRoutes = [
     name: 'SystemManagement',
     meta: {
       title: '系统管理',
-      icon: 'el-icon-setting'
+      icon: 'el-icon-setting',
+      roles: ['superadmin', 'admin'] // 业主不能访问系统管理
     },
     children: [
       {
@@ -737,6 +780,30 @@ export const asyncRoutes = [
         hidden: true,
         component: () => import('@/views/system-management/EditSelf-builtMaintenanceProject.vue'),
         meta: { title: '编辑自建维保项目' }
+      }
+    ]
+  },
+
+  // 消息管理（客服聊天）
+  {
+    path: '/chat',
+    component: Layout,
+    redirect: '/chat/management',
+    name: 'Chat',
+    meta: {
+      title: '消息管理',
+      icon: 'el-icon-chat-dot-round',
+      roles: ['superadmin', 'admin']
+    },
+    children: [
+      {
+        path: 'management',
+        name: 'ChatManagement',
+        component: () => import('@/views/chat-management/ChatManagement.vue'),
+        meta: {
+          title: '在线客服',
+          icon: 'el-icon-service'
+        }
       }
     ]
   },

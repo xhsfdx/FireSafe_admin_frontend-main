@@ -29,6 +29,14 @@
         <el-table-column prop="ownerName" label="业主单位名称" align="center" />
         <el-table-column prop="address" label="项目地址" align="center" />
         <el-table-column prop="area" label="项目区域" align="center" />
+        <el-table-column label="定位" width="100" align="center">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.location && scope.row.location.lng" type="success" size="mini">
+              <i class="el-icon-location" /> 已定位
+            </el-tag>
+            <el-tag v-else type="info" size="mini">未定位</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="linkman" label="项目单位联系人" align="center" />
         <el-table-column prop="phone" label="联系人电话" align="center" />
         <el-table-column label="操作" align="center" width="120">
@@ -129,9 +137,10 @@ export default {
       })
     },
     saveProject(project) {
+      // 保留项目中的业主单位名称，如果没有则使用表单中的委托单位名称
       const projectWithOwner = {
         ...project,
-        ownerName: this.form.entrustName
+        ownerName: project.ownerName || this.form.entrustName || ''
       }
       if (this.editingIndex > -1) {
         this.$set(this.projectList, this.editingIndex, { ...projectWithOwner, index: this.editingIndex + 1 })
@@ -139,6 +148,14 @@ export default {
         this.projectList.push({ ...projectWithOwner, index: this.projectList.length + 1 })
       }
       this.projectDialogVisible = false
+      
+      // 日志输出保存的项目信息
+      console.log('✅ 保存项目信息:', {
+        name: projectWithOwner.name,
+        ownerName: projectWithOwner.ownerName,
+        address: projectWithOwner.address,
+        location: projectWithOwner.location
+      })
     },
     resetProjectForm() {
       this.currentProject = null
@@ -165,7 +182,8 @@ export default {
           area: '',
           linkman: '',
           phone: '',
-          index: 1
+          index: 1,
+          location: { lng: null, lat: null }
         }]
       }
       console.log('🔍 最终 projectList:', projectList)

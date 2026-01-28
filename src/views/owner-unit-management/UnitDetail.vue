@@ -417,6 +417,9 @@ export default {
         } else if (e.response && e.response.status === 401) {
           console.log('❌ 401错误：未授权访问')
           this.$message.error('未授权访问，请重新登录')
+        } else if (e.response && e.response.status === 403) {
+          console.log('❌ 403错误：没有权限查看此项目')
+          this.$message.error('您没有权限查看此项目')
         } else if (e.response && e.response.status === 500) {
           console.log('❌ 500错误：服务器内部错误')
           this.$message.error('服务器内部错误，请稍后重试')

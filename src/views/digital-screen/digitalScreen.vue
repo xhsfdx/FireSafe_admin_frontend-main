@@ -7,14 +7,14 @@
     </div>
     
     <!-- Main Title -->
-    <div class="main-title">
+    <div class="main-title" :class="{ 'main-title-hidden': expandedPanel }">
       <div class="title-text">不凡消防技术服务管理系统</div>
       <div class="title-subtitle">FireSafe Maintenance Management System</div>
       <div class="current-time">{{ currentDateTime }}</div>
     </div>
 
     <!-- 今日关键指标 - 顶部突出显示 -->
-    <div class="today-metrics-bar">
+    <div class="today-metrics-bar" :class="{ 'metrics-bar-hidden': expandedPanel }">
       <div class="today-metric-item urgent">
         <div class="today-metric-label">今日打卡</div>
         <div class="today-metric-value">{{ formatNumber(getTodayData('todayChecked')) }}</div>
@@ -53,11 +53,19 @@
     </div>
 
     <!-- Grid Layout -->
-    <div class="dashboard-grid">
+    <div class="dashboard-grid" :class="{ 'has-expanded': expandedPanel }">
       <!-- Top Left: 例行维保核心指标 -->
-      <div class="panel panel-large panel-tl">
+      <div 
+        class="panel panel-large panel-tl" 
+        :class="{ 'panel-expanded': expandedPanel === 'tl', 'panel-hidden': expandedPanel && expandedPanel !== 'tl' }"
+        @click="togglePanelExpand('tl')"
+      >
         <div class="panel-header">
           <span class="panel-title">例行维保核心指标</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'tl'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
@@ -105,9 +113,17 @@
       </div>
 
       <!-- Top Middle: 四川省维保服务区域地图 -->
-      <div class="panel panel-large panel-tm panel-map">
+      <div 
+        class="panel panel-large panel-tm panel-map" 
+        :class="{ 'panel-expanded': expandedPanel === 'tm', 'panel-hidden': expandedPanel && expandedPanel !== 'tm' }"
+        @click="togglePanelExpand('tm')"
+      >
         <div class="panel-header">
           <span class="panel-title">四川省维保服务区域</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'tm'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content map-content">
@@ -116,9 +132,17 @@
       </div>
 
       <!-- Top Right: 故障工单核心指标 -->
-      <div class="panel panel-large panel-tr">
+      <div 
+        class="panel panel-large panel-tr" 
+        :class="{ 'panel-expanded': expandedPanel === 'tr', 'panel-hidden': expandedPanel && expandedPanel !== 'tr' }"
+        @click="togglePanelExpand('tr')"
+      >
         <div class="panel-header">
           <span class="panel-title">故障工单核心指标</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'tr'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
@@ -166,9 +190,17 @@
       </div>
 
       <!-- Bottom Left: 业务规模 & 设备健康度 -->
-      <div class="panel panel-large panel-bl">
+      <div 
+        class="panel panel-large panel-bl" 
+        :class="{ 'panel-expanded': expandedPanel === 'bl', 'panel-hidden': expandedPanel && expandedPanel !== 'bl' }"
+        @click="togglePanelExpand('bl')"
+      >
         <div class="panel-header">
           <span class="panel-title">业务规模 & 设备健康度</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'bl'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
@@ -209,9 +241,17 @@
       </div>
 
       <!-- Bottom Middle: 月度趋势 -->
-      <div class="panel panel-large panel-bm">
+      <div 
+        class="panel panel-large panel-bm" 
+        :class="{ 'panel-expanded': expandedPanel === 'bm', 'panel-hidden': expandedPanel && expandedPanel !== 'bm' }"
+        @click="togglePanelExpand('bm')"
+      >
         <div class="panel-header">
           <span class="panel-title">月度趋势分析</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'bm'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content">
@@ -228,9 +268,17 @@
       </div>
 
       <!-- Bottom Right: 维保人员排名 -->
-      <div class="panel panel-large panel-br">
+      <div 
+        class="panel panel-large panel-br" 
+        :class="{ 'panel-expanded': expandedPanel === 'br', 'panel-hidden': expandedPanel && expandedPanel !== 'br' }"
+        @click="togglePanelExpand('br')"
+      >
         <div class="panel-header">
           <span class="panel-title">维保人员排名 TOP 5</span>
+          <div class="panel-actions">
+            <span v-if="expandedPanel === 'br'" class="panel-close-hint">点击或按 ESC 退出全屏</span>
+            <span v-else class="panel-expand-hint">点击展开</span>
+          </div>
           <div class="panel-decoration"></div>
         </div>
         <div class="panel-content ranking-list">
@@ -329,7 +377,8 @@ export default {
       isFullscreen: false,
       currentDateTime: '',
       screenData: {},
-      showNavMenu: false
+      showNavMenu: false,
+      expandedPanel: null // 追踪当前展开的面板: 'tl', 'tm', 'tr', 'bl', 'bm', 'br' 或 null
     }
   },
   mounted() {
@@ -339,6 +388,8 @@ export default {
     this.setupDataRefresh()
     this.hideLayoutElements()
     this.loadScreenData()
+    // 添加 ESC 键监听用于退出面板全屏
+    document.addEventListener('keydown', this.handleKeyDown)
   },
   beforeDestroy() {
     this.cleanup()
@@ -572,7 +623,36 @@ export default {
       document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange)
       document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange)
       document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange)
+      document.removeEventListener('keydown', this.handleKeyDown)
       this.restoreUI()
+    },
+    // 处理面板展开/收起
+    togglePanelExpand(panelId) {
+      if (this.expandedPanel === panelId) {
+        // 如果当前面板已展开，则收起
+        this.expandedPanel = null
+      } else {
+        // 展开点击的面板
+        this.expandedPanel = panelId
+      }
+      // 延迟刷新图表以适应新尺寸
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.refreshCharts()
+        }, 350) // 等待动画完成
+      })
+    },
+    // 处理键盘事件
+    handleKeyDown(event) {
+      // ESC 键退出面板全屏
+      if (event.key === 'Escape' && this.expandedPanel) {
+        this.expandedPanel = null
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.refreshCharts()
+          }, 350)
+        })
+      }
     },
     exitFullscreen() {
       try {
@@ -728,6 +808,8 @@ export default {
   overflow: hidden;
   position: relative;
   font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes gradientShift {
@@ -776,59 +858,79 @@ export default {
   position: relative;
   z-index: 10;
   text-align: center;
-  padding: 2.5vh 0;
+  padding: 1vh 0;
   background: linear-gradient(180deg, rgba(0, 20, 40, 0.8) 0%, transparent 100%);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-title.main-title-hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 .title-text {
-  font-size: clamp(48px, 5.5vw, 96px);
+  font-size: clamp(28px, 3vw, 56px);
   font-weight: bold;
   color: #00f0ff;
   text-shadow: 
-    0 0 30px rgba(0, 240, 255, 0.8),
-    0 0 60px rgba(0, 240, 255, 0.6),
-    0 0 90px rgba(0, 240, 255, 0.4);
-  letter-spacing: 6px;
-  margin-bottom: 1vh;
+    0 0 20px rgba(0, 240, 255, 0.8),
+    0 0 40px rgba(0, 240, 255, 0.6);
+  letter-spacing: 4px;
+  margin-bottom: 0.3vh;
 }
 
 .title-subtitle {
-  font-size: clamp(20px, 2.2vw, 36px);
+  font-size: clamp(12px, 1.2vw, 20px);
   color: rgba(0, 240, 255, 0.7);
-  letter-spacing: 3px;
-  margin-bottom: 1.5vh;
+  letter-spacing: 2px;
+  margin-bottom: 0.3vh;
 }
 
 .current-time {
-  font-size: clamp(24px, 2.5vw, 42px);
+  font-size: clamp(14px, 1.4vw, 24px);
   color: #00f0ff;
   font-family: 'Orbitron', monospace;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
 }
 
-/* Today Metrics Bar - Optimized for 65" TV */
+/* Today Metrics Bar - Compact for TV */
 .today-metrics-bar {
   position: relative;
   z-index: 10;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 2vh 3vw;
+  padding: 0.8vh 2vw;
   background: linear-gradient(135deg, rgba(0, 20, 40, 0.9) 0%, rgba(0, 40, 80, 0.85) 100%);
-  border-bottom: 3px solid rgba(0, 192, 255, 0.3);
-  margin-bottom: 2vh;
-  box-shadow: 0 6px 30px rgba(0, 192, 255, 0.2);
+  border-bottom: 2px solid rgba(0, 192, 255, 0.3);
+  margin-bottom: 0.5vh;
+  box-shadow: 0 4px 20px rgba(0, 192, 255, 0.2);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.today-metrics-bar.metrics-bar-hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+  margin-bottom: 0;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 .today-metric-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2vh 2.5vw;
+  padding: 0.8vh 1.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  border: 2px solid rgba(0, 192, 255, 0.3);
-  min-width: 180px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  min-width: 120px;
   transition: all 0.3s ease;
   position: relative;
 }
@@ -845,39 +947,39 @@ export default {
 }
 
 .today-metric-item:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: rgba(0, 192, 255, 0.6);
-  box-shadow: 0 5px 20px rgba(0, 192, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 192, 255, 0.4);
 }
 
 .today-metric-label {
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(12px, 1vw, 16px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 1vh;
+  margin-bottom: 0.3vh;
   font-weight: 500;
 }
 
 .today-metric-value {
-  font-size: clamp(42px, 4.5vw, 72px);
+  font-size: clamp(24px, 2.5vw, 42px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
   font-family: 'Orbitron', monospace;
-  margin-bottom: 0.8vh;
+  margin-bottom: 0.3vh;
 }
 
 .today-metric-item.urgent .today-metric-value {
   color: #ff6b6b;
-  text-shadow: 0 0 25px rgba(255, 107, 107, 0.8);
+  text-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
 }
 
 .today-metric-icon {
-  font-size: clamp(32px, 3vw, 48px);
+  font-size: clamp(18px, 1.5vw, 28px);
   opacity: 0.7;
 }
 
 .today-metric-icon i {
-  font-size: clamp(32px, 3vw, 48px);
+  font-size: clamp(18px, 1.5vw, 28px);
 }
 
 /* Dashboard Grid - Optimized for 65" TV */
@@ -887,9 +989,11 @@ export default {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 2vh 2vw;
-  padding: 2vh 2vw;
-  height: calc(100vh - 25vh);
+  gap: 1vh 1vw;
+  padding: 0.5vh 1vw;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel-map {
@@ -938,27 +1042,120 @@ export default {
     inset 0 0 40px rgba(0, 192, 255, 0.15);
 }
 
+/* Panel Expand/Collapse Styles */
+.panel {
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-grid.has-expanded {
+  position: relative;
+}
+
+.panel-hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.panel-expanded {
+  position: fixed !important;
+  top: 2vh !important;
+  left: 2vw !important;
+  right: 2vw !important;
+  bottom: 2vh !important;
+  width: calc(100vw - 4vw) !important;
+  height: calc(100vh - 4vh) !important;
+  z-index: 9999 !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  border-color: rgba(0, 240, 255, 0.8);
+  box-shadow: 
+    0 0 80px rgba(0, 192, 255, 0.8),
+    inset 0 0 60px rgba(0, 192, 255, 0.2);
+}
+
+.panel-expanded .panel-content {
+  height: calc(100% - 10vh);
+  max-height: none;
+}
+
+/* Panel Header Actions */
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.panel-expand-hint,
+.panel-close-hint {
+  font-size: clamp(9px, 0.8vw, 12px);
+  color: rgba(0, 240, 255, 0.5);
+  padding: 0.3vh 0.6vw;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.panel:hover .panel-expand-hint {
+  opacity: 1;
+}
+
+.panel-close-hint {
+  opacity: 1;
+  color: rgba(255, 200, 100, 0.9);
+  border-color: rgba(255, 200, 100, 0.4);
+  animation: hint-pulse 2s infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* Expanded panel overlay background */
+.dashboard-grid.has-expanded::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 10, 30, 0.85);
+  z-index: 9998;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .panel-header {
-  padding: 1.8vh 2vw;
-  border-bottom: 2px solid rgba(0, 192, 255, 0.3);
+  padding: 0.8vh 1vw;
+  border-bottom: 1px solid rgba(0, 192, 255, 0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(90deg, rgba(0, 192, 255, 0.1) 0%, transparent 100%);
+  flex-shrink: 0;
 }
 
 /* Reduce header height for map panel to give more space to canvas */
 .panel-map .panel-header {
-  padding: 1vh 1.5vw;
+  padding: 0.5vh 1vw;
   min-height: auto;
 }
 
 .panel-title {
-  font-size: clamp(28px, 2.8vw, 48px);
+  font-size: clamp(14px, 1.4vw, 24px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-  letter-spacing: 3px;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+  letter-spacing: 2px;
 }
 
 .panel-decoration {
@@ -969,16 +1166,18 @@ export default {
 }
 
 .panel-content {
-  padding: 2.5vh 2vw;
-  height: calc(100% - 8vh);
+  padding: 0.8vh 1vw;
+  height: calc(100% - 4vh);
   overflow: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Special styling for map panel to minimize padding and maximize height */
 .panel-map .panel-content {
-  padding: 0.3vh 0.3vw;
+  padding: 0.2vh 0.2vw;
   overflow: hidden;
-  height: calc(100% - 6vh); /* 减少 header 占用的高度，增加内容区域 */
+  height: calc(100% - 3vh);
 }
 
 /* Big Numbers */
@@ -1428,26 +1627,26 @@ export default {
   50% { opacity: 0.7; }
 }
 
-/* Core Metrics Grid - Optimized for 65" TV */
+/* Core Metrics Grid - Compact for TV */
 .core-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5vh 1.5vw;
-  margin-bottom: 2.5vh;
+  gap: 0.5vh 0.5vw;
+  margin-bottom: 1vh;
 }
 
 .core-metric-card {
   text-align: center;
-  padding: 2vh 1.5vw;
+  padding: 0.6vh 0.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  border: 2px solid rgba(0, 192, 255, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
   transition: all 0.3s ease;
 }
 
 .core-metric-card:hover {
   border-color: rgba(0, 192, 255, 0.5);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .core-metric-card.highlight {
@@ -1456,30 +1655,30 @@ export default {
 }
 
 .core-metric-label {
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(10px, 1vw, 16px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 1vh;
+  margin-bottom: 0.3vh;
   font-weight: 500;
 }
 
 .core-metric-value {
-  font-size: clamp(36px, 3.8vw, 64px);
+  font-size: clamp(18px, 2vw, 32px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
   font-family: 'Orbitron', monospace;
 }
 
-/* Urgent Alert - Optimized for 65" TV */
+/* Urgent Alert - Compact for TV */
 .urgent-alert {
   display: flex;
   align-items: center;
-  gap: 2vw;
-  padding: 2vh 2vw;
+  gap: 1vw;
+  padding: 0.6vh 1vw;
   background: rgba(255, 193, 7, 0.1);
-  border: 2px solid rgba(255, 193, 7, 0.5);
-  border-radius: 12px;
-  margin-bottom: 2.5vh;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  border-radius: 6px;
+  margin-bottom: 0.8vh;
   animation: pulse-warning 2s infinite;
 }
 
@@ -1490,21 +1689,21 @@ export default {
 }
 
 @keyframes pulse-warning {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(255, 193, 7, 0.6); }
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.6); }
 }
 
 @keyframes pulse-critical {
-  0%, 100% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.4); }
-  50% { box-shadow: 0 0 60px rgba(255, 107, 107, 0.8); }
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.8); }
 }
 
 .alert-icon {
-  font-size: clamp(48px, 4vw, 72px);
+  font-size: clamp(20px, 2vw, 32px);
 }
 
 .alert-icon i {
-  font-size: clamp(48px, 4vw, 72px);
+  font-size: clamp(20px, 2vw, 32px);
 }
 
 .alert-content {
@@ -1512,10 +1711,10 @@ export default {
 }
 
 .alert-title {
-  font-size: clamp(24px, 2.5vw, 40px);
+  font-size: clamp(12px, 1.2vw, 20px);
   font-weight: bold;
   color: #ffc107;
-  margin-bottom: 0.8vh;
+  margin-bottom: 0.2vh;
 }
 
 .urgent-alert.critical .alert-title {
@@ -1523,7 +1722,7 @@ export default {
 }
 
 .alert-desc {
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(10px, 1vw, 16px);
   color: rgba(255, 193, 7, 0.8);
 }
 
@@ -1531,33 +1730,33 @@ export default {
   color: rgba(255, 107, 107, 0.8);
 }
 
-/* Progress Section - Optimized for 65" TV */
+/* Progress Section - Compact for TV */
 .progress-section {
-  margin-top: 2.5vh;
+  margin-top: 0.8vh;
 }
 
 .progress-title {
-  font-size: clamp(20px, 2vw, 32px);
+  font-size: clamp(11px, 1.1vw, 18px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 1.5vh;
+  margin-bottom: 0.5vh;
   font-weight: 500;
 }
 
 .progress-bar-large {
-  height: clamp(40px, 4vh, 60px);
+  height: clamp(18px, 2vh, 28px);
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 20px;
-  border: 2px solid rgba(0, 192, 255, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 192, 255, 0.3);
   position: relative;
   overflow: hidden;
-  margin-bottom: 1.5vh;
+  margin-bottom: 0.5vh;
 }
 
 .progress-fill-large {
   height: 100%;
   background: linear-gradient(90deg, #00c0ff, #00f0ff);
-  border-radius: 20px;
-  box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
   transition: width 0.5s ease;
 }
 
@@ -1567,19 +1766,19 @@ export default {
 
 .progress-text-large {
   position: absolute;
-  right: 1.5vw;
+  right: 1vw;
   top: 50%;
   transform: translateY(-50%);
-  font-size: clamp(20px, 2vw, 32px);
+  font-size: clamp(10px, 1vw, 16px);
   color: #00f0ff;
   font-weight: bold;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
 }
 
 .progress-stats {
   display: flex;
   justify-content: space-between;
-  font-size: clamp(16px, 1.6vw, 24px);
+  font-size: clamp(10px, 0.9vw, 14px);
   color: rgba(0, 240, 255, 0.8);
 }
 
@@ -1591,64 +1790,64 @@ export default {
   color: #ff6b6b;
 }
 
-/* Scale Metrics - Optimized for 65" TV */
+/* Scale Metrics - Compact for TV */
 .scale-metrics {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2vh 2vw;
-  margin-bottom: 2.5vh;
+  gap: 0.5vh 0.5vw;
+  margin-bottom: 0.8vh;
 }
 
 .scale-item {
   text-align: center;
-  padding: 2vh 1.5vw;
+  padding: 0.6vh 0.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  border: 2px solid rgba(0, 192, 255, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
 }
 
 .scale-label {
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(10px, 1vw, 16px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 1vh;
+  margin-bottom: 0.3vh;
   font-weight: 500;
 }
 
 .scale-value {
-  font-size: clamp(32px, 3.2vw, 52px);
+  font-size: clamp(16px, 1.6vw, 26px);
   font-weight: bold;
   color: #00f0ff;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
 }
 
-/* Health Section - Optimized for 65" TV */
+/* Health Section - Compact for TV */
 .health-section {
-  margin-top: 2.5vh;
+  margin-top: 0.8vh;
 }
 
 .health-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5vh;
-  font-size: clamp(20px, 2vw, 32px);
+  margin-bottom: 0.5vh;
+  font-size: clamp(11px, 1.1vw, 18px);
   color: rgba(0, 240, 255, 0.8);
   font-weight: 500;
 }
 
 .health-rate {
-  font-size: clamp(32px, 3.2vw, 52px);
+  font-size: clamp(16px, 1.6vw, 26px);
   font-weight: bold;
   color: #4caf50;
-  text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+  text-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
 }
 
 .health-stats {
   display: flex;
   justify-content: space-between;
-  font-size: clamp(16px, 1.6vw, 24px);
+  font-size: clamp(10px, 0.9vw, 14px);
   color: rgba(0, 240, 255, 0.8);
-  margin-top: 1.5vh;
+  margin-top: 0.5vh;
 }
 
 .health-stats .warning {
@@ -1656,47 +1855,47 @@ export default {
 }
 
 
-/* Trend Header - Optimized for 65" TV */
+/* Trend Header - Compact for TV */
 .trend-header {
-  margin-bottom: 2vh;
+  margin-bottom: 0.8vh;
 }
 
 .trend-metric {
   text-align: center;
-  padding: 2vh 1.5vw;
+  padding: 0.6vh 0.5vw;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  border: 2px solid rgba(0, 192, 255, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
 }
 
 .trend-label {
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(10px, 1vw, 16px);
   color: rgba(0, 240, 255, 0.8);
-  margin-bottom: 1vh;
+  margin-bottom: 0.3vh;
   font-weight: 500;
 }
 
 .trend-value {
-  font-size: clamp(36px, 3.8vw, 64px);
+  font-size: clamp(18px, 2vw, 32px);
   font-weight: bold;
   font-family: 'Orbitron', monospace;
 }
 
 .trend-value.positive {
   color: #4caf50;
-  text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+  text-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
 }
 
 .trend-value.negative {
   color: #ff6b6b;
-  text-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+  text-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
 }
 
-/* Ranking List - Optimized for 65" TV */
+/* Ranking List - Compact for TV */
 .ranking-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5vh;
+  gap: 0.5vh;
   height: 100%;
   overflow-y: auto;
 }
@@ -1704,17 +1903,17 @@ export default {
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 2vw;
-  padding: 2vh 1.5vw;
+  gap: 1vw;
+  padding: 0.6vh 0.8vw;
   background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(0, 192, 255, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 6px;
   transition: all 0.3s ease;
 }
 
 .ranking-item:hover {
   border-color: rgba(0, 192, 255, 0.5);
-  transform: translateX(8px);
+  transform: translateX(4px);
 }
 
 .ranking-item.top-three {
@@ -1723,16 +1922,16 @@ export default {
 }
 
 .ranking-number {
-  font-size: clamp(36px, 3.5vw, 56px);
+  font-size: clamp(16px, 1.6vw, 26px);
   font-weight: bold;
   color: rgba(0, 240, 255, 0.6);
-  min-width: 60px;
+  min-width: 30px;
   text-align: center;
 }
 
 .ranking-item.top-three .ranking-number {
   color: #00f0ff;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
 }
 
 .ranking-info {
@@ -1740,32 +1939,32 @@ export default {
 }
 
 .ranking-name {
-  font-size: clamp(24px, 2.4vw, 40px);
+  font-size: clamp(12px, 1.2vw, 20px);
   font-weight: bold;
   color: #00f0ff;
-  margin-bottom: 0.8vh;
+  margin-bottom: 0.2vh;
 }
 
 .ranking-details {
   display: flex;
-  gap: 2vw;
-  font-size: clamp(16px, 1.6vw, 24px);
+  gap: 1vw;
+  font-size: clamp(9px, 0.9vw, 14px);
   color: rgba(0, 240, 255, 0.7);
 }
 
 .ranking-badge {
-  font-size: clamp(48px, 4vw, 72px);
+  font-size: clamp(20px, 2vw, 32px);
 }
 
 .ranking-medal {
   display: inline-block;
-  padding: 8px 16px;
-  border-radius: 16px;
-  font-size: clamp(18px, 1.8vw, 28px);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: clamp(10px, 1vw, 16px);
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   background: rgba(0, 192, 255, 0.12);
-  border: 2px solid rgba(0, 192, 255, 0.3);
+  border: 1px solid rgba(0, 192, 255, 0.3);
   color: #00f0ff;
 }
 
@@ -1796,7 +1995,7 @@ export default {
 }
 
 .no-ranking-text {
-  font-size: clamp(20px, 2vw, 32px);
+  font-size: clamp(12px, 1.2vw, 20px);
 }
 
 /* Responsive */

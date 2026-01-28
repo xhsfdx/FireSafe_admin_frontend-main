@@ -20,8 +20,8 @@
       <div class="search-btns">
         <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-        <el-button type="primary" icon="el-icon-s-finance" @click="showAmountChart">统计金额</el-button>
-        <el-button type="success" icon="el-icon-edit" @click="handleBatchUpdate">批量结款</el-button>
+        <el-button v-if="$canViewSensitiveData" type="primary" icon="el-icon-s-finance" @click="showAmountChart">统计金额</el-button>
+        <el-button v-if="$canEdit" type="success" icon="el-icon-edit" @click="handleBatchUpdate">批量结款</el-button>
       </div>
     </div>
 
@@ -41,7 +41,7 @@
       :row-key="'id'"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="50" align="center" />
+      <el-table-column v-if="$canEdit" type="selection" width="50" align="center" />
       <el-table-column type="index" label="序号" width="60" align="center" :index="indexMethod" />
       <el-table-column prop="ownerName" label="业主单位名称" align="center" />
       <el-table-column prop="entrustName" label="委托单位" align="center" />
@@ -52,13 +52,13 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="contractAmount" label="合同金额" align="center" />
-      <el-table-column prop="paidAmount" label="已结金额" align="center">
+      <el-table-column v-if="$canViewSensitiveData" prop="contractAmount" label="合同金额" align="center" />
+      <el-table-column v-if="$canViewSensitiveData" prop="paidAmount" label="已结金额" align="center">
         <template slot-scope="{ row }">
           <span style="color:#67c23a">{{ displayCurrency(row.paidAmount) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="unpaidAmount" label="未结金额" align="center">
+      <el-table-column v-if="$canViewSensitiveData" prop="unpaidAmount" label="未结金额" align="center">
         <template slot-scope="{ row }">
           <span style="color:#f56c6c">{{ displayCurrency(row.unpaidAmount) }}</span>
         </template>
@@ -82,11 +82,11 @@
           <span v-else style="color:#909399">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200" align="center">
+      <el-table-column label="操作" :width="$canEdit ? 200 : 80" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">详情</el-link>
-          <el-link type="success" style="margin:0 8px" @click="updatePayment(row)">结款</el-link>
-          <el-link type="warning" @click="viewPaymentHistory(row)">结款记录</el-link>
+          <el-link v-if="$canEdit" type="success" style="margin:0 8px" @click="updatePayment(row)">结款</el-link>
+          <el-link v-if="$canViewSensitiveData" type="warning" @click="viewPaymentHistory(row)">结款记录</el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -303,9 +303,11 @@
 <script>
 import { getPaymentList, updatePaymentStatus, getPaymentStats } from '@/api/payment'
 import { shouldMaskMoney } from '@/utils/status-helper'
+import roleMixin from '@/mixins/roleMixin'
 
 export default {
   name: 'PaymentManagement',
+  mixins: [roleMixin],
   data() {
     return {
       filters: {

@@ -129,15 +129,17 @@ export default {
             checkedMaintList: item.maintainItems || [],
             // 项目信息
             projectList: [{
+              index: 1,
               ownerName: item.ownerCompany || '',
               name: item.projectName || '',
               address: item.projectAddress || '',
               area: item.projectDistrict || '',
               linkman: item.contactPerson || '',
               phone: item.contactPhone || '',
-              leader: item?.leader.name || '',
-              technical: item?.technical.name || '',
-              maintainers: item?.maintainers || ''
+              leader: item?.leader?.name || '',
+              technical: item?.technical?.name || '',
+              maintainers: item?.maintainers || [],
+              location: item.projectPosition || { lng: null, lat: null }
             }],
             // 维保人员
             dispatchStaffList: item.maintainPersons || []

@@ -33,9 +33,34 @@
         <el-table-column prop="index" label="序号" width="70" align="center" />
         <el-table-column prop="ownerName" label="业主单位名称" width="120" align="center" />
         <el-table-column prop="projectName" label="项目名称" width="120" align="center" />
-        <el-table-column prop="techLeader" label="维保技术负责人" align="center" />
-        <el-table-column prop="projectLeader" label="维保项目负责人" align="center" />
-        <el-table-column prop="onSiteStaff" label="现场维保人员" align="center" />
+        <el-table-column prop="techLeader" label="维保技术负责人" align="center">
+          <template slot-scope="scope">
+            <span v-if="scope.row.techLeader" class="configured">{{ scope.row.techLeader }}</span>
+            <span v-else class="not-configured">未配置</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="projectLeader" label="维保项目负责人" align="center">
+          <template slot-scope="scope">
+            <span v-if="scope.row.projectLeader" class="configured">{{ scope.row.projectLeader }}</span>
+            <span v-else class="not-configured">未配置</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="现场维保人员" align="center" min-width="200">
+          <template slot-scope="scope">
+            <div v-if="getMaintainersList(scope.row.onSiteStaff).length > 0" class="maintainers-tags">
+              <el-tag
+                v-for="(name, index) in getMaintainersList(scope.row.onSiteStaff)"
+                :key="index"
+                size="small"
+                type="success"
+                class="maintainer-tag"
+              >
+                {{ name }}
+              </el-tag>
+            </div>
+            <span v-else class="not-configured">未配置</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" align="center" width="80">
           <template slot-scope="scope">
             <el-button type="text" @click="handleConfig(scope.row)">详情</el-button>
@@ -141,6 +166,23 @@ export default {
     window.removeEventListener('maintenancePersonnelUpdated', this.handlePersonnelUpdate)
   },
   methods: {
+    // 将维保人员字符串或数组转换为数组显示
+    getMaintainersList(onSiteStaff) {
+      if (!onSiteStaff) return []
+      // 如果是数组，直接返回
+      if (Array.isArray(onSiteStaff)) {
+        return onSiteStaff.map(item => {
+          if (typeof item === 'string') return item
+          return item.name || item
+        }).filter(Boolean)
+      }
+      // 如果是字符串，按'、'分割
+      if (typeof onSiteStaff === 'string') {
+        return onSiteStaff.split('、').filter(Boolean)
+      }
+      return []
+    },
+
     // 加载最新的维保人员数据
     async loadLatestData() {
       try {
@@ -323,5 +365,28 @@ export default {
 }
 .create-btn:hover {
   background: #157de6;
+}
+
+/* 状态样式 */
+.configured {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.not-configured {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+/* 维保人员标签样式 */
+.maintainers-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.maintainer-tag {
+  margin: 2px;
 }
 </style>

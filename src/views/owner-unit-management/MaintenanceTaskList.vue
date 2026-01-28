@@ -68,9 +68,20 @@
           {{ getPersonName(row.maintainPersons && row.maintainPersons.leader) }}
         </template>
       </el-table-column>
-      <el-table-column label="现场维保人员" align="center">
+      <el-table-column label="现场维保人员" align="center" min-width="160">
         <template slot-scope="{ row }">
-          {{ getMaintainersText(row.maintainPersons && row.maintainPersons.maintainers) }}
+          <div v-if="getMaintainersList(row.maintainPersons && row.maintainPersons.maintainers).length > 0" class="maintainers-tags">
+            <el-tag
+              v-for="(name, index) in getMaintainersList(row.maintainPersons && row.maintainPersons.maintainers)"
+              :key="index"
+              size="mini"
+              type="success"
+              class="maintainer-tag"
+            >
+              {{ name }}
+            </el-tag>
+          </div>
+          <span v-else class="not-configured">未分配</span>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="任务状态" align="center">
@@ -294,6 +305,11 @@ export default {
       if (!maintainers || !Array.isArray(maintainers)) return '未分配'
       return maintainers.map(m => this.getPersonName(m)).join('、')
     },
+    // 将维保人员数组转换为名称列表
+    getMaintainersList(maintainers) {
+      if (!maintainers || !Array.isArray(maintainers)) return []
+      return maintainers.map(m => this.getPersonName(m)).filter(name => name && name !== '未知')
+    },
     getStatusType(status) {
       switch (status) {
         case '已派发':
@@ -418,6 +434,24 @@ export default {
 
 .return-btn:hover {
   background: #66b3ff;
+}
+
+/* 状态样式 */
+.not-configured {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+/* 维保人员标签样式 */
+.maintainers-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.maintainer-tag {
+  margin: 2px;
 }
 
 </style>

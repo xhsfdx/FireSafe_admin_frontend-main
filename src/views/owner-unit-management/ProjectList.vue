@@ -22,8 +22,8 @@
       <div class="search-btns">
         <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
         <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-        <el-button type="primary" icon="el-icon-s-finance" @click="handleSumAmount">统计金额</el-button>
-        <el-button type="success" icon="el-icon-plus" @click="onAdd">新增</el-button>
+        <el-button v-if="$canViewSensitiveData" type="primary" icon="el-icon-s-finance" @click="handleSumAmount">统计金额</el-button>
+        <el-button v-if="$canEdit" type="success" icon="el-icon-plus" @click="onAdd">新增</el-button>
       </div>
     </div>
     <!-- 统计信息 -->
@@ -63,21 +63,23 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="contractAmount" label="合同金额" align="center" />
+      <el-table-column v-if="$canViewSensitiveData" prop="contractAmount" label="合同金额" align="center" />
       <el-table-column prop="days" label="当前合同时间" align="center">
         <template slot-scope="{ row }">
           <span style="color:#409eff">剩余：{{ row.days || 0 }}天</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="280" align="center">
+      <el-table-column label="操作" :width="$canEdit ? 280 : 100" align="center">
         <template slot-scope="{ row }">
           <el-link type="primary" @click="viewDetail(row)">项目详情</el-link>
-          <el-link type="success" style="margin:0 8px" @click="onRenew(row)">续签</el-link>
-          <el-link type="danger" style="margin:0 8px" @click="onDelete(row)">删除</el-link>
-          <!-- 审核按钮 - 只在已提交状态显示 -->
-          <template v-if="row.status === '已提交'">
-            <el-button type="success" size="mini" style="margin:0 4px" @click="onApprove(row)">通过</el-button>
-            <el-button type="danger" size="mini" style="margin:0 4px" @click="onReject(row)">不通过</el-button>
+          <template v-if="$canEdit">
+            <el-link type="success" style="margin:0 8px" @click="onRenew(row)">续签</el-link>
+            <el-link type="danger" style="margin:0 8px" @click="onDelete(row)">删除</el-link>
+            <!-- 审核按钮 - 只在已提交状态显示 -->
+            <template v-if="row.status === '已提交'">
+              <el-button type="success" size="mini" style="margin:0 4px" @click="onApprove(row)">通过</el-button>
+              <el-button type="danger" size="mini" style="margin:0 4px" @click="onReject(row)">不通过</el-button>
+            </template>
           </template>
         </template>
       </el-table-column>
@@ -116,11 +118,12 @@
 <script>
 import { fetchContracts, deleteContract, approveContract, rejectContract } from '@/api/contract'
 import tableListMixin from '@/utils/mixins/table-list'
+import roleMixin from '@/mixins/roleMixin'
 import { getStatusTagType, getStatusDisplayText, getRemainDays, formatAmount } from '@/utils/status-helper'
 
 export default {
   name: 'UnitProject',
-  mixins: [tableListMixin],
+  mixins: [tableListMixin, roleMixin],
   data() {
     return {
       filters: {
