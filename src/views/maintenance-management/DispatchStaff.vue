@@ -236,7 +236,7 @@ export default {
               name: staff.name,
               role: staff.qualificationLevel,
               companyCount: staff.assignedProjects || 0,
-              avatar: this.getValidAvatar(staff.avatar),
+              avatar: this.resolveStaffAvatar(staff),
               phone: staff.phone,
               gender: staff.gender,
               uniqueKey: `tech-${staff._id}-${index}` // 添加唯一键避免重复
@@ -250,7 +250,7 @@ export default {
               name: staff.name,
               role: staff.qualificationLevel,
               companyCount: staff.assignedProjects || 0,
-              avatar: this.getValidAvatar(staff.avatar),
+              avatar: this.resolveStaffAvatar(staff),
               phone: staff.phone,
               gender: staff.gender,
               uniqueKey: `manager-${staff._id}-${index}` // 添加唯一键避免重复
@@ -262,7 +262,7 @@ export default {
             name: staff.name,
             role: staff.qualificationLevel,
             companyCount: staff.assignedProjects || 0,
-            avatar: this.getValidAvatar(staff.avatar),
+            avatar: this.resolveStaffAvatar(staff),
             phone: staff.phone,
             gender: staff.gender
           }))
@@ -855,16 +855,51 @@ export default {
       // 前端本地过滤
     },
 
+    // 兼容后端不同头像字段并标准化为可访问URL
+    resolveStaffAvatar(staff) {
+      if (!staff) return this.getDefaultAvatar()
+
+      const rawAvatar = staff.avatar || staff.avatarUrl || staff.photo || staff.headImg || staff.headImage ||
+        (staff.userId && staff.userId.avatar)
+      return this.getValidAvatar(rawAvatar)
+    },
+
     // 获取有效的头像URL，如果没有则使用默认头像
     getValidAvatar(avatarUrl) {
-      if (avatarUrl && (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://'))) {
-        // 检查是否是有效的URL，如果不是则使用默认头像
-        if (avatarUrl.includes('example.com')) {
-          return require('@/assets/avatar-1.jpg')
-        }
-        return avatarUrl
+      if (!avatarUrl || typeof avatarUrl !== 'string') {
+        return this.getDefaultAvatar()
       }
-      return require('@/assets/avatar-1.jpg') // 默认头像
+
+      const normalizedAvatar = avatarUrl.trim()
+      if (!normalizedAvatar) return this.getDefaultAvatar()
+
+      // 已经是完整 URL
+      if (/^https?:\/\//i.test(normalizedAvatar)) {
+        if (normalizedAvatar.includes('example.com')) return this.getDefaultAvatar()
+        return normalizedAvatar
+      }
+
+      // 协议相对 URL（如 //cdn.xxx.com/a.jpg）
+      if (normalizedAvatar.startsWith('//')) {
+        return `https:${normalizedAvatar}`
+      }
+
+      // 相对路径（如 /uploads/a.jpg 或 uploads/a.jpg）拼接后端域名
+      const host = this.getUploadHost()
+      const normalizedPath = normalizedAvatar.startsWith('/') ? normalizedAvatar : `/${normalizedAvatar}`
+      return `${host}${normalizedPath}`
+    },
+
+    getUploadHost() {
+      const baseApi = (process.env.VUE_APP_BASE_API || '').trim()
+      if (baseApi) {
+        return baseApi.replace(/\/+$/, '')
+      }
+      return window.location.origin
+    },
+
+    getDefaultAvatar() {
+      return require('@/assets/avatar-1.jpg')
     }
   }
 }
