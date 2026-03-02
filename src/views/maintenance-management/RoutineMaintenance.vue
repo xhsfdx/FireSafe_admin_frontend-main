@@ -418,6 +418,10 @@ export default {
               // 如果后端没有返回 timeliness，则计算
               normalizedTimeliness = this.calculateTimeliness(item) || '正常'
             }
+            // 已完成/已评价不应显示为已逾期
+            if (normalizedStatus === '已完成' || normalizedStatus === '已评价') {
+              normalizedTimeliness = '正常'
+            }
             // 确保时效状态存在且有效
             if (!normalizedTimeliness || normalizedTimeliness === '') {
               normalizedTimeliness = '正常'
@@ -816,6 +820,11 @@ export default {
 
     // 计算时效状态
     calculateTimeliness(item) {
+      // 已完成/已评价不参与逾期判断
+      if (item && (item.taskStatus === '已完成' || item.status === '已完成' || item.taskStatus === '已评价' || item.status === '已评价')) {
+        return '正常'
+      }
+
       // 根据任务创建时间和计划类型计算是否逾期
       if (!item.createdAt) return '正常'
 
