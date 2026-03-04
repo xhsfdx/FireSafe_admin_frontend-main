@@ -784,11 +784,12 @@ export const asyncRoutes = [
     ]
   },
 
-  // 消息管理（客服聊天）
+  // 消息管理（客服聊天 + 微信推送）
   {
     path: '/chat',
     component: Layout,
     redirect: '/chat/management',
+    alwaysShow: true,
     name: 'Chat',
     meta: {
       title: '消息管理',
@@ -803,6 +804,15 @@ export const asyncRoutes = [
         meta: {
           title: '在线客服',
           icon: 'el-icon-service'
+        }
+      },
+      {
+        path: 'message-push',
+        name: 'MessagePush',
+        component: () => import('@/views/system-management/MessagePush.vue'),
+        meta: {
+          title: '微信消息推送',
+          icon: 'el-icon-message'
         }
       }
     ]

@@ -12,12 +12,20 @@
           <el-option label="已完成" value="已归档" />
           <el-option label="已续签" value="已续签" />
         </el-select>
-        <el-select v-model="filters.contractType" placeholder="选择合同种类" style="width:180px" clearable>
-          <el-option label="施工" value="施工" />
-          <el-option label="评估" value="评估" />
-          <el-option label="检测" value="检测" />
-          <el-option label="项目维保" value="项目维保" />
-        </el-select>
+        <div class="contract-type-btns">
+          <el-button
+            :type="filters.contractType === '' ? 'primary' : 'default'"
+            size="small"
+            @click="filters.contractType = ''; onSearch()"
+          >全部</el-button>
+          <el-button
+            v-for="ct in contractTypes"
+            :key="ct"
+            :type="filters.contractType === ct ? 'primary' : 'default'"
+            size="small"
+            @click="filters.contractType = ct; onSearch()"
+          >{{ ct }}</el-button>
+        </div>
       </div>
       <div class="search-btns">
         <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
@@ -126,6 +134,7 @@ export default {
   mixins: [tableListMixin, roleMixin],
   data() {
     return {
+      contractTypes: ['施工', '评估', '检测', '项目维保'],
       filters: {
         ownerName: '',
         entrustName: '',
@@ -422,6 +431,23 @@ export default {
 
 .dialog-footer {
   text-align: right;
+}
+
+.contract-type-btns {
+  display: inline-flex;
+  gap: 0;
+  align-items: center;
+}
+.contract-type-btns .el-button {
+  border-radius: 0;
+  margin-left: -1px;
+}
+.contract-type-btns .el-button:first-child {
+  border-radius: 4px 0 0 4px;
+  margin-left: 0;
+}
+.contract-type-btns .el-button:last-child {
+  border-radius: 0 4px 4px 0;
 }
 
 </style>
