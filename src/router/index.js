@@ -747,6 +747,17 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'wechat-push-config',
+        name: 'WechatPushConfig',
+        component: () => import('@/views/system-management/WechatPushConfig.vue'),
+        meta: {
+          title: '微信推送配置',
+          icon: 'el-icon-chat-dot-square',
+          roles: ['superadmin', 'admin'],
+          permissionKey: 'system.wechat-push-config'
+        }
+      },
+      {
         path: '/system-management/add-self-built-maintenance-project',
         name: 'AddSelfBuiltMaintenanceProject',
         hidden: true,
