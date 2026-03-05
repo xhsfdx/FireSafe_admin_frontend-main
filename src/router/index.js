@@ -320,17 +320,17 @@ export const asyncRoutes = [
     meta: { 
       title: '项目管理', 
       icon: 'el-icon-folder-opened',
-      roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问
+      roles: ['superadmin', 'admin', 'customer']
     },
     children: [
-      // 已有的
       {
         path: 'project',
         name: 'UnitProject',
         component: () => import('@/views/owner-unit-management/ProjectList.vue'),
         meta: {
           title: '单位项目管理',
-          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以访问，但只能看到自己的项目
+          roles: ['superadmin', 'admin', 'customer'],
+          permissionKey: 'owner.project'
         }
       },
       {
@@ -339,7 +339,8 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/MaintenancePoint.vue'),
         meta: { 
           title: '维保点位管理',
-          roles: ['superadmin', 'admin', 'owner', 'customer']
+          roles: ['superadmin', 'admin', 'customer'],
+          permissionKey: 'owner.point'
         }
       },
       {
@@ -348,7 +349,8 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/PaymentManagement.vue'),
         meta: {
           title: '结款管理',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问，但只能看到自己的项目
+          roles: ['superadmin', 'admin', 'customer'],
+          permissionKey: 'owner.payment'
         }
       },
       {
@@ -357,7 +359,8 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/MaintenancePlan.vue'),
         meta: { 
           title: '维保计划管理',
-          roles: ['superadmin', 'admin', 'owner', 'customer']
+          roles: ['superadmin', 'admin', 'customer'],
+          permissionKey: 'owner.plan'
         }
       },
       // 维保点位管理相关子路由
@@ -368,7 +371,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/MaintenancePointDetail.vue'),
         meta: { 
           title: '维保点位详情',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
       {
@@ -388,7 +391,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/MaintenancePointBasicInfo.vue'),
         meta: { 
           title: '点位基础信息',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
       {
@@ -398,7 +401,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/MaintenancePointContent.vue'),
         meta: { 
           title: '点位维保内容',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
 
@@ -430,7 +433,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ContractInfo.vue'),
         meta: { 
           title: '合同信息',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
       {
@@ -440,7 +443,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ProjectInfo.vue'),
         meta: { 
           title: '项目信息详情',
-          roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
       {
@@ -473,7 +476,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/UnitDetail.vue'),
         meta: {
           title: '项目详情',
-          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以查看项目详情
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
       {
@@ -483,7 +486,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ContractDetailView.vue'),
         meta: {
           title: '编辑合同',
-          roles: ['superadmin', 'admin', 'editor']
+          roles: ['superadmin', 'admin']
         }
       },
       {
@@ -493,7 +496,7 @@ export const asyncRoutes = [
         component: () => import('@/views/owner-unit-management/ViewContractDetail.vue'),
         meta: {
           title: '合同完整详情',
-          roles: ['superadmin', 'admin', 'editor', 'owner', 'customer'] // 业主可以查看
+          roles: ['superadmin', 'admin', 'customer']
         }
       },
 
@@ -569,20 +572,20 @@ export const asyncRoutes = [
     meta: {
       title: '维护业务管理',
       icon: 'el-icon-s-order',
-      roles: ['superadmin', 'admin', 'owner', 'customer'] // 业主可以访问
+      roles: ['superadmin', 'admin', 'customer']
     },
     children: [
       {
         path: 'routine',
         name: 'RoutineMaintenance',
         component: () => import('@/views/maintenance-management/RoutineMaintenance.vue'),
-        meta: { title: '例行维护', icon: 'el-icon-date' }
+        meta: { title: '例行维护', icon: 'el-icon-date', permissionKey: 'maintenance.routine' }
       },
       {
         path: 'fault',
         name: 'FaultWorkOrder',
         component: () => import('@/views/maintenance-management/FaultWork.vue'),
-        meta: { title: '故障工单', icon: 'el-icon-warning-outline' }
+        meta: { title: '故障工单', icon: 'el-icon-warning-outline', permissionKey: 'maintenance.fault' }
       },
       {
         path: 'fault/detail/:id',
@@ -602,13 +605,13 @@ export const asyncRoutes = [
         path: 'support',
         name: 'AdditionalSupport',
         component: () => import('@/views/maintenance-management/AdditionalSupport.vue'),
-        meta: { title: '附加维护', icon: 'el-icon-s-cooperation' }
+        meta: { title: '附加维护', icon: 'el-icon-s-cooperation', permissionKey: 'maintenance.support' }
       },
       {
         path: 'report',
         name: 'WorkReport',
         component: () => import('@/views/maintenance-management/WorkReport.vue'),
-        meta: { title: '工作上报', icon: 'el-icon-upload2' }
+        meta: { title: '工作上报', icon: 'el-icon-upload2', permissionKey: 'maintenance.report' }
       },
       {
         path: '/maintenance/task-detail/:id?',
@@ -704,13 +707,13 @@ export const asyncRoutes = [
         path: 'manual',
         name: 'OperationManual',
         component: () => import('@/views/system-management/OperationManual.vue'),
-        meta: { title: '操作手册', icon: 'el-icon-notebook-2' }
+        meta: { title: '操作手册', icon: 'el-icon-notebook-2', permissionKey: 'system.manual' }
       },
       {
         path: 'owner-account',
         name: 'OwnerAccount',
         component: () => import('@/views/system-management/OwnerUnitAccount.vue'),
-        meta: { title: '业主单位账号', icon: 'el-icon-user' }
+        meta: { title: '业主单位账号', icon: 'el-icon-user', permissionKey: 'system.owner-account' }
       },
       {
         path: 'admin-permission',
@@ -814,7 +817,8 @@ export const asyncRoutes = [
         component: () => import('@/views/chat-management/ChatManagement.vue'),
         meta: {
           title: '在线客服',
-          icon: 'el-icon-service'
+          icon: 'el-icon-service',
+          permissionKey: 'chat.management'
         }
       },
       {
@@ -823,7 +827,8 @@ export const asyncRoutes = [
         component: () => import('@/views/system-management/MessagePush.vue'),
         meta: {
           title: '微信消息推送',
-          icon: 'el-icon-message'
+          icon: 'el-icon-message',
+          permissionKey: 'chat.message-push'
         }
       }
     ]

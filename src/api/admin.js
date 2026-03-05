@@ -27,3 +27,11 @@ export function updateAdminUser(id, data) {
   })
 }
 
+// 删除管理员用户
+export function deleteAdminUser(id) {
+  return request({
+    url: `/admin/users/${id}`,
+    method: 'delete'
+  })
+}
+
